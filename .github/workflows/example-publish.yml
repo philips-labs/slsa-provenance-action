@@ -1,0 +1,36 @@
+name: Create a sample provenance
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build artifact
+    runs-on: ubuntu-latest
+    steps:
+      # traditionally you would build your code here and generate an artifact
+      - name: Create artifact
+        run:  echo "onion, tomato, jalapeno, cilantro, lime, salt" > salsa.txt
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          path: salsa.txt
+
+  generate-provenance:
+    needs: build
+    name: Generate build provenance
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v2
+
+      - name: Generate provenance
+        uses: slsa-framework/github-actions-demo@v0.1
+        with:
+          artifact_path: artifact/
+
+      - name: Upload provenance
+        uses: actions/upload-artifact@v2
+        with:
+          path: build.provenance
