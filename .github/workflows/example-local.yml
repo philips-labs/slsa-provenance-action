@@ -1,4 +1,4 @@
-name: Create a sample provenance
+name: Create a provenance
 
 on:
   workflow_dispatch:
