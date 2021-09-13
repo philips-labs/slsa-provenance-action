@@ -2,6 +2,10 @@ name: Create a provenance
 
 on:
   workflow_dispatch:
+    inputs:
+      text_input:
+        description: 'Ingredient to input in the artifact text file'     
+        required: false
 
 jobs:
   build:
@@ -11,6 +15,11 @@ jobs:
       # traditionally you would build your code here and generate an artifact
       - name: Create artifact
         run:  echo "onion, tomato, jalapeno, cilantro, lime, salt" > salsa.txt
+
+      - name: Input workflow ingredient
+        if:  ${{ github.event.inputs.text_input != '' }}
+        run: |
+          echo ", ${{github.event.inputs.text_input}}" >> salsa.txt
 
       - name: Upload artifact
         uses: actions/upload-artifact@v2
