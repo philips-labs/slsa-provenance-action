@@ -42,4 +42,4 @@ jobs:
         run: curl https://gist.githubusercontent.com/Brend-Smits/f4cc4f6ccb140712796c23b75dbf70e0/raw/5040c0a727f9e2e6e337ac987fff36b5ff67757f/gistfile1.txt >> example-build.provance
 
       - name: Check and Match contents of provenance
-        run: sh ../bin/diff-checker.sh artifact/build.provance example-build.provance
+        run: sh ../bin/diff-filter.sh artifact/build.provance example-build.provance
