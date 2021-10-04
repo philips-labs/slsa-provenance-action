@@ -39,7 +39,8 @@ jobs:
           artifact_path: artifact/
 
       - name: Get example build.provenance
-        run: curl https://gist.githubusercontent.com/Brend-Smits/f4cc4f6ccb140712796c23b75dbf70e0/raw/5040c0a727f9e2e6e337ac987fff36b5ff67757f/gistfile1.txt >> example-build.provance
+        run: curl https://gist.githubusercontent.com/Brend-Smits/f4cc4f6ccb140712796c23b75dbf70e0/raw/5040c0a727f9e2e6e337ac987fff36b5ff67757f/gistfile1.txt >> example-build.provenance
 
       - name: Check and Match contents of provenance
-        run: sh ../bin/diff-filter.sh artifact/build.provance example-build.provance
+        run: |
+          sh .github/bin/diff-filter.sh build.provenance example-build.provenance
