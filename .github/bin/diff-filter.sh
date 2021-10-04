@@ -6,10 +6,11 @@ SECOND_ARTIFACT=$2
 # SKIP_LINES=$3
 
 diff_artifacts() {
-    comm -3 $FIRST_ARTIFACT $SECOND_ARTIFACT > difference.txt
+    diff -f $FIRST_ARTIFACT $SECOND_ARTIFACT > difference.txt
     grep -vF "buildFinishedOn" difference.txt > difference2.txt
     grep -vF "sha1" difference2.txt > difference3.txt
-    cat difference3.txt
+    grep -vF "buildInvocationId" difference3.txt > difference4.txt    
+    cat difference4.txt
     # cat difference.txt | grep -vF "buildFinishedOn" | grep -vF "sha1" | grep -vF "buildInvocationId" | grep -vE "^c" | grep -vE "^."
 }
 
