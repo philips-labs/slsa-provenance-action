@@ -43,4 +43,5 @@ jobs:
 
       - name: Check and Match contents of provenance
         run: |
+          cat build.provenance
           sh .github/bin/diff-filter.sh build.provenance example-build.provenance
