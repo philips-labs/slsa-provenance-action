@@ -1,0 +1,45 @@
+name: Integration test file provenance
+
+on:
+  push:
+    branches:
+      - tests
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build artifact
+    runs-on: ubuntu-latest
+    steps:
+      # traditionally you would build your code here and generate an artifact
+      - name: Create first artifact
+        run:  echo "onion, tomato, jalapeno, cilantro, lime, salt" > salsa.txt
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          path: '*.txt'
+
+  generate-provenance:
+    needs: build
+    name: Generate build provenance
+    runs-on: ubuntu-latest
+    steps:
+      # checkout only required to run local action (defined in this repo)
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v2
+
+      - name: Generate provenance
+        # use action in the root directory
+        uses: ./
+        with:
+          artifact_path: artifact/
+
+      - name: Get example build.provenance
+        run: curl https://gist.githubusercontent.com/Brend-Smits/f4cc4f6ccb140712796c23b75dbf70e0/raw/5040c0a727f9e2e6e337ac987fff36b5ff67757f/gistfile1.txt >> example-build.provance
+
+      - name: Check and Match contents of provenance
+        run: sh ../bin/diff-checker.sh artifact/build.provance example-build.provance
