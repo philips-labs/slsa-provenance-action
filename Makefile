@@ -18,3 +18,9 @@ download: ## download dependencies via go mod
 
 .PHONY: build
 build: $(addprefix bin/,$(COMMANDS)) ## builds binaries
+
+.PHONY: image
+image: ## build the binary in a docker image
+	docker build \
+		-t "philipssoftware/slsa-provenance:$(GIT_TAG)" \
+		-t "philipssoftware/slsa-provenance:$(GIT_HASH)" .
