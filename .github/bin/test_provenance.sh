@@ -13,7 +13,7 @@ diff_artifacts() {
     echo "-----step4---------"
     cat $temp_file2
     echo "-----step5---------"
-    diff -f $temp_file1 $temp_file2 >difference.txt #>/dev/null
+    diff -wf $temp_file1 $temp_file2 >difference.txt #>/dev/null
     cat difference.txt
     local exit_code=$?
     rm -rf /tmp/{file1,file2}
