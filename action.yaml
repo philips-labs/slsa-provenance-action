@@ -23,6 +23,7 @@ runs:
   using: 'docker'
   image: 'Dockerfile'
   args:
+    - "generate"
     - "--artifact_path"
     - '${{ inputs.artifact_path }}'
     - "--output_path"
