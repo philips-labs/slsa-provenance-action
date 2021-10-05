@@ -1,0 +1,42 @@
+{
+    "_type": "https://in-toto.io/Statement/v0.1",
+    "subject": [
+        {
+            "name": "salsa.txt",
+            "digest": {
+                "sha256": "f8161d035cdf328c7bb124fce192cb90b603f34ca78d73e33b736b4f6bddf993"
+            }
+        }
+    ],
+    "predicateType": "https://slsa.dev/provenance/v0.1",
+    "predicate": {
+        "builder": {
+            "id": "https://github.com/philips-labs/SLSA-Provenance-Action/Attestations/GitHubHostedActions@v1"
+        },
+        "metadata": {
+            "buildInvocationId": "https://github.com/philips-labs/SLSA-Provenance-Action/actions/runs/1303916967",
+            "completeness": {
+                "arguments": true,
+                "environment": false,
+                "materials": false
+            },
+            "reproducible": false,
+            "buildFinishedOn": "2021-10-04T11:08:34Z"
+        },
+        "recipe": {
+            "type": "https://github.com/Attestations/GitHubActionsWorkflow@v1",
+            "definedInMaterial": 0,
+            "entryPoint": "Integration test file provenance",
+            "arguments": null,
+            "environment": null
+        },
+        "materials": [
+            {
+                "uri": "git+https://github.com/philips-labs/SLSA-Provenance-Action",
+                "digest": {
+                    "sha1": "a3bc1c27230caa1cc3c27961f7e9cab43cd208dc"
+                }
+            }
+        ]
+    }
+}
