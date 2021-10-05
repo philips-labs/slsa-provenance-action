@@ -38,8 +38,8 @@ jobs:
         with:
           artifact_path: artifact/
 
-      - name: Get example build.provenance
-        run: .github/test_resource/example_build.provenance >> example-build.provenance
+      # - name: Get example build.provenance
+      #   run: .github/test_resource/example_build.provenance >> example-build.provenance
 
       - name: Check and Match contents of provenance
-        run: .github/bin/test_provenance.sh build.provenance example-build.provenance
+        run: .github/bin/test_provenance.sh build.provenance .github/test_resource/example_build.provenance
