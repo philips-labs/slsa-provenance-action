@@ -1,3 +1,3 @@
-module slsa-framework/demo
+module github.com/philips-labs/slsa-provenance-action
 
-go 1.16
+go 1.17
