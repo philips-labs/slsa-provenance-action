@@ -8,7 +8,13 @@ diff_artifacts() {
     local temp_file2=/tmp/file2
     (grep -v "buildInvocationId" | grep -vF "buildFinishedOn") >$temp_file1 <"$FIRST_ARTIFACT"
     (grep -v "buildInvocationId" | grep -vF "buildFinishedOn") >$temp_file2 <"$SECOND_ARTIFACT"
-    diff -f $temp_file1 $temp_file2 >/dev/null
+    echo "-----step3---------"
+    cat $temp_file1
+    echo "-----step4---------"
+    cat $temp_file2
+    echo "-----step5---------"
+    diff -f $temp_file1 $temp_file2 >difference.txt #>/dev/null
+    cat difference.txt
     local exit_code=$?
     rm -rf /tmp/{file1,file2}
     exit $exit_code
