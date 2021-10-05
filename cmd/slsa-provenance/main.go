@@ -20,10 +20,13 @@ func main() {
 		FlagSet: rootFlagSet,
 		Subcommands: []*ffcli.Command{
 			cli.Generate(),
+			cli.Version(),
 		},
 		Exec: func(ctx context.Context, args []string) error {
 			fmt.Println("slsa-provenance")
 			fmt.Println()
+
+			return cli.Version().Exec(ctx, args)
 		},
 	}
 
