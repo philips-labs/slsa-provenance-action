@@ -3,20 +3,17 @@
 FIRST_ARTIFACT=$1
 SECOND_ARTIFACT=$2
 
-cp "$FIRST_ARTIFACT" /tmp/first_artifact
-cp "$SECOND_ARTIFACT" /tmp/second_artifact
-
 diff_artifacts() {
-    (grep -v "buildInvocationId" | grep -vF "buildFinishedOn") > /tmp/first_artifact
-    (grep -v "buildInvocationId" | grep -vF "buildFinishedOn") > /tmp/second_artifact
-    cat /tmp/first_artifact
+    local temp_file1=/tmp/file1
+    local temp_file2=/tmp/file2
+    (grep -v "buildInvocationId" | grep -vF "buildFinishedOn1") > $temp_file1 < "$FIRST_ARTIFACT"
+    (grep -v "buildInvocationId" | grep -vF "buildFinishedOn1") > $temp_file2 < "$SECOND_ARTIFACT"
+    cat  $temp_file1
     echo "--------------"
-    cat /tmp/second_artifact
-    echo "--------------"
-    diff -f /tmp/first_artifact /tmp/second_artifact > /dev/null
+    cat  $temp_file2
+     echo "--------------"
+    diff -f $temp_file1 $temp_file2 > /dev/null
     local exit_code=$?
-    rm -rf /tmp/{first_artifact,second_artifact}
+    rm -rf /tmp/{file1,file2}
     exit $exit_code
 }
-
-diff_artifacts
