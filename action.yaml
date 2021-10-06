@@ -23,11 +23,12 @@ runs:
   using: 'docker'
   image: 'Dockerfile'
   args:
-    - "--artifact_path"
+    - "generate"
+    - "-artifact_path"
     - '${{ inputs.artifact_path }}'
-    - "--output_path"
+    - "-output_path"
     - '${{ inputs.output_path }}'
-    - "--github_context"
+    - "-github_context"
     - '${{ inputs.github_context }}'
-    - "--runner_context"
+    - "-runner_context"
     - '${{ inputs.runner_context }}'
