@@ -4,16 +4,16 @@ on:
   workflow_dispatch:
     inputs:
       ingredient_input:
-        description: 'Ingredient to input in the artifact text file'     
+        description: 'Ingredient to input in the artifact text file'
         required: false
       car_input:
-        description: 'Car to input in the artifact text file'     
+        description: 'Car to input in the artifact text file'
         required: false
 
 jobs:
   build:
     name: Build artifact
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       # traditionally you would build your code here and generate an artifact
       - name: Create first artifact
@@ -40,7 +40,7 @@ jobs:
   generate-provenance:
     needs: build
     name: Generate build provenance
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       # checkout only required to run local action (defined in this repo)
       - name: Checkout
