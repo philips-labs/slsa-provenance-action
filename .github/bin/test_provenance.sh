@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 
-FIRST_ARTIFACT=$1
-SECOND_ARTIFACT=$2
 
 diff_artifacts() {
+  if [ ! -f "$1" ] || [ ! -f "$2" ] ; then
+    echo "Please provide two files to compare" >&2
+    exit 1
+  fi
+
   local temp_file1=/tmp/file1
   local temp_file2=/tmp/file2
   (grep -v "buildInvocationId" | grep -v "buildFinishedOn" | grep -v "sha1") > $temp_file1 < "$FIRST_ARTIFACT"
@@ -15,4 +18,4 @@ diff_artifacts() {
   exit $exit_code
 }
 
-diff_artifacts
+diff_artifacts "$1" "$2"
