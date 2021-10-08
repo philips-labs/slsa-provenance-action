@@ -153,7 +153,7 @@ Please refer to the [Contributing Guidelines](/CONTRIBUTING.md) for all the guid
 <!-- LICENSE -->
 ## License
 
-Distributed under the MIT License. See [LICENSE](/LICENSE) for more information.
+Distributed under the MIT License. See [LICENSE](/LICENSE.md) for more information.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -183,4 +183,4 @@ This project is inspired by:
 [issues-shield]: https://img.shields.io/github/issues/philips-labs/slsa-provenance-action.svg?style=for-the-badge
 [issues-url]: https://github.com/philips-labs/slsa-provenance-action/issues
 [license-shield]: https://img.shields.io/github/license/philips-labs/slsa-provenance-action.svg?style=for-the-badge
-[license-url]: https://github.com/philips-labs/slsa-provenance-action/blob/main/LICENSE
+[license-url]: https://github.com/philips-labs/slsa-provenance-action/blob/main/LICENSE.md
