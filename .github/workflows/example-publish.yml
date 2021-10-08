@@ -26,7 +26,7 @@ jobs:
         uses: actions/download-artifact@v2
 
       - name: Generate provenance
-        uses: philips-labs/SLSA-Provenance-Action@v0.1
+        uses: philips-labs/slsa-provenance-action@v0.1
         with:
           artifact_path: artifact/
 
