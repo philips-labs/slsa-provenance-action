@@ -26,6 +26,11 @@ const (
 	payloadContentType   = "application/vnd.in-toto+json"
 )
 
+// RequiredFlagError creates an error flag error for the given flag name
+func RequiredFlagError(flagName string) error {
+	return fmt.Errorf("no value found for required flag: %s", flagName)
+}
+
 // subjects walks the file or directory at "root" and hashes all files.
 func subjects(root string) ([]provenance.Subject, error) {
 	var s []provenance.Subject
@@ -73,19 +78,19 @@ func Generate() *ffcli.Command {
 		Exec: func(ctx context.Context, args []string) error {
 			if *artifactPath == "" {
 				flagset.Usage()
-				return fmt.Errorf("no value found for required flag: -artifact_path")
+				return RequiredFlagError("-artifact_path")
 			}
 			if *outputPath == "" {
 				flagset.Usage()
-				return fmt.Errorf("no value found for required flag: -output_path")
+				return RequiredFlagError("-output_path")
 			}
 			if *githubContext == "" {
 				flagset.Usage()
-				return fmt.Errorf("no value found for required flag: -github_context")
+				return RequiredFlagError("-github_context")
 			}
 			if *runnerContext == "" {
 				flagset.Usage()
-				return fmt.Errorf("no value found for required flag: -runner_context")
+				return RequiredFlagError("-runner_context")
 			}
 
 			stmt := provenance.Statement{PredicateType: "https://slsa.dev/provenance/v0.1", Type: "https://in-toto.io/Statement/v0.1"}
