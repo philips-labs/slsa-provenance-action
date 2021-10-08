@@ -33,6 +33,7 @@ jobs:
       - name: Download build artifact
         uses: actions/download-artifact@v2.0.10
         with:
+         name: slsa
          path: slsa
 
       - name: Generate provenance
