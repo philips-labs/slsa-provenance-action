@@ -2,7 +2,6 @@ package cli_test
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"testing"
 
@@ -75,7 +74,7 @@ func TestErrors(t *testing.T) {
 				if err == nil {
 					tt.Error("Expected an error but did not generate one")
 				} else {
-					if errors.Is(err, tc.err) {
+					if err.Error() != tc.err.Error() {
 						tt.Errorf("Expected error to match: %v, got: %v", tc.err, err)
 					}
 				}
