@@ -2,8 +2,7 @@ name: Integration test file provenance
 
 on:
   push:
-    branches:
-      - tests
+  pull_request:
   workflow_dispatch:
 
 jobs:
