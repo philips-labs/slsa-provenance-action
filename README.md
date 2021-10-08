@@ -31,9 +31,9 @@
 ## About This Project
 
 This GitHub action implements the level 1 requirements of the [SLSA framework](https://slsa.dev/). By using this GitHub Action it is possible to easily generate the provenance file for different artifact types.
-Different artifact types include:
+Different artifact types include, but not limited to:
 * Files
-* Push to some API (Docker Hub, different workflow)
+* Push event (Docker Hub, trigger different workflow, etc)
 
 While there are no integrity guarantees on the produced provenance at L1,
 publishing artifact provenance in a common format opens up opportunities for
@@ -43,6 +43,8 @@ improvement from the ecosystem's current state.
 
 
 This is not an official GitHub Action set up and maintained by the SLSA team. This GitHub Action is built for research purposes by Philips Research. It is heavily inspired by the original [Provenance Action example](https://github.com/slsa-framework/github-actions-demo) built by SLSA.
+
+<p align="right">(<a href="#top">back to top</a>)</p>
 
 ## Background
 
@@ -55,8 +57,6 @@ metadata format.
 
 ### Built With
 
-This section should list any major frameworks/libraries used to bootstrap your project. Leave any add-ons/plugins for the acknowledgements section. Here are a few examples.
-
 * [SLSA Framework](https://github.com/slsa-framework/slsa/)
 * [Golang](https://golang.org/)
 * [GitHub Actions](https://github.com/features/actions)
@@ -66,8 +66,7 @@ This section should list any major frameworks/libraries used to bootstrap your p
 
 ## Getting Started
 
-TODO Add instructions to built locally. TODO
-TODO Add instructions to add it to your repository. TODO
+Get started quickly by reading the information below.
 
 ### Prerequisites
 
@@ -94,12 +93,18 @@ The following IDE is recommended when working on this codebase:
    ```sh
    ./bin/slsa-provenance help
    ```
-
+### Docker Image
+  
+Run the Docker Image by doing:
+   ```sh
+   docker run philipssoftware/slsa-provenance:latest
+   ```
+The docker image includes the working binary that can be executed by using the ``slsa-provenance`` command.
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 ## Usage
 
-The easiest way to use this Action is to add the following into your workflow file. Additional configuration might be nessecary to fit your usecase.
+The easiest way to use this action is to add the following into your workflow file. Additional configuration might be nessecary to fit your usecase.
 
 1. Add the following part in your workflow file:
    ```yaml
@@ -123,16 +128,19 @@ The easiest way to use this Action is to add the following into your workflow fi
           path: build.provenance
    ```
 ### Available commands
-* Generate
-* Help
-* Version
+* Generate  
+   Command that generates the provenance.
+* Help  
+   Command that prints helpful information about what commands and arguments can be used.
+* Version  
+   Command that prints version information about the binary that is used.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 <!-- CONTRIBUTING -->
 ## Contributing
 
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
+If you have a suggestion that would make this project better, please fork the repository and create a pull request. You can also simply open an issue with the tag "enhancement".
 
 1. Fork the Project
 2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
@@ -141,7 +149,6 @@ If you have a suggestion that would make this better, please fork the repo and c
 5. Open a Pull Request
 
 Please refer to the [Contributing Guidelines](/CONTRIBUTING.md) for all the guidelines.
-
 
 <!-- LICENSE -->
 ## License
@@ -153,9 +160,10 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Brend Smits - brend.smits@philips.com
-
-
+[Brend Smits](https://github.com/Brend-Smits) - brend.smits@philips.com  
+[Marco Franssen](https://github.com/marcofranssen)  
+[Jeroen Knoops](https://github.com/JeroenKnoops)  
+[Annie Jovitha](https://github.com/AnnieJovitha)  
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
@@ -174,5 +182,5 @@ This project is inspired by:
 [stars-url]: https://github.com/philips-labs/slsa-provenance-action/stargazers
 [issues-shield]: https://img.shields.io/github/issues/philips-labs/slsa-provenance-action.svg?style=for-the-badge
 [issues-url]: https://github.com/philips-labs/slsa-provenance-action/issues
-[license-shield]: https://img.shields.io/github/license/philips-labs/slsa-provenance-actionsvg?style=for-the-badge
+[license-shield]: https://img.shields.io/github/license/philips-labs/slsa-provenance-action.svg?style=for-the-badge
 [license-url]: https://github.com/philips-labs/slsa-provenance-action/blob/main/LICENSE.txt
