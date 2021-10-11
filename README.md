@@ -63,7 +63,6 @@ metadata format.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-
 ## Getting Started
 
 Get started quickly by reading the information below.
@@ -100,6 +99,7 @@ Run the Docker Image by doing:
    docker run philipssoftware/slsa-provenance:latest
    ```
 The docker image includes the working binary that can be executed by using the ``slsa-provenance`` command.
+
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 ## Usage
@@ -150,6 +150,8 @@ If you have a suggestion that would make this project better, please fork the re
 
 Please refer to the [Contributing Guidelines](/CONTRIBUTING.md) for all the guidelines.
 
+<p align="right">(<a href="#top">back to top</a>)</p>
+
 <!-- LICENSE -->
 ## License
 
@@ -160,10 +162,15 @@ Distributed under the MIT License. See [LICENSE](/LICENSE) for more information.
 <!-- CONTACT -->
 ## Contact
 
+*Powered by Philips SWAT Eindhoven*
+
 [Brend Smits](https://github.com/Brend-Smits) - brend.smits@philips.com  
 [Marco Franssen](https://github.com/marcofranssen)  
 [Jeroen Knoops](https://github.com/JeroenKnoops)  
 [Annie Jovitha](https://github.com/AnnieJovitha)  
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
