@@ -161,6 +161,7 @@ Distributed under the MIT License. See [LICENSE](/LICENSE) for more information.
 
 <!-- CONTACT -->
 ## Contact
+
 *Powered by Philips SWAT Eindhoven*
 
 [Brend Smits](https://github.com/Brend-Smits) - brend.smits@philips.com  
