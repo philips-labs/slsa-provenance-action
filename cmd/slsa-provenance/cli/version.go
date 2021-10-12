@@ -29,6 +29,7 @@ var (
 	buildDate = "unknown"
 )
 
+// Version creates an instance of *ffcli.Command to print version info
 func Version() *ffcli.Command {
 	var (
 		flagset = flag.NewFlagSet("slsa-provenance version", flag.ExitOnError)
@@ -56,6 +57,7 @@ func Version() *ffcli.Command {
 	}
 }
 
+// Info holds the version information of the binary
 type Info struct {
 	GitVersion   string `json:"git_version,omitempty"`
 	GitCommit    string `json:"git_commit,omitempty"`
@@ -66,6 +68,7 @@ type Info struct {
 	Platform     string `json:"platform,omitempty"`
 }
 
+// VersionInfo creates an instance of the Info structure
 func VersionInfo() Info {
 	return Info{
 		GitVersion:   GitVersion,
