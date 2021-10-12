@@ -33,6 +33,19 @@ bin/%: cmd/% FORCE
 download: ## download dependencies via go mod
 	go mod download
 
+$(GO_PATH)/bin/goimports:
+	go install golang.org/x/tools/cmd/goimports@latest
+
+$(GO_PATH)/bin/golint:
+	go install golang.org/x/lint/golint@latest
+
+.PHONY: lint
+lint: $(GO_PATH)/bin/goimports $(GO_PATH)/bin/golint ## runs linting
+	@echo Linting using golint
+	@golint -set_exit_status $(shell go list -f '{{ .Dir }}' ./...)
+	@echo Linting imports
+	@goimports -d -e -local github.com/philips-labs/slsa-provenance-action $(shell go list -f '{{ .Dir }}' ./...)
+
 .PHONY: build
 build: $(addprefix bin/,$(COMMANDS)) ## builds binaries
 

@@ -20,10 +20,10 @@ import (
 )
 
 const (
-	GitHubHostedIdSuffix = "/Attestations/GitHubHostedActions@v1"
-	SelfHostedIdSuffix   = "/Attestations/SelfHostedActions@v1"
-	TypeId               = "https://github.com/Attestations/GitHubActionsWorkflow@v1"
-	PayloadContentType   = "application/vnd.in-toto+json"
+	gitHubHostedIDSuffix = "/Attestations/GitHubHostedActions@v1"
+	selfHostedIDSuffix   = "/Attestations/SelfHostedActions@v1"
+	typeID               = "https://github.com/Attestations/GitHubActionsWorkflow@v1"
+	payloadContentType   = "application/vnd.in-toto+json"
 )
 
 // subjects walks the file or directory at "root" and hashes all files.
@@ -55,6 +55,7 @@ func subjects(root string) ([]provenance.Subject, error) {
 	})
 }
 
+// Generate creates an instance of *ffcli.Command to generate provenance
 func Generate() *ffcli.Command {
 	var (
 		flagset       = flag.NewFlagSet("slsa-provenance version", flag.ExitOnError)
@@ -108,7 +109,7 @@ func Generate() *ffcli.Command {
 					BuildFinishedOn: time.Now().UTC().Format(time.RFC3339),
 				},
 				Recipe: provenance.Recipe{
-					Type:              TypeId,
+					Type:              typeID,
 					DefinedInMaterial: 0,
 				},
 				Materials: []provenance.Item{},
@@ -126,7 +127,7 @@ func Generate() *ffcli.Command {
 			context.GitHubContext.Token = ""
 			// NOTE: Re-runs are not uniquely identified and can cause run ID collisions.
 			repoURI := "https://github.com/" + gh.Repository
-			stmt.Predicate.Metadata.BuildInvocationId = repoURI + "/actions/runs/" + gh.RunId
+			stmt.Predicate.Metadata.BuildInvocationID = repoURI + "/actions/runs/" + gh.RunID
 			// NOTE: This is inexact as multiple workflows in a repo can have the same name.
 			// See https://github.com/github/feedback/discussions/4188
 			stmt.Predicate.Recipe.EntryPoint = gh.Workflow
@@ -139,9 +140,9 @@ func Generate() *ffcli.Command {
 			stmt.Predicate.Materials = append(stmt.Predicate.Materials, provenance.Item{URI: "git+" + repoURI, Digest: provenance.DigestSet{"sha1": gh.SHA}})
 
 			if os.Getenv("GITHUB_ACTIONS") == "true" {
-				stmt.Predicate.Builder.Id = repoURI + GitHubHostedIdSuffix
+				stmt.Predicate.Builder.ID = repoURI + gitHubHostedIDSuffix
 			} else {
-				stmt.Predicate.Builder.Id = repoURI + SelfHostedIdSuffix
+				stmt.Predicate.Builder.ID = repoURI + selfHostedIDSuffix
 			}
 
 			// NOTE: At L1, writing the in-toto Statement type is sufficient but, at
