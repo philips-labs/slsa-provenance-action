@@ -33,7 +33,7 @@ jobs:
       - name: Lint
         run: |
           result=$(make lint)
-          echo $result
+          echo "$result"
           [ -n "$(echo "$result" | grep 'diff -u')" ] && exit 1 || exit 0
 
       - name: Build
