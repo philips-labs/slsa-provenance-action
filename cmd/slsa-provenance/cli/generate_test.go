@@ -35,6 +35,10 @@ func TestErrors(t *testing.T) {
 				"artifact/path",
 				"-github_context",
 				"gh-context",
+				"-runner_context",
+				"runner-context",
+				"-output_path",
+				"''",
 			},
 		},
 		{
@@ -65,9 +69,9 @@ func TestErrors(t *testing.T) {
 		},
 	}
 
-	cli := cli.Generate()
 	for _, tc := range testCases {
 		t.Run(tc.name, func(tt *testing.T) {
+			cli := cli.Generate()
 			err := cli.ParseAndRun(context.Background(), tc.arguments)
 
 			if tc.err != nil {
