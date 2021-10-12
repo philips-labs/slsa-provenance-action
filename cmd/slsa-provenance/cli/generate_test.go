@@ -2,8 +2,9 @@ package cli_test
 
 import (
 	"context"
-	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	"github.com/philips-labs/slsa-provenance-action/cmd/slsa-provenance/cli"
 )
@@ -71,19 +72,14 @@ func TestErrors(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(tt *testing.T) {
+			assert := assert.New(tt)
 			cli := cli.Generate()
 			err := cli.ParseAndRun(context.Background(), tc.arguments)
 
 			if tc.err != nil {
-				if err == nil {
-					tt.Error("Expected an error but did not generate one")
-				} else {
-					if err.Error() != tc.err.Error() {
-						tt.Errorf("Expected error to match: %v, got: %v", tc.err, err)
-					}
-				}
+				assert.EqualError(err, tc.err.Error())
 			} else {
-				fmt.Println("Add happyflow tests")
+				assert.NoError(err)
 			}
 		})
 	}
