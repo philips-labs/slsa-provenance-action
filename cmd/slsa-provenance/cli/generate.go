@@ -8,7 +8,6 @@ import (
 	"flag"
 	"fmt"
 	"io/fs"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"time"
@@ -49,7 +48,7 @@ func subjects(root string) ([]provenance.Subject, error) {
 		if relpath == "." {
 			relpath = filepath.Base(root)
 		}
-		contents, err := ioutil.ReadFile(abspath)
+		contents, err := os.ReadFile(abspath)
 		if err != nil {
 			return err
 		}
@@ -155,7 +154,7 @@ func Generate() *ffcli.Command {
 			// Envelope to support attaching signatures.
 			payload, _ := json.MarshalIndent(stmt, "", "  ")
 			fmt.Println("Provenance:\n" + string(payload))
-			if err := ioutil.WriteFile(*outputPath, payload, 0755); err != nil {
+			if err := os.WriteFile(*outputPath, payload, 0755); err != nil {
 				return errors.Wrap(err, "failed to write provenance")
 			}
 
