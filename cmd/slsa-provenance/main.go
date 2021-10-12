@@ -19,7 +19,7 @@ func main() {
 		Name:    "slsa-provenance [flags] <subcommand>",
 		FlagSet: rootFlagSet,
 		Subcommands: []*ffcli.Command{
-			cli.Generate(),
+			cli.Generate(os.Stdout),
 			cli.Version(),
 		},
 		Exec: func(ctx context.Context, args []string) error {

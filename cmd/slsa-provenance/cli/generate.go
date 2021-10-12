@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -60,14 +61,16 @@ func subjects(root string) ([]provenance.Subject, error) {
 }
 
 // Generate creates an instance of *ffcli.Command to generate provenance
-func Generate() *ffcli.Command {
+func Generate(w io.Writer) *ffcli.Command {
 	var (
-		flagset       = flag.NewFlagSet("slsa-provenance version", flag.ExitOnError)
+		flagset       = flag.NewFlagSet("slsa-provenance generate", flag.ExitOnError)
 		artifactPath  = flagset.String("artifact_path", "", "The file or dir path of the artifacts for which provenance should be generated.")
 		outputPath    = flagset.String("output_path", "build.provenance", "The path to which the generated provenance should be written.")
 		githubContext = flagset.String("github_context", "", "The '${github}' context value.")
 		runnerContext = flagset.String("runner_context", "", "The '${runner}' context value.")
 	)
+
+	flagset.SetOutput(w)
 
 	return &ffcli.Command{
 		Name:       "generate",
@@ -153,7 +156,8 @@ func Generate() *ffcli.Command {
 			// higher SLSA levels, the Statement must be encoded and wrapped in an
 			// Envelope to support attaching signatures.
 			payload, _ := json.MarshalIndent(stmt, "", "  ")
-			fmt.Println("Provenance:\n" + string(payload))
+			fmt.Fprintf(w, "Saving provenance to %s:\n\n%s\n", *outputPath, string(payload))
+
 			if err := os.WriteFile(*outputPath, payload, 0755); err != nil {
 				return errors.Wrap(err, "failed to write provenance")
 			}
