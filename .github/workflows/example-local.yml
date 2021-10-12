@@ -15,6 +15,10 @@ jobs:
     name: Build artifact
     runs-on: ubuntu-20.04
     steps:
+      - name: dump context GH
+        run: echo ${{ $GITHUB_CONTEXT }}
+      - name: dump context Runner
+        run: echo ${{ $RUNNER_CONTEXT }}
       # traditionally you would build your code here and generate an artifact
       - name: Create first artifact
         run:  echo "onion, tomato, jalapeno, cilantro, lime, salt" > salsa.txt
