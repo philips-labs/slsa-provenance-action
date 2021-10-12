@@ -38,3 +38,19 @@ jobs:
 
       - name: Build
         run: make build
+
+      - name: Test
+        run: make test
+
+      - name: Coverage
+        run: make coverage-out
+
+      - name: Upload Code Coverage
+        uses: codecov/codecov-action@v2.1.0
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.out
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: true
+          verbose: true
