@@ -15,18 +15,20 @@ import (
 func main() {
 	rootFlagSet := flag.NewFlagSet("slsa-provenance", flag.ExitOnError)
 
+	v := cli.Version(os.Stdout)
+
 	app := &ffcli.Command{
 		Name:    "slsa-provenance [flags] <subcommand>",
 		FlagSet: rootFlagSet,
 		Subcommands: []*ffcli.Command{
 			cli.Generate(os.Stdout),
-			cli.Version(),
+			v,
 		},
 		Exec: func(ctx context.Context, args []string) error {
 			fmt.Println("slsa-provenance")
 			fmt.Println()
 
-			return cli.Version().Exec(ctx, args)
+			return v.Exec(ctx, args)
 		},
 	}
 
