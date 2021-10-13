@@ -17,7 +17,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/philips-labs/slsa-provenance-action/lib/github"
-	"github.com/philips-labs/slsa-provenance-action/lib/provenance"
+	"github.com/philips-labs/slsa-provenance-action/lib/intoto"
 )
 
 const (
@@ -33,8 +33,8 @@ func RequiredFlagError(flagName string) error {
 }
 
 // subjects walks the file or directory at "root" and hashes all files.
-func subjects(root string) ([]provenance.Subject, error) {
-	var s []provenance.Subject
+func subjects(root string) ([]intoto.Subject, error) {
+	var s []intoto.Subject
 	return s, filepath.Walk(root, func(abspath string, info fs.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -56,7 +56,7 @@ func subjects(root string) ([]provenance.Subject, error) {
 		}
 		sha := sha256.Sum256(contents)
 		shaHex := hex.EncodeToString(sha[:])
-		s = append(s, provenance.Subject{Name: relpath, Digest: provenance.DigestSet{"sha256": shaHex}})
+		s = append(s, intoto.Subject{Name: relpath, Digest: intoto.DigestSet{"sha256": shaHex}})
 		return nil
 	})
 }
@@ -96,7 +96,7 @@ func Generate(w io.Writer) *ffcli.Command {
 				return RequiredFlagError("-runner_context")
 			}
 
-			stmt := provenance.Statement{PredicateType: "https://slsa.dev/provenance/v0.1", Type: "https://in-toto.io/Statement/v0.1"}
+			stmt := intoto.Statement{PredicateType: "https://slsa.dev/provenance/v0.1", Type: "https://in-toto.io/Statement/v0.1"}
 			subjects, err := subjects(*artifactPath)
 			if os.IsNotExist(err) {
 				return fmt.Errorf("resource path not found: [provided=%s]", *artifactPath)
@@ -105,10 +105,10 @@ func Generate(w io.Writer) *ffcli.Command {
 			}
 
 			stmt.Subject = append(stmt.Subject, subjects...)
-			stmt.Predicate = provenance.Predicate{
-				Builder: provenance.Builder{},
-				Metadata: provenance.Metadata{
-					Completeness: provenance.Completeness{
+			stmt.Predicate = intoto.Predicate{
+				Builder: intoto.Builder{},
+				Metadata: intoto.Metadata{
+					Completeness: intoto.Completeness{
 						Arguments:   true,
 						Environment: false,
 						Materials:   false,
@@ -116,11 +116,11 @@ func Generate(w io.Writer) *ffcli.Command {
 					Reproducible:    false,
 					BuildFinishedOn: time.Now().UTC().Format(time.RFC3339),
 				},
-				Recipe: provenance.Recipe{
+				Recipe: intoto.Recipe{
 					Type:              typeID,
 					DefinedInMaterial: 0,
 				},
-				Materials: []provenance.Item{},
+				Materials: []intoto.Item{},
 			}
 
 			anyCtx := github.AnyContext{}
@@ -144,7 +144,7 @@ func Generate(w io.Writer) *ffcli.Command {
 			}
 
 			stmt.Predicate.Recipe.Arguments = event.Inputs
-			stmt.Predicate.Materials = append(stmt.Predicate.Materials, provenance.Item{URI: "git+" + repoURI, Digest: provenance.DigestSet{"sha1": gh.SHA}})
+			stmt.Predicate.Materials = append(stmt.Predicate.Materials, intoto.Item{URI: "git+" + repoURI, Digest: intoto.DigestSet{"sha1": gh.SHA}})
 
 			if os.Getenv("GITHUB_ACTIONS") == "true" {
 				stmt.Predicate.Builder.ID = repoURI + gitHubHostedIDSuffix

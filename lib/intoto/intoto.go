@@ -1,4 +1,4 @@
-package provenance
+package intoto
 
 import (
 	"encoding/json"
