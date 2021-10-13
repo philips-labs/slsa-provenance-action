@@ -61,6 +61,13 @@ func subjects(root string) ([]intoto.Subject, error) {
 	})
 }
 
+func builderID(repoURI string) string {
+	if os.Getenv("GITHUB_ACTIONS") == "true" {
+		return repoURI + gitHubHostedIDSuffix
+	}
+	return repoURI + selfHostedIDSuffix
+}
+
 // Generate creates an instance of *ffcli.Command to generate provenance
 func Generate(w io.Writer) *ffcli.Command {
 	var (
@@ -103,28 +110,6 @@ func Generate(w io.Writer) *ffcli.Command {
 				return err
 			}
 
-			stmt := intoto.SLSAProvenanceStatement(
-				intoto.WithSubject(subjects),
-			)
-
-			stmt.Predicate = intoto.Predicate{
-				Builder: intoto.Builder{},
-				Metadata: intoto.Metadata{
-					Completeness: intoto.Completeness{
-						Arguments:   true,
-						Environment: false,
-						Materials:   false,
-					},
-					Reproducible:    false,
-					BuildFinishedOn: time.Now().UTC().Format(time.RFC3339),
-				},
-				Recipe: intoto.Recipe{
-					Type:              typeID,
-					DefinedInMaterial: 0,
-				},
-				Materials: []intoto.Item{},
-			}
-
 			anyCtx := github.AnyContext{}
 			if err := json.Unmarshal([]byte(*githubContext), &anyCtx.Context); err != nil {
 				return errors.Wrap(err, "failed to unmarshal github context json")
@@ -136,7 +121,27 @@ func Generate(w io.Writer) *ffcli.Command {
 
 			// NOTE: Re-runs are not uniquely identified and can cause run ID collisions.
 			repoURI := "https://github.com/" + gh.Repository
-			stmt.Predicate.Metadata.BuildInvocationID = repoURI + "/actions/runs/" + gh.RunID
+
+			stmt := intoto.SLSAProvenanceStatement(
+				intoto.WithSubject(subjects),
+				intoto.WithBuilder(builderID(repoURI)),
+			)
+			stmt.Predicate.Metadata = intoto.Metadata{
+				Completeness: intoto.Completeness{
+					Arguments:   true,
+					Environment: false,
+					Materials:   false,
+				},
+				Reproducible:      false,
+				BuildInvocationID: repoURI + "/actions/runs/" + gh.RunID,
+				BuildFinishedOn:   time.Now().UTC().Format(time.RFC3339),
+			}
+			stmt.Predicate.Recipe = intoto.Recipe{
+				Type:              typeID,
+				DefinedInMaterial: 0,
+			}
+			stmt.Predicate.Materials = []intoto.Item{}
+
 			// NOTE: This is inexact as multiple workflows in a repo can have the same name.
 			// See https://github.com/github/feedback/discussions/4188
 			stmt.Predicate.Recipe.EntryPoint = gh.Workflow
@@ -147,12 +152,6 @@ func Generate(w io.Writer) *ffcli.Command {
 
 			stmt.Predicate.Recipe.Arguments = event.Inputs
 			stmt.Predicate.Materials = append(stmt.Predicate.Materials, intoto.Item{URI: "git+" + repoURI, Digest: intoto.DigestSet{"sha1": gh.SHA}})
-
-			if os.Getenv("GITHUB_ACTIONS") == "true" {
-				stmt.Predicate.Builder.ID = repoURI + gitHubHostedIDSuffix
-			} else {
-				stmt.Predicate.Builder.ID = repoURI + selfHostedIDSuffix
-			}
 
 			// NOTE: At L1, writing the in-toto Statement type is sufficient but, at
 			// higher SLSA levels, the Statement must be encoded and wrapped in an

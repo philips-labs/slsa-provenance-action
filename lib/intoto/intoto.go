@@ -32,6 +32,13 @@ func WithSubject(s []Subject) StatementOption {
 	}
 }
 
+// WithBuilder sets the Statement builder with the given ID
+func WithBuilder(id string) StatementOption {
+	return func(st *Statement) {
+		st.Predicate.Builder = Builder{ID: id}
+	}
+}
+
 // Statement The Statement is the middle layer of the attestation, binding it to a particular subject and unambiguously identifying the types of the predicate.
 type Statement struct {
 	Type          string    `json:"_type"`
