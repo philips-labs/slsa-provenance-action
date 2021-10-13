@@ -96,7 +96,6 @@ func Generate(w io.Writer) *ffcli.Command {
 				return RequiredFlagError("-runner_context")
 			}
 
-			stmt := intoto.Statement{PredicateType: "https://slsa.dev/provenance/v0.1", Type: "https://in-toto.io/Statement/v0.1"}
 			subjects, err := subjects(*artifactPath)
 			if os.IsNotExist(err) {
 				return fmt.Errorf("resource path not found: [provided=%s]", *artifactPath)
@@ -104,7 +103,10 @@ func Generate(w io.Writer) *ffcli.Command {
 				return err
 			}
 
-			stmt.Subject = append(stmt.Subject, subjects...)
+			stmt := intoto.SLSAProvenanceStatement(
+				intoto.WithSubject(subjects),
+			)
+
 			stmt.Predicate = intoto.Predicate{
 				Builder: intoto.Builder{},
 				Metadata: intoto.Metadata{

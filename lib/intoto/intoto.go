@@ -13,12 +13,31 @@ type Envelope struct {
 	Signatures  []interface{} `json:"signatures"`
 }
 
+// SLSAProvenanceStatement builds a in-toto statement with predicate type https://slsa.dev/provenance/v0.1
+func SLSAProvenanceStatement(opts ...StatementOption) *Statement {
+	stmt := &Statement{PredicateType: "https://slsa.dev/provenance/v0.1", Type: "https://in-toto.io/Statement/v0.1"}
+	for _, opt := range opts {
+		opt(stmt)
+	}
+	return stmt
+}
+
+// StatementOption option flag to build the Statement
+type StatementOption func(*Statement)
+
+// WithSubject sets the Statement subject to the provided value
+func WithSubject(s []Subject) StatementOption {
+	return func(st *Statement) {
+		st.Subject = s
+	}
+}
+
 // Statement The Statement is the middle layer of the attestation, binding it to a particular subject and unambiguously identifying the types of the predicate.
 type Statement struct {
 	Type          string    `json:"_type"`
 	Subject       []Subject `json:"subject"`
 	PredicateType string    `json:"predicateType"`
-	Predicate     `json:"predicate"`
+	Predicate     Predicate `json:"predicate"`
 }
 
 // Subject The software artifacts that the attestation applies to.
