@@ -1,6 +1,10 @@
 package provenance
 
-import "encoding/json"
+import (
+	"encoding/json"
+
+	"github.com/philips-labs/slsa-provenance-action/lib/github"
+)
 
 // Envelope wraps an in-toto statement to be able to attach signatures to the Statement
 type Envelope struct {
@@ -58,11 +62,11 @@ type Metadata struct {
 
 // Recipe Identifies the configuration used for the build. When combined with materials, this SHOULD fully describe the build, such that re-running this recipe results in bit-for-bit identical output (if the build is reproducible).
 type Recipe struct {
-	Type              string          `json:"type"`
-	DefinedInMaterial int             `json:"definedInMaterial"`
-	EntryPoint        string          `json:"entryPoint"`
-	Arguments         json.RawMessage `json:"arguments"`
-	Environment       *AnyContext     `json:"environment"`
+	Type              string             `json:"type"`
+	DefinedInMaterial int                `json:"definedInMaterial"`
+	EntryPoint        string             `json:"entryPoint"`
+	Arguments         json.RawMessage    `json:"arguments"`
+	Environment       *github.AnyContext `json:"environment"`
 }
 
 // Completeness Indicates that the builder claims certain fields in this message to be complete.
@@ -79,52 +83,4 @@ type DigestSet map[string]string
 type Item struct {
 	URI    string    `json:"uri"`
 	Digest DigestSet `json:"digest"`
-}
-
-// AnyContext holds the GitHubContext and the RunnerContext
-type AnyContext struct {
-	GitHubContext `json:"github"`
-	RunnerContext `json:"runner"`
-}
-
-// GitHubContext holds all the information set on Github runners in relation to the job
-//
-// This information is retrieved from variables during workflow execution
-type GitHubContext struct {
-	Action          string          `json:"action"`
-	ActionPath      string          `json:"action_path"`
-	Actor           string          `json:"actor"`
-	BaseRef         string          `json:"base_ref"`
-	Event           json.RawMessage `json:"event"`
-	EventName       string          `json:"event_name"`
-	EventPath       string          `json:"event_path"`
-	HeadRef         string          `json:"head_ref"`
-	Job             string          `json:"job"`
-	Ref             string          `json:"ref"`
-	Repository      string          `json:"repository"`
-	RepositoryOwner string          `json:"repository_owner"`
-	RunID           string          `json:"run_id"`
-	RunNumber       string          `json:"run_number"`
-	SHA             string          `json:"sha"`
-	Token           string          `json:"token,omitempty"`
-	Workflow        string          `json:"workflow"`
-	Workspace       string          `json:"workspace"`
-}
-
-// RunnerContext holds information about the given Github Runner in which a workflow executes
-//
-// This information is retrieved from variables during workflow execution
-type RunnerContext struct {
-	OS        string `json:"os"`
-	Temp      string `json:"temp"`
-	ToolCache string `json:"tool_cache"`
-}
-
-// AnyEvent holds the inputs from a Github workflow
-//
-// See https://docs.github.com/en/actions/reference/events-that-trigger-workflows
-// The only Event with dynamically-provided input is workflow_dispatch which
-// exposes the user params at the key "input."
-type AnyEvent struct {
-	Inputs json.RawMessage `json:"inputs"`
 }

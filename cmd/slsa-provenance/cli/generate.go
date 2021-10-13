@@ -16,6 +16,7 @@ import (
 	"github.com/peterbourgon/ff/v3/ffcli"
 	"github.com/pkg/errors"
 
+	"github.com/philips-labs/slsa-provenance-action/lib/github"
 	"github.com/philips-labs/slsa-provenance-action/lib/provenance"
 )
 
@@ -122,24 +123,23 @@ func Generate(w io.Writer) *ffcli.Command {
 				Materials: []provenance.Item{},
 			}
 
-			context := provenance.AnyContext{}
-			if err := json.Unmarshal([]byte(*githubContext), &context.GitHubContext); err != nil {
+			anyCtx := github.AnyContext{}
+			if err := json.Unmarshal([]byte(*githubContext), &anyCtx.Context); err != nil {
 				return errors.Wrap(err, "failed to unmarshal github context json")
 			}
-			if err := json.Unmarshal([]byte(*runnerContext), &context.RunnerContext); err != nil {
+			if err := json.Unmarshal([]byte(*runnerContext), &anyCtx.RunnerContext); err != nil {
 				return errors.Wrap(err, "failed to unmarshal runner context json")
 			}
-			gh := context.GitHubContext
-			// Remove access token from the generated provenance.
-			context.GitHubContext.Token = ""
+			gh := anyCtx.Context
+
 			// NOTE: Re-runs are not uniquely identified and can cause run ID collisions.
 			repoURI := "https://github.com/" + gh.Repository
 			stmt.Predicate.Metadata.BuildInvocationID = repoURI + "/actions/runs/" + gh.RunID
 			// NOTE: This is inexact as multiple workflows in a repo can have the same name.
 			// See https://github.com/github/feedback/discussions/4188
 			stmt.Predicate.Recipe.EntryPoint = gh.Workflow
-			event := provenance.AnyEvent{}
-			if err := json.Unmarshal(context.GitHubContext.Event, &event); err != nil {
+			event := github.AnyEvent{}
+			if err := json.Unmarshal(gh.Event, &event); err != nil {
 				return errors.Wrap(err, "failed to unmarshal github context event json")
 			}
 
