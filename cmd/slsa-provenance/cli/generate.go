@@ -11,7 +11,6 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"time"
 
 	"github.com/peterbourgon/ff/v3/ffcli"
 	"github.com/pkg/errors"
@@ -125,17 +124,9 @@ func Generate(w io.Writer) *ffcli.Command {
 			stmt := intoto.SLSAProvenanceStatement(
 				intoto.WithSubject(subjects),
 				intoto.WithBuilder(builderID(repoURI)),
+				intoto.WithMetadata(repoURI+"/actions/runs/"+gh.RunID),
 			)
-			stmt.Predicate.Metadata = intoto.Metadata{
-				Completeness: intoto.Completeness{
-					Arguments:   true,
-					Environment: false,
-					Materials:   false,
-				},
-				Reproducible:      false,
-				BuildInvocationID: repoURI + "/actions/runs/" + gh.RunID,
-				BuildFinishedOn:   time.Now().UTC().Format(time.RFC3339),
-			}
+
 			stmt.Predicate.Recipe = intoto.Recipe{
 				Type:              typeID,
 				DefinedInMaterial: 0,

@@ -2,6 +2,7 @@ package intoto
 
 import (
 	"encoding/json"
+	"time"
 
 	"github.com/philips-labs/slsa-provenance-action/lib/github"
 )
@@ -36,6 +37,22 @@ func WithSubject(s []Subject) StatementOption {
 func WithBuilder(id string) StatementOption {
 	return func(st *Statement) {
 		st.Predicate.Builder = Builder{ID: id}
+	}
+}
+
+// WithMetadata sets the Predicate Metadata using the buildInvocationID and the current time
+func WithMetadata(buildInvocationID string) StatementOption {
+	return func(s *Statement) {
+		s.Predicate.Metadata = Metadata{
+			Completeness: Completeness{
+				Arguments:   true,
+				Environment: false,
+				Materials:   false,
+			},
+			Reproducible:      false,
+			BuildInvocationID: buildInvocationID,
+			BuildFinishedOn:   time.Now().UTC().Format(time.RFC3339),
+		}
 	}
 }
 
