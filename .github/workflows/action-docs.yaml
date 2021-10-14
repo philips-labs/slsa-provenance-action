@@ -16,6 +16,7 @@ jobs:
       - uses: npalm/action-docs-action@v1.1.0
         with:
           tocLevel: 4
+          actionFile: action.yaml
 
       - name: Update readme in the repository
         if: github.event_name != 'pull_request'
