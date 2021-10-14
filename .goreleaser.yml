@@ -1,0 +1,71 @@
+project_name: slsa-provenance
+
+before:
+  hooks:
+    - go mod tidy
+
+env:
+  - CGO_ENABLED=0
+
+builds:
+  - id: binary
+    dir: cmd/slsa-provenance
+    goos:
+      - windows
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    goarm:
+      - 8
+    ldflags:
+      - "{{ .Env.LDFLAGS }}"
+
+archives:
+  - id: archive
+    format: tar.gz
+    replacements:
+      darwin: macOS
+    files:
+      - LICENSE*
+      - README*
+    format_overrides:
+      - goos: windows
+        format: zip
+
+dockers:
+  - goos: linux
+    goarch: amd64
+    image_templates:
+      - "philipssoftware/{{ .ProjectName }}:{{ .Tag }}"
+      - "philipssoftware/{{ .ProjectName }}:{{ .Env.GIT_HASH }}"
+    build_flag_templates:
+      - "--pull"
+      - "--label=com.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+    extra_files:
+      - "Makefile"
+      - "go.mod"
+      - "go.sum"
+      - "cmd"
+      - "lib"
+checksum:
+  name_template: 'checksums.txt'
+
+snapshot:
+  name_template: "{{ .Tag }}-next"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - Merge pull request
+      - Merge branch
+
+release:
+  prerelease: auto
