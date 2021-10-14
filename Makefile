@@ -46,6 +46,21 @@ lint: $(GO_PATH)/bin/goimports $(GO_PATH)/bin/golint ## runs linting
 	@echo Linting imports
 	@goimports -d -e -local github.com/philips-labs/slsa-provenance-action $(shell go list -f '{{ .Dir }}' ./...)
 
+.PHONY: test
+test: ## runs the tests
+	go test -race -v -count=1 ./...
+
+coverage.out:
+	go test -race -v -count=1 -covermode=atomic -coverprofile=coverage.out ./... || true
+
+.PHONY: coverage.out
+coverage-out: coverage.out ## Ouput code coverage to stdout
+	go tool cover -func=$<
+
+.PHONY: coverage.out
+coverage-html: coverage.out ## Ouput code coverage as HTML
+	go tool cover -html=$<
+
 .PHONY: build
 build: $(addprefix bin/,$(COMMANDS)) ## builds binaries
 

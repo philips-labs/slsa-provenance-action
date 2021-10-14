@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"runtime"
 	"strings"
 	"text/tabwriter"
@@ -30,11 +31,14 @@ var (
 )
 
 // Version creates an instance of *ffcli.Command to print version info
-func Version() *ffcli.Command {
+func Version(w io.Writer) *ffcli.Command {
 	var (
 		flagset = flag.NewFlagSet("slsa-provenance version", flag.ExitOnError)
 		outJSON = flagset.Bool("json", false, "print JSON instead of text")
 	)
+
+	flagset.SetOutput(w)
+
 	return &ffcli.Command{
 		Name:       "version",
 		ShortUsage: "slsa-provenance version",
@@ -51,7 +55,7 @@ func Version() *ffcli.Command {
 				res = j
 			}
 
-			fmt.Println(res)
+			fmt.Fprintln(w, res)
 			return nil
 		},
 	}
