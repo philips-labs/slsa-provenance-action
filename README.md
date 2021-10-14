@@ -127,6 +127,11 @@ The easiest way to use this action is to add the following into your workflow fi
         with:
           path: build.provenance
    ```
+
+<!-- action-docs-description -->
+<!-- action-docs-inputs -->
+<!-- action-docs-outputs -->
+
 ### Available commands
 * Generate  
    Command that generates the provenance.

@@ -1,0 +1,25 @@
+# Workflow to keep action docs up to date
+
+name: 'Action docs'
+on:
+  push:
+    branches:
+      - main
+      - add-github-action-docs 
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.3.4
+
+      - uses: npalm/action-docs-action@v1.1.0
+        with:
+          tocLevel: 4
+
+      - name: Update readme in the repository
+        if: github.event_name != 'pull_request'
+        uses: stefanzweifel/git-auto-commit-action@v4.12.0
+        with:
+          commit_message: "chore(ci): Updating readme"
+          file_pattern: README.md
