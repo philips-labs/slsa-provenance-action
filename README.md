@@ -104,7 +104,7 @@ The docker image includes the working binary that can be executed by using the `
 
 ## Usage
 
-The easiest way to use this action is to add the following into your workflow file. Additional configuration might be nessecary to fit your usecase.
+The easiest way to use this action is to add the following into your workflow file. Additional configuration might be necessary to fit your usecase.
 
 1. Add the following part in your workflow file:
    ```yaml
