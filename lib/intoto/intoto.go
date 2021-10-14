@@ -56,6 +56,23 @@ func WithMetadata(buildInvocationID string) StatementOption {
 	}
 }
 
+// WithRecipe sets the Predicate Recipe and Materials
+func WithRecipe(predicateType string, entryPoint string, arguments json.RawMessage, materials []Item) StatementOption {
+	return func(s *Statement) {
+		s.Predicate.Recipe = Recipe{
+			Type:       predicateType,
+			EntryPoint: entryPoint,
+			Arguments:  arguments,
+			// Subject to change and simplify https://github.com/slsa-framework/slsa/issues/178
+			// Index in materials containing the recipe steps that are not implied by recipe.type. For example, if the recipe type were "make", then this would point to the source containing the Makefile, not the make program itself.
+			// Omit this field (or use null) if the recipe doesn't come from a material.
+			// TODO: What if there is more than one material?
+			DefinedInMaterial: 0,
+		}
+		s.Predicate.Materials = append(s.Predicate.Materials, materials...)
+	}
+}
+
 // Statement The Statement is the middle layer of the attestation, binding it to a particular subject and unambiguously identifying the types of the predicate.
 type Statement struct {
 	Type          string    `json:"_type"`

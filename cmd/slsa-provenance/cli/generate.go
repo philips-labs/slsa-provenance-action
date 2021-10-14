@@ -22,7 +22,7 @@ import (
 const (
 	gitHubHostedIDSuffix = "/Attestations/GitHubHostedActions@v1"
 	selfHostedIDSuffix   = "/Attestations/SelfHostedActions@v1"
-	typeID               = "https://github.com/Attestations/GitHubActionsWorkflow@v1"
+	recipeType           = "https://github.com/Attestations/GitHubActionsWorkflow@v1"
 	payloadContentType   = "application/vnd.in-toto+json"
 )
 
@@ -117,6 +117,10 @@ func Generate(w io.Writer) *ffcli.Command {
 				return errors.Wrap(err, "failed to unmarshal runner context json")
 			}
 			gh := anyCtx.Context
+			event := github.AnyEvent{}
+			if err := json.Unmarshal(gh.Event, &event); err != nil {
+				return errors.Wrap(err, "failed to unmarshal github context event json")
+			}
 
 			// NOTE: Re-runs are not uniquely identified and can cause run ID collisions.
 			repoURI := "https://github.com/" + gh.Repository
@@ -125,24 +129,17 @@ func Generate(w io.Writer) *ffcli.Command {
 				intoto.WithSubject(subjects),
 				intoto.WithBuilder(builderID(repoURI)),
 				intoto.WithMetadata(repoURI+"/actions/runs/"+gh.RunID),
+				// NOTE: This is inexact as multiple workflows in a repo can have the same name.
+				// See https://github.com/github/feedback/discussions/4188
+				intoto.WithRecipe(
+					recipeType,
+					gh.Workflow,
+					event.Inputs,
+					[]intoto.Item{
+						{URI: "git+" + repoURI, Digest: intoto.DigestSet{"sha1": gh.SHA}},
+					},
+				),
 			)
-
-			stmt.Predicate.Recipe = intoto.Recipe{
-				Type:              typeID,
-				DefinedInMaterial: 0,
-			}
-			stmt.Predicate.Materials = []intoto.Item{}
-
-			// NOTE: This is inexact as multiple workflows in a repo can have the same name.
-			// See https://github.com/github/feedback/discussions/4188
-			stmt.Predicate.Recipe.EntryPoint = gh.Workflow
-			event := github.AnyEvent{}
-			if err := json.Unmarshal(gh.Event, &event); err != nil {
-				return errors.Wrap(err, "failed to unmarshal github context event json")
-			}
-
-			stmt.Predicate.Recipe.Arguments = event.Inputs
-			stmt.Predicate.Materials = append(stmt.Predicate.Materials, intoto.Item{URI: "git+" + repoURI, Digest: intoto.DigestSet{"sha1": gh.SHA}})
 
 			// NOTE: At L1, writing the in-toto Statement type is sufficient but, at
 			// higher SLSA levels, the Statement must be encoded and wrapped in an
