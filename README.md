@@ -127,6 +127,31 @@ The easiest way to use this action is to add the following into your workflow fi
         with:
           path: build.provenance
    ```
+
+<!-- action-docs-description -->
+#### Description
+
+An action to generate SLSA build provenance for an artifact
+
+
+<!-- action-docs-description -->
+<!-- action-docs-inputs -->
+#### Inputs
+
+| parameter | description | required | default |
+| - | - | - | - |
+| artifact_path | path to artifact or directory of artifacts | `true` |  |
+| output_path | path to write build provenance file | `true` | build.provenance |
+| github_context | internal (do not set): the "github" context object in json | `true` | ${{ toJSON(github) }} |
+| runner_context | internal (do not set): the "runner" context object in json | `true` | ${{ toJSON(runner) }} |
+
+
+
+<!-- action-docs-inputs -->
+<!-- action-docs-outputs -->
+
+<!-- action-docs-outputs -->
+
 ### Available commands
 * Generate  
    Command that generates the provenance.
