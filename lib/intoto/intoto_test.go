@@ -12,7 +12,7 @@ func TestSLSAProvenanceStatement(t *testing.T) {
 
 	predicateType := "https://slsa.dev/provenance/v0.1"
 	statementType := "https://in-toto.io/Statement/v0.1"
-	repoURI := "https://github.com/slsa-provenance-action"
+	repoURI := "https://github.com/philips-labs/slsa-provenance-action"
 	builderID := repoURI + "/Attestations/GitHubHostedActions@v1"
 	buildInvocationID := repoURI + "/actions/runs/123498765"
 	recipeType := "https://github.com/Attestations/GitHubActionsWorkflow@v1"
