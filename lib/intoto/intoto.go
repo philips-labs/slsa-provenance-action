@@ -1,6 +1,11 @@
-package provenance
+package intoto
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"time"
+
+	"github.com/philips-labs/slsa-provenance-action/lib/github"
+)
 
 // Envelope wraps an in-toto statement to be able to attach signatures to the Statement
 type Envelope struct {
@@ -9,12 +14,71 @@ type Envelope struct {
 	Signatures  []interface{} `json:"signatures"`
 }
 
+// SLSAProvenanceStatement builds a in-toto statement with predicate type https://slsa.dev/provenance/v0.1
+func SLSAProvenanceStatement(opts ...StatementOption) *Statement {
+	stmt := &Statement{PredicateType: "https://slsa.dev/provenance/v0.1", Type: "https://in-toto.io/Statement/v0.1"}
+	for _, opt := range opts {
+		opt(stmt)
+	}
+	return stmt
+}
+
+// StatementOption option flag to build the Statement
+type StatementOption func(*Statement)
+
+// WithSubject sets the Statement subject to the provided value
+func WithSubject(s []Subject) StatementOption {
+	return func(st *Statement) {
+		st.Subject = s
+	}
+}
+
+// WithBuilder sets the Statement builder with the given ID
+func WithBuilder(id string) StatementOption {
+	return func(st *Statement) {
+		st.Predicate.Builder = Builder{ID: id}
+	}
+}
+
+// WithMetadata sets the Predicate Metadata using the buildInvocationID and the current time
+func WithMetadata(buildInvocationID string) StatementOption {
+	return func(s *Statement) {
+		s.Predicate.Metadata = Metadata{
+			Completeness: Completeness{
+				Arguments:   true,
+				Environment: false,
+				Materials:   false,
+			},
+			Reproducible:      false,
+			BuildInvocationID: buildInvocationID,
+			BuildFinishedOn:   time.Now().UTC().Format(time.RFC3339),
+		}
+	}
+}
+
+// WithRecipe sets the Predicate Recipe and Materials
+func WithRecipe(predicateType string, entryPoint string, arguments json.RawMessage, materials []Item) StatementOption {
+	return func(s *Statement) {
+		s.Predicate.Recipe = Recipe{
+			Type:       predicateType,
+			EntryPoint: entryPoint,
+			Arguments:  arguments,
+			// Subject to change and simplify https://github.com/slsa-framework/slsa/issues/178
+			// Index in materials containing the recipe steps that are not implied by recipe.type. For example, if the recipe type were "make", then this would point to the source containing the Makefile, not the make program itself.
+			// Omit this field (or use null) if the recipe doesn't come from a material.
+			// TODO: What if there is more than one material?
+			DefinedInMaterial: 0,
+		}
+		s.Predicate.Materials = append(s.Predicate.Materials, materials...)
+	}
+}
+
 // Statement The Statement is the middle layer of the attestation, binding it to a particular subject and unambiguously identifying the types of the predicate.
 type Statement struct {
 	Type          string    `json:"_type"`
 	Subject       []Subject `json:"subject"`
 	PredicateType string    `json:"predicateType"`
-	Predicate     `json:"predicate"`
+	Predicate     Predicate `json:"predicate"`
 }
 
 // Subject The software artifacts that the attestation applies to.
@@ -58,11 +122,11 @@ type Metadata struct {
 
 // Recipe Identifies the configuration used for the build. When combined with materials, this SHOULD fully describe the build, such that re-running this recipe results in bit-for-bit identical output (if the build is reproducible).
 type Recipe struct {
-	Type              string          `json:"type"`
-	DefinedInMaterial int             `json:"definedInMaterial"`
-	EntryPoint        string          `json:"entryPoint"`
-	Arguments         json.RawMessage `json:"arguments"`
-	Environment       *AnyContext     `json:"environment"`
+	Type              string             `json:"type"`
+	DefinedInMaterial int                `json:"definedInMaterial"`
+	EntryPoint        string             `json:"entryPoint"`
+	Arguments         json.RawMessage    `json:"arguments"`
+	Environment       *github.AnyContext `json:"environment"`
 }
 
 // Completeness Indicates that the builder claims certain fields in this message to be complete.
@@ -79,52 +143,4 @@ type DigestSet map[string]string
 type Item struct {
 	URI    string    `json:"uri"`
 	Digest DigestSet `json:"digest"`
-}
-
-// AnyContext holds the GitHubContext and the RunnerContext
-type AnyContext struct {
-	GitHubContext `json:"github"`
-	RunnerContext `json:"runner"`
-}
-
-// GitHubContext holds all the information set on Github runners in relation to the job
-//
-// This information is retrieved from variables during workflow execution
-type GitHubContext struct {
-	Action          string          `json:"action"`
-	ActionPath      string          `json:"action_path"`
-	Actor           string          `json:"actor"`
-	BaseRef         string          `json:"base_ref"`
-	Event           json.RawMessage `json:"event"`
-	EventName       string          `json:"event_name"`
-	EventPath       string          `json:"event_path"`
-	HeadRef         string          `json:"head_ref"`
-	Job             string          `json:"job"`
-	Ref             string          `json:"ref"`
-	Repository      string          `json:"repository"`
-	RepositoryOwner string          `json:"repository_owner"`
-	RunID           string          `json:"run_id"`
-	RunNumber       string          `json:"run_number"`
-	SHA             string          `json:"sha"`
-	Token           string          `json:"token,omitempty"`
-	Workflow        string          `json:"workflow"`
-	Workspace       string          `json:"workspace"`
-}
-
-// RunnerContext holds information about the given Github Runner in which a workflow executes
-//
-// This information is retrieved from variables during workflow execution
-type RunnerContext struct {
-	OS        string `json:"os"`
-	Temp      string `json:"temp"`
-	ToolCache string `json:"tool_cache"`
-}
-
-// AnyEvent holds the inputs from a Github workflow
-//
-// See https://docs.github.com/en/actions/reference/events-that-trigger-workflows
-// The only Event with dynamically-provided input is workflow_dispatch which
-// exposes the user params at the key "input."
-type AnyEvent struct {
-	Inputs json.RawMessage `json:"inputs"`
 }

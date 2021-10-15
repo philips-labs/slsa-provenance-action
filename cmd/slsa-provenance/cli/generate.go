@@ -11,18 +11,18 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"time"
 
 	"github.com/peterbourgon/ff/v3/ffcli"
 	"github.com/pkg/errors"
 
-	"github.com/philips-labs/slsa-provenance-action/lib/provenance"
+	"github.com/philips-labs/slsa-provenance-action/lib/github"
+	"github.com/philips-labs/slsa-provenance-action/lib/intoto"
 )
 
 const (
 	gitHubHostedIDSuffix = "/Attestations/GitHubHostedActions@v1"
 	selfHostedIDSuffix   = "/Attestations/SelfHostedActions@v1"
-	typeID               = "https://github.com/Attestations/GitHubActionsWorkflow@v1"
+	recipeType           = "https://github.com/Attestations/GitHubActionsWorkflow@v1"
 	payloadContentType   = "application/vnd.in-toto+json"
 )
 
@@ -32,8 +32,8 @@ func RequiredFlagError(flagName string) error {
 }
 
 // subjects walks the file or directory at "root" and hashes all files.
-func subjects(root string) ([]provenance.Subject, error) {
-	var s []provenance.Subject
+func subjects(root string) ([]intoto.Subject, error) {
+	var s []intoto.Subject
 	return s, filepath.Walk(root, func(abspath string, info fs.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -55,9 +55,16 @@ func subjects(root string) ([]provenance.Subject, error) {
 		}
 		sha := sha256.Sum256(contents)
 		shaHex := hex.EncodeToString(sha[:])
-		s = append(s, provenance.Subject{Name: relpath, Digest: provenance.DigestSet{"sha256": shaHex}})
+		s = append(s, intoto.Subject{Name: relpath, Digest: intoto.DigestSet{"sha256": shaHex}})
 		return nil
 	})
+}
+
+func builderID(repoURI string) string {
+	if os.Getenv("GITHUB_ACTIONS") == "true" {
+		return repoURI + gitHubHostedIDSuffix
+	}
+	return repoURI + selfHostedIDSuffix
 }
 
 // Generate creates an instance of *ffcli.Command to generate provenance
@@ -95,7 +102,6 @@ func Generate(w io.Writer) *ffcli.Command {
 				return RequiredFlagError("-runner_context")
 			}
 
-			stmt := provenance.Statement{PredicateType: "https://slsa.dev/provenance/v0.1", Type: "https://in-toto.io/Statement/v0.1"}
 			subjects, err := subjects(*artifactPath)
 			if os.IsNotExist(err) {
 				return fmt.Errorf("resource path not found: [provided=%s]", *artifactPath)
@@ -103,54 +109,37 @@ func Generate(w io.Writer) *ffcli.Command {
 				return err
 			}
 
-			stmt.Subject = append(stmt.Subject, subjects...)
-			stmt.Predicate = provenance.Predicate{
-				Builder: provenance.Builder{},
-				Metadata: provenance.Metadata{
-					Completeness: provenance.Completeness{
-						Arguments:   true,
-						Environment: false,
-						Materials:   false,
-					},
-					Reproducible:    false,
-					BuildFinishedOn: time.Now().UTC().Format(time.RFC3339),
-				},
-				Recipe: provenance.Recipe{
-					Type:              typeID,
-					DefinedInMaterial: 0,
-				},
-				Materials: []provenance.Item{},
-			}
-
-			context := provenance.AnyContext{}
-			if err := json.Unmarshal([]byte(*githubContext), &context.GitHubContext); err != nil {
+			anyCtx := github.AnyContext{}
+			if err := json.Unmarshal([]byte(*githubContext), &anyCtx.Context); err != nil {
 				return errors.Wrap(err, "failed to unmarshal github context json")
 			}
-			if err := json.Unmarshal([]byte(*runnerContext), &context.RunnerContext); err != nil {
+			if err := json.Unmarshal([]byte(*runnerContext), &anyCtx.RunnerContext); err != nil {
 				return errors.Wrap(err, "failed to unmarshal runner context json")
 			}
-			gh := context.GitHubContext
-			// Remove access token from the generated provenance.
-			context.GitHubContext.Token = ""
-			// NOTE: Re-runs are not uniquely identified and can cause run ID collisions.
-			repoURI := "https://github.com/" + gh.Repository
-			stmt.Predicate.Metadata.BuildInvocationID = repoURI + "/actions/runs/" + gh.RunID
-			// NOTE: This is inexact as multiple workflows in a repo can have the same name.
-			// See https://github.com/github/feedback/discussions/4188
-			stmt.Predicate.Recipe.EntryPoint = gh.Workflow
-			event := provenance.AnyEvent{}
-			if err := json.Unmarshal(context.GitHubContext.Event, &event); err != nil {
+			gh := anyCtx.Context
+			event := github.AnyEvent{}
+			if err := json.Unmarshal(gh.Event, &event); err != nil {
 				return errors.Wrap(err, "failed to unmarshal github context event json")
 			}
 
-			stmt.Predicate.Recipe.Arguments = event.Inputs
-			stmt.Predicate.Materials = append(stmt.Predicate.Materials, provenance.Item{URI: "git+" + repoURI, Digest: provenance.DigestSet{"sha1": gh.SHA}})
+			// NOTE: Re-runs are not uniquely identified and can cause run ID collisions.
+			repoURI := "https://github.com/" + gh.Repository
 
-			if os.Getenv("GITHUB_ACTIONS") == "true" {
-				stmt.Predicate.Builder.ID = repoURI + gitHubHostedIDSuffix
-			} else {
-				stmt.Predicate.Builder.ID = repoURI + selfHostedIDSuffix
-			}
+			stmt := intoto.SLSAProvenanceStatement(
+				intoto.WithSubject(subjects),
+				intoto.WithBuilder(builderID(repoURI)),
+				intoto.WithMetadata(repoURI+"/actions/runs/"+gh.RunID),
+				// NOTE: This is inexact as multiple workflows in a repo can have the same name.
+				// See https://github.com/github/feedback/discussions/4188
+				intoto.WithRecipe(
+					recipeType,
+					gh.Workflow,
+					event.Inputs,
+					[]intoto.Item{
+						{URI: "git+" + repoURI, Digest: intoto.DigestSet{"sha1": gh.SHA}},
+					},
+				),
+			)
 
 			// NOTE: At L1, writing the in-toto Statement type is sufficient but, at
 			// higher SLSA levels, the Statement must be encoded and wrapped in an
