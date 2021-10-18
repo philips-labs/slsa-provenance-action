@@ -7,6 +7,8 @@ version: 2
 updates:
   - package-ecosystem: "gomod" # See documentation for possible values
     directory: "/" # Location of package manifests
+    commit_message:
+      prefix: ":arrow_up:"
     schedule:
       interval: "daily"
 
@@ -14,5 +16,7 @@ updates:
     # Workflow files stored in the
     # default location of `.github/workflows`
     directory: "/"
+    commit_message:
+      prefix: ":arrow_up:"
     schedule:
       interval: "weekly"
