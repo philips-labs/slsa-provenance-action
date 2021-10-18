@@ -8,6 +8,11 @@ on:
       - Makefile
       - action.yaml
   pull_request:
+    paths:
+      - cmd/**
+      - lib/**
+      - Makefile
+      - action.yaml
   workflow_dispatch:
 
 jobs:
