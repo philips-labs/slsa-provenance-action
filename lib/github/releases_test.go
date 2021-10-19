@@ -48,6 +48,11 @@ func TestFetchRelease(t *testing.T) {
 
 func TestAddProvenanceToRelease(t *testing.T) {
 	assert := assert.New(t)
+	githubToken := tokenRetriever()
+
+	if githubToken == "" {
+		t.Skip("skipping as GITHUB_TOKEN environment variable isn't set")
+	}
 
 	_, filename, _, _ := runtime.Caller(0)
 	rootDir := path.Join(path.Dir(filename), "../..")
