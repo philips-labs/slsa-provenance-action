@@ -41,9 +41,13 @@ jobs:
         run: make build
 
       - name: Test
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         run: make test
 
       - name: Coverage
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         run: make coverage-out
 
       - name: Upload Code Coverage
