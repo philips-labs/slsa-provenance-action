@@ -14,6 +14,7 @@ import (
 // The token is placed in a StaticTokenSource to authenticate using oauth2.
 type TokenRetriever func() string
 
+// NewOAuth2Client creates a oauth2 client using the token from the TokenRetriever
 func NewOAuth2Client(ctx context.Context, tokenRetriever TokenRetriever) *http.Client {
 	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: tokenRetriever()})
 	return oauth2.NewClient(ctx, ts)
