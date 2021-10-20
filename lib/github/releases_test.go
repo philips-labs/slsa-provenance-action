@@ -18,6 +18,8 @@ const (
 	repo  = "slsa-provenance-action"
 )
 
+var githubToken string
+
 func tokenRetriever() string {
 	return os.Getenv("GITHUB_TOKEN")
 }
@@ -30,12 +32,22 @@ func boolPointer(b bool) *bool {
 	return &b
 }
 
+func init() {
+	githubToken = tokenRetriever()
+}
+
 func TestFetchRelease(t *testing.T) {
 	assert := assert.New(t)
 
 	ctx := context.Background()
 
-	client := github.NewProvenanceClient(nil)
+	var client *github.ProvenanceClient
+	if githubToken != "" {
+		tc := github.NewOAuth2Client(ctx, tokenRetriever)
+		client = github.NewProvenanceClient(tc)
+	} else {
+		client = github.NewProvenanceClient(nil)
+	}
 	release, err := client.FetchRelease(ctx, owner, repo, "v0.1.1")
 
 	if !assert.NoError(err) && assert.Nil(release) {
@@ -48,7 +60,6 @@ func TestFetchRelease(t *testing.T) {
 
 func TestAddProvenanceToRelease(t *testing.T) {
 	assert := assert.New(t)
-	githubToken := tokenRetriever()
 
 	if githubToken == "" {
 		t.Skip("skipping as GITHUB_TOKEN environment variable isn't set")
