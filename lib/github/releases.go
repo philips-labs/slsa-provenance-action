@@ -2,6 +2,8 @@ package github
 
 import (
 	"context"
+	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"time"
@@ -9,6 +11,12 @@ import (
 	"github.com/google/go-github/v39/github"
 	"golang.org/x/oauth2"
 )
+
+// ReleaseAsset holds the release asset information and it's contents.
+type ReleaseAsset struct {
+	*github.ReleaseAsset
+	Content io.ReadCloser
+}
 
 // TokenRetriever allows to implement a function to retrieve the token
 // The token is placed in a StaticTokenSource to authenticate using oauth2.
@@ -23,12 +31,14 @@ func NewOAuth2Client(ctx context.Context, tokenRetriever TokenRetriever) *http.C
 // ProvenanceClient GitHub client adding convenience methods to add provenance to a release
 type ProvenanceClient struct {
 	*github.Client
+	httpClient *http.Client
 }
 
 // NewProvenanceClient create new ProvenanceClient instance
 func NewProvenanceClient(httpClient *http.Client) *ProvenanceClient {
 	return &ProvenanceClient{
-		Client: github.NewClient(httpClient),
+		Client:     github.NewClient(httpClient),
+		httpClient: httpClient,
 	}
 }
 
@@ -54,6 +64,30 @@ func (p *ProvenanceClient) FetchRelease(ctx context.Context, owner, repo, tagNam
 	}
 
 	return rel, nil
+}
+
+// DownloadReleaseAssets download the assets for a release.
+// It is up to the caller to Close the ReadCloser.
+func (p *ProvenanceClient) DownloadReleaseAssets(ctx context.Context, owner, repo string, releaseID int64) ([]ReleaseAsset, error) {
+	// TODO: add pagination when there are tons of releaseAssets not fitting in a single page for the release
+	releaseAssets, _, err := p.Repositories.ListReleaseAssets(ctx, owner, repo, releaseID, &github.ListOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("failed to list release assets: %w", err)
+	}
+	assets := make([]ReleaseAsset, len(releaseAssets))
+
+	for i, releaseAsset := range releaseAssets {
+		asset, _, err := p.Repositories.DownloadReleaseAsset(ctx, owner, repo, releaseAsset.GetID(), p.httpClient)
+		if err != nil {
+			return nil, err
+		}
+		assets[i] = ReleaseAsset{
+			ReleaseAsset: releaseAsset,
+			Content:      asset,
+		}
+	}
+
+	return assets, nil
 }
 
 // AddProvenanceToRelease uploads the provenance for the given release
