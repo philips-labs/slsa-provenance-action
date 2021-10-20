@@ -58,6 +58,54 @@ func TestFetchRelease(t *testing.T) {
 	assert.Len(release.Assets, 7)
 }
 
+func TestDownloadReleaseAssets(t *testing.T) {
+	assert := assert.New(t)
+
+	ctx := context.Background()
+
+	var client *github.ProvenanceClient
+	if githubToken != "" {
+		tc := github.NewOAuth2Client(ctx, tokenRetriever)
+		client = github.NewProvenanceClient(tc)
+	} else {
+		client = github.NewProvenanceClient(nil)
+	}
+
+	release, err := client.FetchRelease(ctx, owner, repo, "v0.1.1")
+	if !assert.NoError(err) && assert.Nil(release) {
+		return
+	}
+	assert.Equal(int64(51517953), release.GetID())
+
+	assets, err := client.DownloadReleaseAssets(ctx, owner, repo, release.GetID())
+	if !assert.NoError(err) {
+		return
+	}
+	defer func() {
+		for _, a := range assets {
+			if a.Content != nil {
+				_ = a.Content.Close()
+			}
+		}
+	}()
+
+	assert.Len(assets, 7)
+	assert.Equal("checksums.txt", assets[0].GetName())
+	assert.NotNil(assets[0].Content)
+	assert.Equal("slsa-provenance_0.1.1_linux_amd64.tar.gz", assets[1].GetName())
+	assert.NotNil(assets[1].Content)
+	assert.Equal("slsa-provenance_0.1.1_linux_arm64.tar.gz", assets[2].GetName())
+	assert.NotNil(assets[2].Content)
+	assert.Equal("slsa-provenance_0.1.1_macOS_amd64.tar.gz", assets[3].GetName())
+	assert.NotNil(assets[3].Content)
+	assert.Equal("slsa-provenance_0.1.1_macOS_arm64.tar.gz", assets[4].GetName())
+	assert.NotNil(assets[4].Content)
+	assert.Equal("slsa-provenance_0.1.1_windows_amd64.zip", assets[5].GetName())
+	assert.NotNil(assets[5].Content)
+	assert.Equal("slsa-provenance_0.1.1_windows_arm64.zip", assets[6].GetName())
+	assert.NotNil(assets[6].Content)
+}
+
 func TestAddProvenanceToRelease(t *testing.T) {
 	assert := assert.New(t)
 
