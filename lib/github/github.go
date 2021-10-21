@@ -2,12 +2,6 @@ package github
 
 import "encoding/json"
 
-// AnyContext holds the GitHubContext and the RunnerContext
-type AnyContext struct {
-	Context       `json:"github"`
-	RunnerContext `json:"runner"`
-}
-
 // Context holds all the information set on Github runners in relation to the job
 //
 // This information is retrieved from variables during workflow execution

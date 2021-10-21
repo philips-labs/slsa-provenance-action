@@ -57,7 +57,7 @@ func WithMetadata(buildInvocationID string) StatementOption {
 }
 
 // WithRecipe sets the Predicate Recipe and Materials
-func WithRecipe(predicateType string, entryPoint string, arguments json.RawMessage, materials []Item) StatementOption {
+func WithRecipe(predicateType string, entryPoint string, environment *Environment, arguments json.RawMessage, materials []Item) StatementOption {
 	return func(s *Statement) {
 		s.Predicate.Recipe = Recipe{
 			Type:       predicateType,
@@ -68,6 +68,7 @@ func WithRecipe(predicateType string, entryPoint string, arguments json.RawMessa
 			// Omit this field (or use null) if the recipe doesn't come from a material.
 			// TODO: What if there is more than one material?
 			DefinedInMaterial: 0,
+			Environment:       environment,
 		}
 		s.Predicate.Materials = append(s.Predicate.Materials, materials...)
 	}
@@ -120,13 +121,19 @@ type Metadata struct {
 	BuildFinishedOn string `json:"buildFinishedOn"`
 }
 
+// Environment holds the GitHub Context and the RunnerContext
+type Environment struct {
+	GitHub github.Context       `json:"github"`
+	Runner github.RunnerContext `json:"runner"`
+}
+
 // Recipe Identifies the configuration used for the build. When combined with materials, this SHOULD fully describe the build, such that re-running this recipe results in bit-for-bit identical output (if the build is reproducible).
 type Recipe struct {
-	Type              string             `json:"type"`
-	DefinedInMaterial int                `json:"definedInMaterial"`
-	EntryPoint        string             `json:"entryPoint"`
-	Arguments         json.RawMessage    `json:"arguments"`
-	Environment       *github.AnyContext `json:"environment"`
+	Type              string          `json:"type"`
+	DefinedInMaterial int             `json:"definedInMaterial"`
+	EntryPoint        string          `json:"entryPoint"`
+	Arguments         json.RawMessage `json:"arguments"`
+	Environment       *Environment    `json:"environment"`
 }
 
 // Completeness Indicates that the builder claims certain fields in this message to be complete.
