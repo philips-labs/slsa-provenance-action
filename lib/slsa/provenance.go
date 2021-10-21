@@ -33,7 +33,7 @@ func builderID(repoURI string) string {
 
 // GenerateProvenanceStatement generates a in-toto provenance statement based on the github context
 func GenerateProvenanceStatement(ctx context.Context, gh github.Context, runner github.RunnerContext, artifactPath string) (*intoto.Statement, error) {
-	subjects, err := subjects(artifactPath)
+	subjects, err := intoto.Subjects(artifactPath)
 	if os.IsNotExist(err) {
 		return nil, fmt.Errorf("resource path not found: [provided=%s]", artifactPath)
 	} else if err != nil {

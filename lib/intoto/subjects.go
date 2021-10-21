@@ -1,4 +1,4 @@
-package slsa
+package intoto
 
 import (
 	"crypto/sha256"
@@ -6,13 +6,11 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-
-	"github.com/philips-labs/slsa-provenance-action/lib/intoto"
 )
 
-// subjects walks the file or directory at "root" and hashes all files.
-func subjects(root string) ([]intoto.Subject, error) {
-	var s []intoto.Subject
+// Subjects walks the file or directory at "root" and hashes all files.
+func Subjects(root string) ([]Subject, error) {
+	var s []Subject
 	return s, filepath.Walk(root, func(abspath string, info fs.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -36,7 +34,7 @@ func subjects(root string) ([]intoto.Subject, error) {
 
 		shaHex := ShaSum256HexEncoded(binary)
 
-		s = append(s, intoto.Subject{Name: relpath, Digest: intoto.DigestSet{"sha256": shaHex}})
+		s = append(s, Subject{Name: relpath, Digest: DigestSet{"sha256": shaHex}})
 		return nil
 	})
 }
