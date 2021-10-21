@@ -257,14 +257,10 @@ func TestGenerateProvenance(t *testing.T) {
 	}
 
 	binaryName := "slsa-provenance"
-	binary, err := os.ReadFile(path.Join(artifactPath, binaryName))
-	if !assert.NoError(err) {
-		return
-	}
+	binaryPath := path.Join(artifactPath, binaryName)
 
-	shaHex := slsa.ShaSum256HexEncoded(binary)
 	assert.Len(stmt.Subject, 1)
-	assert.Contains(stmt.Subject, intoto.Subject{Name: binaryName, Digest: intoto.DigestSet{"sha256": shaHex}})
+	slsa.AssertSubject(assert, stmt.Subject, binaryName, binaryPath)
 
 	assert.Equal(intoto.SlsaPredicateType, stmt.PredicateType)
 	assert.Equal(intoto.StatementType, stmt.Type)
