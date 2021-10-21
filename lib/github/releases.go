@@ -44,19 +44,16 @@ func NewProvenanceClient(httpClient *http.Client) *ProvenanceClient {
 
 // FetchRelease get the release by its tagName
 func (p *ProvenanceClient) FetchRelease(ctx context.Context, owner, repo, tagName string) (*github.RepositoryRelease, error) {
-	client := p.Client
-
-	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	listCtx, cancel := context.WithTimeout(ctx, 1*time.Minute)
 	defer cancel()
 
-	// TODO: add pagination when there are tons of releases for the repo
-	releases, _, err := client.Repositories.ListReleases(ctx, owner, repo, &github.ListOptions{})
+	allReleases, err := p.ListReleases(listCtx, owner, repo, github.ListOptions{PerPage: 10})
 	if err != nil {
 		return nil, err
 	}
 
 	var rel *github.RepositoryRelease
-	for _, r := range releases {
+	for _, r := range allReleases {
 		if *r.TagName == tagName {
 			rel = r
 			break
@@ -69,14 +66,16 @@ func (p *ProvenanceClient) FetchRelease(ctx context.Context, owner, repo, tagNam
 // DownloadReleaseAssets download the assets for a release.
 // It is up to the caller to Close the ReadCloser.
 func (p *ProvenanceClient) DownloadReleaseAssets(ctx context.Context, owner, repo string, releaseID int64) ([]ReleaseAsset, error) {
-	// TODO: add pagination when there are tons of releaseAssets not fitting in a single page for the release
-	releaseAssets, _, err := p.Repositories.ListReleaseAssets(ctx, owner, repo, releaseID, &github.ListOptions{})
-	if err != nil {
-		return nil, fmt.Errorf("failed to list release assets: %w", err)
-	}
-	assets := make([]ReleaseAsset, len(releaseAssets))
+	listCtx, cancel := context.WithTimeout(ctx, 1*time.Minute)
+	defer cancel()
 
-	for i, releaseAsset := range releaseAssets {
+	allAssets, err := p.ListReleaseAssets(listCtx, owner, repo, releaseID, github.ListOptions{PerPage: 10})
+	if err != nil {
+		return nil, err
+	}
+	assets := make([]ReleaseAsset, len(allAssets))
+
+	for i, releaseAsset := range allAssets {
 		asset, _, err := p.Repositories.DownloadReleaseAsset(ctx, owner, repo, releaseAsset.GetID(), p.httpClient)
 		if err != nil {
 			return nil, err
@@ -101,4 +100,48 @@ func (p *ProvenanceClient) AddProvenanceToRelease(ctx context.Context, owner, re
 	uploadOptions := &github.UploadOptions{Name: stat.Name(), MediaType: "application/json; charset=utf-8"}
 	asset, _, err := client.Repositories.UploadReleaseAsset(ctx, owner, repo, releaseID, uploadOptions, provenance)
 	return asset, err
+}
+
+// ListReleaseAssets will retrieve the list of all release assets.
+func (p *ProvenanceClient) ListReleaseAssets(ctx context.Context, owner, repo string, releaseID int64, listOptions github.ListOptions) ([]*github.ReleaseAsset, error) {
+	var allAssets []*github.ReleaseAsset
+	for {
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		default:
+		}
+		assets, resp, err := p.Repositories.ListReleaseAssets(ctx, owner, repo, releaseID, &listOptions)
+		if err != nil {
+			return nil, fmt.Errorf("failed to list release assets: %w", err)
+		}
+		allAssets = append(allAssets, assets...)
+		if resp.NextPage == 0 {
+			break
+		}
+		listOptions.Page = resp.NextPage
+	}
+	return allAssets, nil
+}
+
+// ListReleases will retrieve the list of all releases.
+func (p *ProvenanceClient) ListReleases(ctx context.Context, owner, repo string, listOptions github.ListOptions) ([]*github.RepositoryRelease, error) {
+	var allReleases []*github.RepositoryRelease
+	for {
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		default:
+		}
+		releases, resp, err := p.Repositories.ListReleases(ctx, owner, repo, &listOptions)
+		if err != nil {
+			return nil, fmt.Errorf("failed to list releases: %w", err)
+		}
+		allReleases = append(allReleases, releases...)
+		if resp.NextPage == 0 {
+			break
+		}
+		listOptions.Page = resp.NextPage
+	}
+	return allReleases, nil
 }

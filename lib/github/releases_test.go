@@ -50,6 +50,8 @@ func TestFetchRelease(t *testing.T) {
 	}
 	release, err := client.FetchRelease(ctx, owner, repo, "v0.1.1")
 
+	assert.Greater(release, 2)
+
 	if !assert.NoError(err) && assert.Nil(release) {
 		return
 	}
@@ -152,4 +154,56 @@ func TestAddProvenanceToRelease(t *testing.T) {
 	}
 	assert.Equal(stat.Name(), asset.GetName())
 	assert.Equal("application/json; charset=utf-8", asset.GetContentType())
+}
+
+func TestListReleaseAssets(t *testing.T) {
+	assert := assert.New(t)
+	ctx := context.Background()
+
+	var client *github.ProvenanceClient
+	if githubToken != "" {
+		tc := github.NewOAuth2Client(ctx, tokenRetriever)
+		client = github.NewProvenanceClient(tc)
+	} else {
+		client = github.NewProvenanceClient(nil)
+	}
+	opt := gh.ListOptions{PerPage: 2}
+	assets, err := client.ListReleaseAssets(ctx, owner, repo, 51517953, opt)
+	if !assert.NoError(err) {
+		return
+	}
+	assert.Len(assets, 7)
+
+	opt = gh.ListOptions{PerPage: 10}
+	assets, err = client.ListReleaseAssets(ctx, owner, repo, 51517953, opt)
+	if !assert.NoError(err) {
+		return
+	}
+	assert.Len(assets, 7)
+}
+
+func TestListReleases(t *testing.T) {
+	assert := assert.New(t)
+	ctx := context.Background()
+
+	var client *github.ProvenanceClient
+	if githubToken != "" {
+		tc := github.NewOAuth2Client(ctx, tokenRetriever)
+		client = github.NewProvenanceClient(tc)
+	} else {
+		client = github.NewProvenanceClient(nil)
+	}
+	opt := gh.ListOptions{PerPage: 1}
+	releases, err := client.ListReleases(ctx, owner, repo, opt)
+	if !assert.NoError(err) {
+		return
+	}
+	assert.GreaterOrEqual(len(releases), 2)
+
+	opt = gh.ListOptions{PerPage: 2}
+	releases, err = client.ListReleases(ctx, owner, repo, opt)
+	if !assert.NoError(err) {
+		return
+	}
+	assert.GreaterOrEqual(len(releases), 2)
 }
