@@ -260,7 +260,7 @@ func TestGenerateProvenance(t *testing.T) {
 	binaryPath := path.Join(artifactPath, binaryName)
 
 	assert.Len(stmt.Subject, 1)
-	slsa.AssertSubject(assert, stmt.Subject, binaryName, binaryPath)
+	assertSubject(assert, stmt.Subject, binaryName, binaryPath)
 
 	assert.Equal(intoto.SlsaPredicateType, stmt.PredicateType)
 	assert.Equal(intoto.StatementType, stmt.Type)
@@ -291,4 +291,14 @@ func assertMetadata(assert *assert.Assertions, meta intoto.Metadata, gh github.C
 	assert.Equal(false, meta.Completeness.Environment)
 	assert.Equal(false, meta.Completeness.Materials)
 	assert.Equal(false, meta.Reproducible)
+}
+
+func assertSubject(assert *assert.Assertions, subject []intoto.Subject, binaryName, binaryPath string) {
+	binary, err := os.ReadFile(binaryPath)
+	if !assert.NoError(err) {
+		return
+	}
+
+	shaHex := intoto.ShaSum256HexEncoded(binary)
+	assert.Contains(subject, intoto.Subject{Name: binaryName, Digest: intoto.DigestSet{"sha256": shaHex}})
 }
