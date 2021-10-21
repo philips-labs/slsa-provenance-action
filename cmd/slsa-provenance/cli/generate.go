@@ -15,7 +15,7 @@ import (
 	"github.com/philips-labs/slsa-provenance-action/lib/slsa"
 )
 
-// RequiredFlagError creates an error flag error for the given flag name
+// RequiredFlagError creates a required flag error for the given flag name
 func RequiredFlagError(flagName string) error {
 	return fmt.Errorf("no value found for required flag: %s", flagName)
 }
