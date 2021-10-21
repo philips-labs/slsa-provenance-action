@@ -7,6 +7,13 @@ import (
 	"github.com/philips-labs/slsa-provenance-action/lib/github"
 )
 
+const (
+	// SlsaPredicateType the predicate type for SLSA intoto statements
+	SlsaPredicateType = "https://slsa.dev/provenance/v0.1"
+	// StatementType the type of the intoto statement
+	StatementType = "https://in-toto.io/Statement/v0.1"
+)
+
 // Envelope wraps an in-toto statement to be able to attach signatures to the Statement
 type Envelope struct {
 	PayloadType string        `json:"payloadType"`
@@ -16,7 +23,7 @@ type Envelope struct {
 
 // SLSAProvenanceStatement builds a in-toto statement with predicate type https://slsa.dev/provenance/v0.1
 func SLSAProvenanceStatement(opts ...StatementOption) *Statement {
-	stmt := &Statement{PredicateType: "https://slsa.dev/provenance/v0.1", Type: "https://in-toto.io/Statement/v0.1"}
+	stmt := &Statement{PredicateType: SlsaPredicateType, Type: StatementType}
 	for _, opt := range opts {
 		opt(stmt)
 	}

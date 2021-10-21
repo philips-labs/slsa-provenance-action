@@ -28,13 +28,23 @@ func subjects(root string) ([]intoto.Subject, error) {
 		if relpath == "." {
 			relpath = filepath.Base(root)
 		}
-		contents, err := os.ReadFile(abspath)
+
+		binary, err := os.ReadFile(abspath)
 		if err != nil {
 			return err
 		}
-		sha := sha256.Sum256(contents)
-		shaHex := hex.EncodeToString(sha[:])
+
+		shaHex := ShaSum256HexEncoded(binary)
+
 		s = append(s, intoto.Subject{Name: relpath, Digest: intoto.DigestSet{"sha256": shaHex}})
 		return nil
 	})
+}
+
+// ShaSum256HexEncoded calculates a SHA256 checksum from the content
+func ShaSum256HexEncoded(b []byte) string {
+	sha := sha256.Sum256(b)
+	shaHex := hex.EncodeToString(sha[:])
+
+	return shaHex
 }
