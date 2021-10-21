@@ -300,7 +300,7 @@ func TestGenerateCliOptions(t *testing.T) {
 		},
 		{
 			name: "invalid artifact_path",
-			err:  fmt.Errorf("resource path not found: [provided=non-existing-folder/unknown-file]"),
+			err:  fmt.Errorf("failed to generate provenance: resource path not found: [provided=non-existing-folder/unknown-file]"),
 			arguments: []string{
 				"-artifact_path",
 				"non-existing-folder/unknown-file",

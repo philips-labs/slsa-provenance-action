@@ -68,6 +68,7 @@ func TestSLSAProvenanceStatement(t *testing.T) {
 			recipeType,
 			"CI workflow",
 			nil,
+			nil,
 			provenanceActionMaterial,
 		),
 	)
