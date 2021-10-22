@@ -1,6 +1,34 @@
 package github
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"os"
+)
+
+const (
+	// HostedIDSuffix the GitHub hosted attestation type
+	HostedIDSuffix = "/Attestations/GitHubHostedActions@v1"
+	// SelfHostedIDSuffix the GitHub self hosted attestation type
+	SelfHostedIDSuffix = "/Attestations/SelfHostedActions@v1"
+	// RecipeType the attestion type for a recipe
+	RecipeType = "https://github.com/Attestations/GitHubActionsWorkflow@v1"
+	// PayloadContentType used to define the Envelope content type
+	// See: https://github.com/in-toto/attestation#provenance-example
+	PayloadContentType = "application/vnd.in-toto+json"
+)
+
+func builderID(repoURI string) string {
+	if os.Getenv("GITHUB_ACTIONS") == "true" {
+		return repoURI + HostedIDSuffix
+	}
+	return repoURI + SelfHostedIDSuffix
+}
+
+// Environment the environment from which provenance is generated.
+type Environment struct {
+	Context *Context       `json:"github,omitempty"`
+	Runner  *RunnerContext `json:"runner,omitempty"`
+}
 
 // Context holds all the information set on Github runners in relation to the job
 //

@@ -14,7 +14,6 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/philips-labs/slsa-provenance-action/lib/github"
-	"github.com/philips-labs/slsa-provenance-action/lib/slsa"
 )
 
 // RequiredFlagError creates a required flag error for the given flag name
@@ -69,6 +68,11 @@ func Generate(w io.Writer) *ffcli.Command {
 				return errors.Wrap(err, "failed to unmarshal runner context json")
 			}
 
+			environment := github.Environment{
+				Context: &gh,
+				Runner:  &runner,
+			}
+
 			if *tagName != "" {
 				ghToken := os.Getenv("GITHUB_TOKEN")
 				if ghToken == "" {
@@ -109,7 +113,7 @@ func Generate(w io.Writer) *ffcli.Command {
 				}()
 			}
 
-			stmt, err := slsa.GenerateProvenanceStatement(ctx, gh, runner, *artifactPath)
+			stmt, err := environment.GenerateProvenanceStatement(ctx, *artifactPath)
 			if err != nil {
 				return errors.Wrap(err, "failed to generate provenance")
 			}

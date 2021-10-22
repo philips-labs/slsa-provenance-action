@@ -1,4 +1,4 @@
-package slsa_test
+package github_test
 
 import (
 	"context"
@@ -13,10 +13,10 @@ import (
 
 	"github.com/philips-labs/slsa-provenance-action/lib/github"
 	"github.com/philips-labs/slsa-provenance-action/lib/intoto"
-	"github.com/philips-labs/slsa-provenance-action/lib/slsa"
 )
 
-const pushGitHubEvent = `{
+const (
+	pushGitHubEvent = `{
 	"after": "c4f679f131dfb7f810fd411ac9475549d1c393df",
 	"base_ref": null,
 	"before": "715b4daa0f750f420635ee488ef37a2433608438",
@@ -225,6 +225,7 @@ const pushGitHubEvent = `{
 	  "url": "https://api.github.com/users/john-doe"
 	}
   }`
+)
 
 func TestGenerateProvenance(t *testing.T) {
 	assert := assert.New(t)
@@ -251,7 +252,11 @@ func TestGenerateProvenance(t *testing.T) {
 	rootDir := path.Join(path.Dir(filename), "../..")
 	artifactPath := path.Join(rootDir, "bin")
 
-	stmt, err := slsa.GenerateProvenanceStatement(ctx, gh, runner, artifactPath)
+	env := github.Environment{
+		Context: &gh,
+		Runner:  &runner,
+	}
+	stmt, err := env.GenerateProvenanceStatement(ctx, artifactPath)
 	if !assert.NoError(err) {
 		return
 	}
@@ -266,16 +271,16 @@ func TestGenerateProvenance(t *testing.T) {
 	assert.Equal(intoto.StatementType, stmt.Type)
 
 	predicate := stmt.Predicate
-	assert.Equal(fmt.Sprintf("%s%s", repoURL, slsa.GitHubHostedIDSuffix), predicate.ID)
+	assert.Equal(fmt.Sprintf("%s%s", repoURL, github.HostedIDSuffix), predicate.ID)
 	assert.Equal(materials, predicate.Materials)
-	assert.Equal(fmt.Sprintf("%s%s", repoURL, slsa.GitHubHostedIDSuffix), predicate.Builder.ID)
+	assert.Equal(fmt.Sprintf("%s%s", repoURL, github.HostedIDSuffix), predicate.Builder.ID)
 
 	assertMetadata(assert, predicate.Metadata, gh, repoURL)
 	assertRecipe(assert, predicate.Recipe)
 }
 
 func assertRecipe(assert *assert.Assertions, recipe intoto.Recipe) {
-	assert.Equal(slsa.RecipeType, recipe.Type)
+	assert.Equal(github.RecipeType, recipe.Type)
 	assert.Equal(0, recipe.DefinedInMaterial)
 	assert.Equal("", recipe.EntryPoint)
 	assert.Nil(recipe.Environment)
