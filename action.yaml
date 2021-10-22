@@ -19,6 +19,11 @@ inputs:
     description: 'internal (do not set): the "runner" context object in json'
     required: true
     default: ${{ toJSON(runner) }}
+  tag_name:
+    description: |
+      The github release to generate provenance on.
+      (if set the artifacts will be downloaded from the release and the provenance will be added as an additional release asset.)
+    required: false
 runs:
   using: 'docker'
   image: 'Dockerfile'
@@ -32,3 +37,5 @@ runs:
     - '${{ inputs.github_context }}'
     - "-runner_context"
     - '${{ inputs.runner_context }}'
+    - "-tag_name"
+    - '${{ inputs.tag_name }}'
