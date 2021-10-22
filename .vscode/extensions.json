@@ -6,6 +6,7 @@
     "golang.go",
     "editorconfig.editorconfig",
     "esbenp.prettier-vscode",
-    "timonwong.shellcheck"
+    "timonwong.shellcheck",
+    "DavidAnson.vscode-markdownlint"
   ]
 }
