@@ -38,19 +38,10 @@ func init() {
 
 func TestFetchRelease(t *testing.T) {
 	assert := assert.New(t)
-
 	ctx := context.Background()
 
-	var client *github.ProvenanceClient
-	if githubToken != "" {
-		tc := github.NewOAuth2Client(ctx, tokenRetriever)
-		client = github.NewProvenanceClient(tc)
-	} else {
-		client = github.NewProvenanceClient(nil)
-	}
+	client := createProvenanceClient(ctx)
 	release, err := client.FetchRelease(ctx, owner, repo, "v0.1.1")
-
-	assert.Greater(release, 2)
 
 	if !assert.NoError(err) && assert.Nil(release) {
 		return
@@ -65,13 +56,7 @@ func TestDownloadReleaseAssets(t *testing.T) {
 
 	ctx := context.Background()
 
-	var client *github.ProvenanceClient
-	if githubToken != "" {
-		tc := github.NewOAuth2Client(ctx, tokenRetriever)
-		client = github.NewProvenanceClient(tc)
-	} else {
-		client = github.NewProvenanceClient(nil)
-	}
+	client := createProvenanceClient(ctx)
 
 	release, err := client.FetchRelease(ctx, owner, repo, "v0.1.1")
 	if !assert.NoError(err) && assert.Nil(release) {
@@ -160,13 +145,7 @@ func TestListReleaseAssets(t *testing.T) {
 	assert := assert.New(t)
 	ctx := context.Background()
 
-	var client *github.ProvenanceClient
-	if githubToken != "" {
-		tc := github.NewOAuth2Client(ctx, tokenRetriever)
-		client = github.NewProvenanceClient(tc)
-	} else {
-		client = github.NewProvenanceClient(nil)
-	}
+	client := createProvenanceClient(ctx)
 	opt := gh.ListOptions{PerPage: 2}
 	assets, err := client.ListReleaseAssets(ctx, owner, repo, 51517953, opt)
 	if !assert.NoError(err) {
@@ -186,13 +165,7 @@ func TestListReleases(t *testing.T) {
 	assert := assert.New(t)
 	ctx := context.Background()
 
-	var client *github.ProvenanceClient
-	if githubToken != "" {
-		tc := github.NewOAuth2Client(ctx, tokenRetriever)
-		client = github.NewProvenanceClient(tc)
-	} else {
-		client = github.NewProvenanceClient(nil)
-	}
+	client := createProvenanceClient(ctx)
 	opt := gh.ListOptions{PerPage: 1}
 	releases, err := client.ListReleases(ctx, owner, repo, opt)
 	if !assert.NoError(err) {
@@ -206,4 +179,15 @@ func TestListReleases(t *testing.T) {
 		return
 	}
 	assert.GreaterOrEqual(len(releases), 2)
+}
+
+func createProvenanceClient(ctx context.Context) *github.ProvenanceClient {
+	var client *github.ProvenanceClient
+	if githubToken != "" {
+		tc := github.NewOAuth2Client(ctx, tokenRetriever)
+		client = github.NewProvenanceClient(tc)
+	} else {
+		client = github.NewProvenanceClient(nil)
+	}
+	return client
 }
