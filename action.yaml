@@ -26,7 +26,7 @@ inputs:
     required: false
 runs:
   using: 'docker'
-  image: 'Dockerfile'
+  image: 'docker://philipssoftware/slsa-provenance:v0.2.0-rc1'
   args:
     - "generate"
     - "-artifact_path"
