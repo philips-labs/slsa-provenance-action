@@ -108,17 +108,12 @@ func TestAddProvenanceToRelease(t *testing.T) {
 	tc := github.NewOAuth2Client(ctx, tokenRetriever)
 	client := github.NewProvenanceClient(tc)
 
-	rel, _, err := client.Repositories.CreateRelease(
-		ctx,
-		owner,
-		repo,
-		&gh.RepositoryRelease{TagName: stringPointer("v0.0.0-test"), Draft: boolPointer(true), Prerelease: boolPointer(true)},
-	)
-	if !assert.NoError(err) && assert.Nil(rel) {
+	releaseId, err := createGitHubRelease(ctx, client, owner, repo, "v0.0.0-test")
+	if !assert.NoError(err) {
 		return
 	}
 	defer func() {
-		_, err := client.Repositories.DeleteRelease(ctx, owner, repo, rel.GetID())
+		_, err := client.Repositories.DeleteRelease(ctx, owner, repo, releaseId)
 		assert.NoError(err)
 	}()
 
@@ -133,7 +128,7 @@ func TestAddProvenanceToRelease(t *testing.T) {
 	}
 	assert.Equal("example_build.provenance", stat.Name())
 
-	asset, err := client.AddProvenanceToRelease(ctx, owner, repo, rel.GetID(), provenance)
+	asset, err := client.AddProvenanceToRelease(ctx, owner, repo, releaseId, provenance)
 	if !assert.NoError(err) && assert.Nil(asset) {
 		return
 	}
@@ -190,4 +185,26 @@ func createProvenanceClient(ctx context.Context) *github.ProvenanceClient {
 		client = github.NewProvenanceClient(nil)
 	}
 	return client
+}
+
+func createGitHubRelease(ctx context.Context, client *github.ProvenanceClient, owner, repo, version string, assets ...string) (int64, error) {
+	rel, _, err := client.Repositories.CreateRelease(
+		ctx,
+		owner,
+		repo,
+		&gh.RepositoryRelease{TagName: stringPointer(version), Name: stringPointer(version), Draft: boolPointer(true), Prerelease: boolPointer(true)},
+	)
+	if err != nil {
+		return 0, err
+	}
+
+	for _, a := range assets {
+		asset, err := os.Open(a)
+		if err != nil {
+			return 0, err
+		}
+		client.AddProvenanceToRelease(ctx, owner, repo, rel.GetID(), asset)
+	}
+
+	return rel.GetID(), nil
 }

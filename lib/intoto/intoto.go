@@ -1,6 +1,7 @@
 package intoto
 
 import (
+	"context"
 	"encoding/json"
 	"time"
 )
@@ -11,6 +12,11 @@ const (
 	// StatementType the type of the intoto statement
 	StatementType = "https://in-toto.io/Statement/v0.1"
 )
+
+// Provenancer generates provenance statements for given artifacts
+type Provenancer interface {
+	GenerateProvenanceStatement(ctx context.Context, artifactPath string) (*Statement, error)
+}
 
 // Envelope wraps an in-toto statement to be able to attach signatures to the Statement
 type Envelope struct {
