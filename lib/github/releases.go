@@ -75,8 +75,10 @@ func (p *ProvenanceClient) DownloadReleaseAssets(ctx context.Context, owner, rep
 	}
 	assets := make([]ReleaseAsset, len(allAssets))
 
+	downloadCtx, cancel := context.WithTimeout(ctx, 2*time.Minute)
+	defer cancel()
 	for i, releaseAsset := range allAssets {
-		asset, _, err := p.Repositories.DownloadReleaseAsset(ctx, owner, repo, releaseAsset.GetID(), p.httpClient)
+		asset, _, err := p.Repositories.DownloadReleaseAsset(downloadCtx, owner, repo, releaseAsset.GetID(), p.httpClient)
 		if err != nil {
 			return nil, err
 		}
@@ -98,7 +100,9 @@ func (p *ProvenanceClient) AddProvenanceToRelease(ctx context.Context, owner, re
 		return nil, err
 	}
 	uploadOptions := &github.UploadOptions{Name: stat.Name(), MediaType: "application/json; charset=utf-8"}
-	asset, _, err := client.Repositories.UploadReleaseAsset(ctx, owner, repo, releaseID, uploadOptions, provenance)
+	uploadCtx, cancel := context.WithTimeout(ctx, 2*time.Minute)
+	defer cancel()
+	asset, _, err := client.Repositories.UploadReleaseAsset(uploadCtx, owner, repo, releaseID, uploadOptions, provenance)
 	return asset, err
 }
 
