@@ -279,6 +279,80 @@ func TestGenerateProvenance(t *testing.T) {
 	assertRecipe(assert, predicate.Recipe)
 }
 
+func TestGenerateProvenanceFromGitHubRelease(t *testing.T) {
+	assert := assert.New(t)
+
+	ctx := context.Background()
+	os.Setenv("GITHUB_ACTIONS", "true")
+
+	repoURL := "https://github.com/philips-labs/slsa-provenance-action"
+
+	ghContext := github.Context{
+		RunID:           "1029384756",
+		RepositoryOwner: "philips-labs",
+		Repository:      "philips-labs/slsa-provenance-action",
+		Event:           []byte(pushGitHubEvent),
+		EventName:       "push",
+		SHA:             "849fb987efc0c0fc72e26a38f63f0c00225132be",
+	}
+	materials := []intoto.Item{
+		{URI: "git+" + repoURL, Digest: intoto.DigestSet{"sha1": ghContext.SHA}},
+	}
+
+	runner := github.RunnerContext{}
+	_, filename, _, _ := runtime.Caller(0)
+	rootDir := path.Join(path.Dir(filename), "../..")
+	artifactPath := path.Join(rootDir, "release-assets")
+
+	tc := github.NewOAuth2Client(ctx, tokenRetriever)
+	client := github.NewProvenanceClient(tc)
+
+	version := "v0.0.0-rel-test"
+	releaseId, err := createGitHubRelease(
+		ctx,
+		client,
+		owner,
+		repo,
+		version,
+		path.Join(rootDir, "bin", "slsa-provenance"),
+		path.Join(rootDir, "README.md"),
+	)
+	if !assert.NoError(err) {
+		return
+	}
+	defer func() {
+		_ = os.RemoveAll(artifactPath)
+		_, err := client.Repositories.DeleteRelease(ctx, owner, repo, releaseId)
+		assert.NoError(err)
+	}()
+
+	env := github.NewReleaseEnvironment(ghContext, runner, version, client)
+	stmt, err := env.GenerateProvenanceStatement(ctx, artifactPath)
+	if !assert.NoError(err) {
+		return
+	}
+
+	binaryName := "slsa-provenance"
+	binaryPath := path.Join(artifactPath, binaryName)
+	readmeName := "README.md"
+	readmePath := path.Join(artifactPath, readmeName)
+
+	assert.Len(stmt.Subject, 2)
+	assertSubject(assert, stmt.Subject, binaryName, binaryPath)
+	assertSubject(assert, stmt.Subject, readmeName, readmePath)
+
+	assert.Equal(intoto.SlsaPredicateType, stmt.PredicateType)
+	assert.Equal(intoto.StatementType, stmt.Type)
+
+	predicate := stmt.Predicate
+	assert.Equal(fmt.Sprintf("%s%s", repoURL, github.HostedIDSuffix), predicate.ID)
+	assert.Equal(materials, predicate.Materials)
+	assert.Equal(fmt.Sprintf("%s%s", repoURL, github.HostedIDSuffix), predicate.Builder.ID)
+
+	assertMetadata(assert, predicate.Metadata, ghContext, repoURL)
+	assertRecipe(assert, predicate.Recipe)
+}
+
 func assertRecipe(assert *assert.Assertions, recipe intoto.Recipe) {
 	assert.Equal(github.RecipeType, recipe.Type)
 	assert.Equal(0, recipe.DefinedInMaterial)

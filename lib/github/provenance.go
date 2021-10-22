@@ -4,7 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
+	"path"
+	"strings"
 
 	"github.com/pkg/errors"
 
@@ -47,4 +50,102 @@ func (e *Environment) GenerateProvenanceStatement(ctx context.Context, artifactP
 		))
 
 	return stmt, nil
+}
+
+// ReleaseEnvironment implements intoto.Provenancer to Generate provenance based on a GitHub release
+type ReleaseEnvironment struct {
+	*Environment
+	pc      *ProvenanceClient
+	tagName string
+}
+
+// NewReleaseEnvironment creates a new instance of ReleaseEnvironment with the given tagName and provenanceClient
+func NewReleaseEnvironment(gh Context, runner RunnerContext, tagName string, pc *ProvenanceClient) *ReleaseEnvironment {
+	return &ReleaseEnvironment{
+		Environment: &Environment{
+			Context: &gh,
+			Runner:  &runner,
+		},
+		pc:      pc,
+		tagName: tagName,
+	}
+}
+
+// GenerateProvenanceStatement generates provenance from the GitHub release environment
+//
+// Release assets will be downloaded to the given artifactPath
+//
+// The artifactPath has to be a directory.
+func (e *ReleaseEnvironment) GenerateProvenanceStatement(ctx context.Context, artifactPath string) (*intoto.Statement, error) {
+	err := os.MkdirAll(artifactPath, 0755)
+	if err != nil {
+		return nil, err
+	}
+	isDir, err := isEmptyDirectory(artifactPath)
+	if err != nil {
+		return nil, err
+	}
+	if !isDir {
+		return nil, errors.New("artifactPath has to be an empty directory")
+	}
+
+	owner := e.Context.RepositoryOwner
+	repo := repositoryName(e.Context.Repository)
+	rel, err := e.pc.FetchRelease(ctx, owner, repo, e.tagName)
+	if err != nil {
+		return nil, err
+	}
+	assets, err := e.pc.DownloadReleaseAssets(ctx, owner, repo, rel.GetID())
+	if err != nil {
+		return nil, err
+	}
+
+	err = saveAssets(artifactPath, assets)
+	if err != nil {
+		return nil, err
+	}
+
+	return e.Environment.GenerateProvenanceStatement(ctx, artifactPath)
+}
+
+func isEmptyDirectory(p string) (bool, error) {
+	f, err := os.Open(p)
+	if err != nil {
+		return false, err
+	}
+	defer f.Close()
+
+	_, err = f.Readdirnames(1)
+	if err == io.EOF {
+		return true, nil
+	}
+	return false, err
+}
+
+func saveAssets(artifactPath string, assets []ReleaseAsset) error {
+	for _, asset := range assets {
+		err := saveFile(path.Join(artifactPath, asset.GetName()), asset.Content)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func saveFile(path string, content io.ReadCloser) error {
+	assetFile, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer assetFile.Close()
+	defer content.Close()
+
+	_, err = io.Copy(assetFile, content)
+
+	return err
+}
+
+func repositoryName(repo string) string {
+	repoParts := strings.Split(repo, "/")
+	return repoParts[len(repoParts)-1]
 }
