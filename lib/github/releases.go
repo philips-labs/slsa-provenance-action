@@ -6,17 +6,12 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path"
 	"time"
 
 	"github.com/google/go-github/v39/github"
 	"golang.org/x/oauth2"
 )
-
-// ReleaseAsset holds the release asset information and it's contents.
-type ReleaseAsset struct {
-	*github.ReleaseAsset
-	Content io.ReadCloser
-}
 
 // TokenRetriever allows to implement a function to retrieve the token
 // The token is placed in a StaticTokenSource to authenticate using oauth2.
@@ -63,9 +58,8 @@ func (p *ProvenanceClient) FetchRelease(ctx context.Context, owner, repo, tagNam
 	return rel, nil
 }
 
-// DownloadReleaseAssets download the assets for a release.
-// It is up to the caller to Close the ReadCloser.
-func (p *ProvenanceClient) DownloadReleaseAssets(ctx context.Context, owner, repo string, releaseID int64) ([]ReleaseAsset, error) {
+// DownloadReleaseAssets download the assets for a release at the given storage location.
+func (p *ProvenanceClient) DownloadReleaseAssets(ctx context.Context, owner, repo string, releaseID int64, storageLocation string) ([]*github.ReleaseAsset, error) {
 	listCtx, cancel := context.WithTimeout(ctx, 1*time.Minute)
 	defer cancel()
 
@@ -73,22 +67,42 @@ func (p *ProvenanceClient) DownloadReleaseAssets(ctx context.Context, owner, rep
 	if err != nil {
 		return nil, err
 	}
-	assets := make([]ReleaseAsset, len(allAssets))
+	assets := make([]*github.ReleaseAsset, len(allAssets))
 
 	downloadCtx, cancel := context.WithTimeout(ctx, 2*time.Minute)
 	defer cancel()
+
+	err = os.MkdirAll(storageLocation, 0755)
+	if err != nil {
+		return nil, err
+	}
+
 	for i, releaseAsset := range allAssets {
 		asset, _, err := p.Repositories.DownloadReleaseAsset(downloadCtx, owner, repo, releaseAsset.GetID(), p.httpClient)
 		if err != nil {
 			return nil, err
 		}
-		assets[i] = ReleaseAsset{
-			ReleaseAsset: releaseAsset,
-			Content:      asset,
+		err = saveFile(path.Join(storageLocation, releaseAsset.GetName()), asset)
+		if err != nil {
+			return nil, err
 		}
+		assets[i] = releaseAsset
 	}
 
 	return assets, nil
+}
+
+func saveFile(path string, content io.ReadCloser) error {
+	assetFile, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer assetFile.Close()
+	defer content.Close()
+
+	_, err = io.Copy(assetFile, content)
+
+	return err
 }
 
 // AddProvenanceToRelease uploads the provenance for the given release
@@ -102,6 +116,7 @@ func (p *ProvenanceClient) AddProvenanceToRelease(ctx context.Context, owner, re
 	uploadOptions := &github.UploadOptions{Name: stat.Name(), MediaType: "application/json; charset=utf-8"}
 	uploadCtx, cancel := context.WithTimeout(ctx, 2*time.Minute)
 	defer cancel()
+
 	asset, _, err := client.Repositories.UploadReleaseAsset(uploadCtx, owner, repo, releaseID, uploadOptions, provenance)
 	return asset, err
 }
