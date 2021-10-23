@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -95,12 +94,7 @@ func (e *ReleaseEnvironment) GenerateProvenanceStatement(ctx context.Context, ar
 	if err != nil {
 		return nil, err
 	}
-	assets, err := e.pc.DownloadReleaseAssets(ctx, owner, repo, rel.GetID())
-	if err != nil {
-		return nil, err
-	}
-
-	err = saveAssets(artifactPath, assets)
+	_, err = e.pc.DownloadReleaseAssets(ctx, owner, repo, rel.GetID(), artifactPath)
 	if err != nil {
 		return nil, err
 	}
@@ -120,29 +114,6 @@ func isEmptyDirectory(p string) (bool, error) {
 		return true, nil
 	}
 	return false, err
-}
-
-func saveAssets(artifactPath string, assets []ReleaseAsset) error {
-	for _, asset := range assets {
-		err := saveFile(path.Join(artifactPath, asset.GetName()), asset.Content)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func saveFile(path string, content io.ReadCloser) error {
-	assetFile, err := os.Create(path)
-	if err != nil {
-		return err
-	}
-	defer assetFile.Close()
-	defer content.Close()
-
-	_, err = io.Copy(assetFile, content)
-
-	return err
 }
 
 func repositoryName(repo string) string {

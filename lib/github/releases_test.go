@@ -64,33 +64,32 @@ func TestDownloadReleaseAssets(t *testing.T) {
 	}
 	assert.Equal(int64(51517953), release.GetID())
 
-	assets, err := client.DownloadReleaseAssets(ctx, owner, repo, release.GetID())
+	_, filename, _, _ := runtime.Caller(0)
+	rootDir := path.Join(path.Dir(filename), "../..")
+	artifactPath := path.Join(rootDir, "download-test")
+	assets, err := client.DownloadReleaseAssets(ctx, owner, repo, release.GetID(), artifactPath)
 	if !assert.NoError(err) {
 		return
 	}
 	defer func() {
-		for _, a := range assets {
-			if a.Content != nil {
-				_ = a.Content.Close()
-			}
-		}
+		_ = os.RemoveAll(artifactPath)
 	}()
 
 	assert.Len(assets, 7)
 	assert.Equal("checksums.txt", assets[0].GetName())
-	assert.NotNil(assets[0].Content)
+	assert.FileExists(path.Join(artifactPath, assets[0].GetName()))
 	assert.Equal("slsa-provenance_0.1.1_linux_amd64.tar.gz", assets[1].GetName())
-	assert.NotNil(assets[1].Content)
+	assert.FileExists(path.Join(artifactPath, assets[1].GetName()))
 	assert.Equal("slsa-provenance_0.1.1_linux_arm64.tar.gz", assets[2].GetName())
-	assert.NotNil(assets[2].Content)
+	assert.FileExists(path.Join(artifactPath, assets[2].GetName()))
 	assert.Equal("slsa-provenance_0.1.1_macOS_amd64.tar.gz", assets[3].GetName())
-	assert.NotNil(assets[3].Content)
+	assert.FileExists(path.Join(artifactPath, assets[3].GetName()))
 	assert.Equal("slsa-provenance_0.1.1_macOS_arm64.tar.gz", assets[4].GetName())
-	assert.NotNil(assets[4].Content)
+	assert.FileExists(path.Join(artifactPath, assets[4].GetName()))
 	assert.Equal("slsa-provenance_0.1.1_windows_amd64.zip", assets[5].GetName())
-	assert.NotNil(assets[5].Content)
+	assert.FileExists(path.Join(artifactPath, assets[5].GetName()))
 	assert.Equal("slsa-provenance_0.1.1_windows_arm64.zip", assets[6].GetName())
-	assert.NotNil(assets[6].Content)
+	assert.FileExists(path.Join(artifactPath, assets[6].GetName()))
 }
 
 func TestAddProvenanceToRelease(t *testing.T) {
