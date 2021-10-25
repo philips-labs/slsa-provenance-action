@@ -80,25 +80,9 @@ func Generate(w io.Writer) *ffcli.Command {
 				return errors.Wrap(err, "failed to generate provenance")
 			}
 
-			// NOTE: At L1, writing the in-toto Statement type is sufficient but, at
-			// higher SLSA levels, the Statement must be encoded and wrapped in an
-			// Envelope to support attaching signatures.
-			payload, _ := json.MarshalIndent(stmt, "", "  ")
-			fmt.Fprintf(w, "Saving provenance to %s:\n\n%s\n", *outputPath, string(payload))
+			fmt.Fprintf(w, "Saving provenance to %s\n", *outputPath)
 
-			if err := os.WriteFile(*outputPath, payload, 0755); err != nil {
-				return errors.Wrap(err, "failed to write provenance")
-			}
-
-			if renv, ok := env.(*github.ReleaseEnvironment); ok {
-				stmtFile, err := os.Open(*outputPath)
-				if err != nil {
-					return fmt.Errorf("failed to open provenance statement: %w", err)
-				}
-				renv.AttachProvenanceStatement(ctx, *tagName, stmtFile)
-			}
-
-			return nil
+			return env.PersistProvenanceStatement(ctx, stmt, *outputPath)
 		},
 	}
 }

@@ -16,6 +16,7 @@ const (
 // Provenancer generates provenance statements for given artifacts
 type Provenancer interface {
 	GenerateProvenanceStatement(ctx context.Context, artifactPath string) (*Statement, error)
+	PersistProvenanceStatement(ctx context.Context, stmt *Statement, path string) error
 }
 
 // Envelope wraps an in-toto statement to be able to attach signatures to the Statement

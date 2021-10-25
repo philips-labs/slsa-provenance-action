@@ -8,7 +8,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/google/go-github/v39/github"
 	"github.com/pkg/errors"
 
 	"github.com/philips-labs/slsa-provenance-action/lib/intoto"
@@ -50,6 +49,22 @@ func (e *Environment) GenerateProvenanceStatement(ctx context.Context, artifactP
 		))
 
 	return stmt, nil
+}
+
+// PersistProvenanceStatement writes the provenance statement at the given path
+func (e *Environment) PersistProvenanceStatement(ctx context.Context, stmt *intoto.Statement, path string) error {
+	// NOTE: At L1, writing the in-toto Statement type is sufficient but, at
+	// higher SLSA levels, the Statement must be encoded and wrapped in an
+	// Envelope to support attaching signatures.
+	payload, err := json.MarshalIndent(stmt, "", "  ")
+	if err != nil {
+		return fmt.Errorf("failed to marshal provenance: %w", err)
+	}
+	if err := os.WriteFile(path, payload, 0755); err != nil {
+		return fmt.Errorf("failed to write provenance: %w", err)
+	}
+
+	return nil
 }
 
 // ReleaseEnvironment implements intoto.Provenancer to Generate provenance based on a GitHub release
@@ -106,15 +121,26 @@ func (e *ReleaseEnvironment) GenerateProvenanceStatement(ctx context.Context, ar
 	return e.Environment.GenerateProvenanceStatement(ctx, artifactPath)
 }
 
-// AttachProvenanceStatement attaches the provenance statement to the release
-func (e *ReleaseEnvironment) AttachProvenanceStatement(ctx context.Context, file *os.File) (*github.ReleaseAsset, error) {
+// PersistProvenanceStatement writes the provenance statement at the given path and uploads it to the GitHub release
+func (e *ReleaseEnvironment) PersistProvenanceStatement(ctx context.Context, stmt *intoto.Statement, path string) error {
+	err := e.Environment.PersistProvenanceStatement(ctx, stmt, path)
+	if err != nil {
+		return err
+	}
+
+	stmtFile, err := os.Open(path)
+	if err != nil {
+		return fmt.Errorf("failed to open provenance statement: %w", err)
+	}
+
 	owner := e.Context.RepositoryOwner
 	repo := repositoryName(e.Context.Repository)
-	releaseID, err := e.GetReleaseID(ctx, e.tagName)
+	_, err = e.rc.AddProvenanceToRelease(ctx, owner, repo, e.releaseID, stmtFile)
 	if err != nil {
-		return nil, err
+		return fmt.Errorf("failed to upload provenance to release: %w", err)
 	}
-	return e.rc.AddProvenanceToRelease(ctx, owner, repo, releaseID, file)
+
+	return nil
 }
 
 // GetReleaseID fetches a release and caches the releaseID in the environment
