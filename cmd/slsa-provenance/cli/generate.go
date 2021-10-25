@@ -73,8 +73,8 @@ func Generate(w io.Writer) *ffcli.Command {
 			}
 
 			tc := github.NewOAuth2Client(ctx, func() string { return ghToken })
-			pc := github.NewProvenanceClient(tc)
-			env := createEnvironment(gh, runner, *tagName, pc)
+			rc := github.NewReleaseClient(tc)
+			env := createEnvironment(gh, runner, *tagName, rc)
 			stmt, err := env.GenerateProvenanceStatement(ctx, *artifactPath)
 			if err != nil {
 				return errors.Wrap(err, "failed to generate provenance")
@@ -86,7 +86,7 @@ func Generate(w io.Writer) *ffcli.Command {
 				// 	if err != nil {
 				// 		fmt.Printf("%s", err)
 				// 	}
-				// 	pc.AddProvenanceToRelease(ctx, gh.RepositoryOwner, repo, rel.GetID(), provenanceFile)
+				// rc.AddProvenanceToRelease(ctx, gh.RepositoryOwner, repo, rel.GetID(), provenanceFile)
 				// }()
 			}
 
@@ -105,9 +105,9 @@ func Generate(w io.Writer) *ffcli.Command {
 	}
 }
 
-func createEnvironment(gh github.Context, runner github.RunnerContext, tagName string, pc *github.ProvenanceClient) intoto.Provenancer {
+func createEnvironment(gh github.Context, runner github.RunnerContext, tagName string, rc *github.ReleaseClient) intoto.Provenancer {
 	if tagName != "" {
-		return github.NewReleaseEnvironment(gh, runner, tagName, pc)
+		return github.NewReleaseEnvironment(gh, runner, tagName, rc)
 	}
 
 	return &github.Environment{
