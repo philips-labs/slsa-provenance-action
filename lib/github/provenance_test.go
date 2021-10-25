@@ -2,6 +2,7 @@ package github_test
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path"
@@ -351,6 +352,16 @@ func TestGenerateProvenanceFromGitHubRelease(t *testing.T) {
 
 	assertMetadata(assert, predicate.Metadata, ghContext, repoURL)
 	assertRecipe(assert, predicate.Recipe)
+
+	payload, _ := json.MarshalIndent(stmt, "", "  ")
+	stmtPath := path.Join(artifactPath, "build.provenance")
+	err = os.WriteFile(stmtPath, payload, 0755)
+	assert.NoError(err)
+
+	stmtFile, err := os.Open(stmtPath)
+	assert.NoError(err)
+	_, err = env.AttachProvenanceStatement(ctx, stmtFile)
+	assert.NoError(err)
 }
 
 func assertRecipe(assert *assert.Assertions, recipe intoto.Recipe) {

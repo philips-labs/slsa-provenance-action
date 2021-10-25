@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/google/go-github/v39/github"
 	"github.com/pkg/errors"
 
 	"github.com/philips-labs/slsa-provenance-action/lib/intoto"
@@ -54,8 +55,9 @@ func (e *Environment) GenerateProvenanceStatement(ctx context.Context, artifactP
 // ReleaseEnvironment implements intoto.Provenancer to Generate provenance based on a GitHub release
 type ReleaseEnvironment struct {
 	*Environment
-	rc      *ReleaseClient
-	tagName string
+	rc        *ReleaseClient
+	tagName   string
+	releaseID int64
 }
 
 // NewReleaseEnvironment creates a new instance of ReleaseEnvironment with the given tagName and provenanceClient
@@ -65,8 +67,9 @@ func NewReleaseEnvironment(gh Context, runner RunnerContext, tagName string, rc 
 			Context: &gh,
 			Runner:  &runner,
 		},
-		rc:      rc,
-		tagName: tagName,
+		rc:        rc,
+		tagName:   tagName,
+		releaseID: 0,
 	}
 }
 
@@ -90,16 +93,44 @@ func (e *ReleaseEnvironment) GenerateProvenanceStatement(ctx context.Context, ar
 
 	owner := e.Context.RepositoryOwner
 	repo := repositoryName(e.Context.Repository)
-	rel, err := e.rc.FetchRelease(ctx, owner, repo, e.tagName)
+
+	releaseID, err := e.GetReleaseID(ctx, e.tagName)
 	if err != nil {
 		return nil, err
 	}
-	_, err = e.rc.DownloadReleaseAssets(ctx, owner, repo, rel.GetID(), artifactPath)
+	_, err = e.rc.DownloadReleaseAssets(ctx, owner, repo, releaseID, artifactPath)
 	if err != nil {
 		return nil, err
 	}
 
 	return e.Environment.GenerateProvenanceStatement(ctx, artifactPath)
+}
+
+// AttachProvenanceStatement attaches the provenance statement to the release
+func (e *ReleaseEnvironment) AttachProvenanceStatement(ctx context.Context, file *os.File) (*github.ReleaseAsset, error) {
+	owner := e.Context.RepositoryOwner
+	repo := repositoryName(e.Context.Repository)
+	releaseID, err := e.GetReleaseID(ctx, e.tagName)
+	if err != nil {
+		return nil, err
+	}
+	return e.rc.AddProvenanceToRelease(ctx, owner, repo, releaseID, file)
+}
+
+// GetReleaseID fetches a release and caches the releaseID in the environment
+func (e *ReleaseEnvironment) GetReleaseID(ctx context.Context, tagName string) (int64, error) {
+	owner := e.Context.RepositoryOwner
+	repo := repositoryName(e.Context.Repository)
+
+	if e.releaseID == 0 {
+		rel, err := e.rc.FetchRelease(ctx, owner, repo, e.tagName)
+		if err != nil {
+			return 0, err
+		}
+		e.releaseID = rel.GetID()
+	}
+
+	return e.releaseID, nil
 }
 
 func isEmptyDirectory(p string) (bool, error) {
