@@ -40,7 +40,7 @@ func TestFetchRelease(t *testing.T) {
 	assert := assert.New(t)
 	ctx := context.Background()
 
-	client := createProvenanceClient(ctx)
+	client := createReleaseClient(ctx)
 	release, err := client.FetchRelease(ctx, owner, repo, "v0.1.1")
 
 	if !assert.NoError(err) && assert.Nil(release) {
@@ -56,7 +56,7 @@ func TestDownloadReleaseAssets(t *testing.T) {
 
 	ctx := context.Background()
 
-	client := createProvenanceClient(ctx)
+	client := createReleaseClient(ctx)
 
 	release, err := client.FetchRelease(ctx, owner, repo, "v0.1.1")
 	if !assert.NoError(err) && assert.Nil(release) {
@@ -105,7 +105,7 @@ func TestAddProvenanceToRelease(t *testing.T) {
 
 	ctx := context.Background()
 	tc := github.NewOAuth2Client(ctx, tokenRetriever)
-	client := github.NewProvenanceClient(tc)
+	client := github.NewReleaseClient(tc)
 
 	releaseId, err := createGitHubRelease(ctx, client, owner, repo, "v0.0.0-test")
 	if !assert.NoError(err) {
@@ -139,7 +139,7 @@ func TestListReleaseAssets(t *testing.T) {
 	assert := assert.New(t)
 	ctx := context.Background()
 
-	client := createProvenanceClient(ctx)
+	client := createReleaseClient(ctx)
 	opt := gh.ListOptions{PerPage: 2}
 	assets, err := client.ListReleaseAssets(ctx, owner, repo, 51517953, opt)
 	if !assert.NoError(err) {
@@ -159,7 +159,7 @@ func TestListReleases(t *testing.T) {
 	assert := assert.New(t)
 	ctx := context.Background()
 
-	client := createProvenanceClient(ctx)
+	client := createReleaseClient(ctx)
 	opt := gh.ListOptions{PerPage: 1}
 	releases, err := client.ListReleases(ctx, owner, repo, opt)
 	if !assert.NoError(err) {
@@ -175,18 +175,18 @@ func TestListReleases(t *testing.T) {
 	assert.GreaterOrEqual(len(releases), 2)
 }
 
-func createProvenanceClient(ctx context.Context) *github.ProvenanceClient {
-	var client *github.ProvenanceClient
+func createReleaseClient(ctx context.Context) *github.ReleaseClient {
+	var client *github.ReleaseClient
 	if githubToken != "" {
 		tc := github.NewOAuth2Client(ctx, tokenRetriever)
-		client = github.NewProvenanceClient(tc)
+		client = github.NewReleaseClient(tc)
 	} else {
-		client = github.NewProvenanceClient(nil)
+		client = github.NewReleaseClient(nil)
 	}
 	return client
 }
 
-func createGitHubRelease(ctx context.Context, client *github.ProvenanceClient, owner, repo, version string, assets ...string) (int64, error) {
+func createGitHubRelease(ctx context.Context, client *github.ReleaseClient, owner, repo, version string, assets ...string) (int64, error) {
 	rel, _, err := client.Repositories.CreateRelease(
 		ctx,
 		owner,

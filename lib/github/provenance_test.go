@@ -305,7 +305,7 @@ func TestGenerateProvenanceFromGitHubRelease(t *testing.T) {
 	artifactPath := path.Join(rootDir, "release-assets")
 
 	tc := github.NewOAuth2Client(ctx, tokenRetriever)
-	client := github.NewProvenanceClient(tc)
+	client := github.NewReleaseClient(tc)
 
 	version := "v0.0.0-rel-test"
 	releaseId, err := createGitHubRelease(

@@ -54,18 +54,18 @@ func (e *Environment) GenerateProvenanceStatement(ctx context.Context, artifactP
 // ReleaseEnvironment implements intoto.Provenancer to Generate provenance based on a GitHub release
 type ReleaseEnvironment struct {
 	*Environment
-	pc      *ProvenanceClient
+	rc      *ReleaseClient
 	tagName string
 }
 
 // NewReleaseEnvironment creates a new instance of ReleaseEnvironment with the given tagName and provenanceClient
-func NewReleaseEnvironment(gh Context, runner RunnerContext, tagName string, pc *ProvenanceClient) *ReleaseEnvironment {
+func NewReleaseEnvironment(gh Context, runner RunnerContext, tagName string, rc *ReleaseClient) *ReleaseEnvironment {
 	return &ReleaseEnvironment{
 		Environment: &Environment{
 			Context: &gh,
 			Runner:  &runner,
 		},
-		pc:      pc,
+		rc:      rc,
 		tagName: tagName,
 	}
 }
@@ -90,11 +90,11 @@ func (e *ReleaseEnvironment) GenerateProvenanceStatement(ctx context.Context, ar
 
 	owner := e.Context.RepositoryOwner
 	repo := repositoryName(e.Context.Repository)
-	rel, err := e.pc.FetchRelease(ctx, owner, repo, e.tagName)
+	rel, err := e.rc.FetchRelease(ctx, owner, repo, e.tagName)
 	if err != nil {
 		return nil, err
 	}
-	_, err = e.pc.DownloadReleaseAssets(ctx, owner, repo, rel.GetID(), artifactPath)
+	_, err = e.rc.DownloadReleaseAssets(ctx, owner, repo, rel.GetID(), artifactPath)
 	if err != nil {
 		return nil, err
 	}

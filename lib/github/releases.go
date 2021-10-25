@@ -23,22 +23,22 @@ func NewOAuth2Client(ctx context.Context, tokenRetriever TokenRetriever) *http.C
 	return oauth2.NewClient(ctx, ts)
 }
 
-// ProvenanceClient GitHub client adding convenience methods to add provenance to a release
-type ProvenanceClient struct {
+// ReleaseClient GitHub client adding convenience methods to add provenance to a release
+type ReleaseClient struct {
 	*github.Client
 	httpClient *http.Client
 }
 
-// NewProvenanceClient create new ProvenanceClient instance
-func NewProvenanceClient(httpClient *http.Client) *ProvenanceClient {
-	return &ProvenanceClient{
+// NewReleaseClient create new ReleaseClient instance
+func NewReleaseClient(httpClient *http.Client) *ReleaseClient {
+	return &ReleaseClient{
 		Client:     github.NewClient(httpClient),
 		httpClient: httpClient,
 	}
 }
 
 // FetchRelease get the release by its tagName
-func (p *ProvenanceClient) FetchRelease(ctx context.Context, owner, repo, tagName string) (*github.RepositoryRelease, error) {
+func (p *ReleaseClient) FetchRelease(ctx context.Context, owner, repo, tagName string) (*github.RepositoryRelease, error) {
 	listCtx, cancel := context.WithTimeout(ctx, 1*time.Minute)
 	defer cancel()
 
@@ -59,7 +59,7 @@ func (p *ProvenanceClient) FetchRelease(ctx context.Context, owner, repo, tagNam
 }
 
 // DownloadReleaseAssets download the assets for a release at the given storage location.
-func (p *ProvenanceClient) DownloadReleaseAssets(ctx context.Context, owner, repo string, releaseID int64, storageLocation string) ([]*github.ReleaseAsset, error) {
+func (p *ReleaseClient) DownloadReleaseAssets(ctx context.Context, owner, repo string, releaseID int64, storageLocation string) ([]*github.ReleaseAsset, error) {
 	listCtx, cancel := context.WithTimeout(ctx, 1*time.Minute)
 	defer cancel()
 
@@ -106,7 +106,7 @@ func saveFile(path string, content io.ReadCloser) error {
 }
 
 // AddProvenanceToRelease uploads the provenance for the given release
-func (p *ProvenanceClient) AddProvenanceToRelease(ctx context.Context, owner, repo string, releaseID int64, provenance *os.File) (*github.ReleaseAsset, error) {
+func (p *ReleaseClient) AddProvenanceToRelease(ctx context.Context, owner, repo string, releaseID int64, provenance *os.File) (*github.ReleaseAsset, error) {
 	client := p.Client
 
 	stat, err := provenance.Stat()
@@ -122,7 +122,7 @@ func (p *ProvenanceClient) AddProvenanceToRelease(ctx context.Context, owner, re
 }
 
 // ListReleaseAssets will retrieve the list of all release assets.
-func (p *ProvenanceClient) ListReleaseAssets(ctx context.Context, owner, repo string, releaseID int64, listOptions github.ListOptions) ([]*github.ReleaseAsset, error) {
+func (p *ReleaseClient) ListReleaseAssets(ctx context.Context, owner, repo string, releaseID int64, listOptions github.ListOptions) ([]*github.ReleaseAsset, error) {
 	var allAssets []*github.ReleaseAsset
 	for {
 		select {
@@ -144,7 +144,7 @@ func (p *ProvenanceClient) ListReleaseAssets(ctx context.Context, owner, repo st
 }
 
 // ListReleases will retrieve the list of all releases.
-func (p *ProvenanceClient) ListReleases(ctx context.Context, owner, repo string, listOptions github.ListOptions) ([]*github.RepositoryRelease, error) {
+func (p *ReleaseClient) ListReleases(ctx context.Context, owner, repo string, listOptions github.ListOptions) ([]*github.RepositoryRelease, error) {
 	var allReleases []*github.RepositoryRelease
 	for {
 		select {
