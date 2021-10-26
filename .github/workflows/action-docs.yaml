@@ -3,8 +3,9 @@
 name: 'Action docs'
 on:
   push:
-    branches:
+    branches-ignore:
       - main
+  pull_request:
 
 jobs:
   update:
