@@ -358,6 +358,38 @@ func TestGenerateProvenanceFromGitHubRelease(t *testing.T) {
 	assert.NoError(err)
 }
 
+func TestGenerateProvenanceFromGitHubReleaseErrors(t *testing.T) {
+	assert := assert.New(t)
+
+	ctx := context.Background()
+	os.Setenv("GITHUB_ACTIONS", "true")
+
+	ghContext := github.Context{
+		RunID:           "1029384756",
+		RepositoryOwner: "philips-labs",
+		Repository:      "philips-labs/slsa-provenance-action",
+		Event:           []byte(pushGitHubEvent),
+		EventName:       "push",
+		SHA:             "849fb987efc0c0fc72e26a38f63f0c00225132be",
+	}
+
+	_, filename, _, _ := runtime.Caller(0)
+	rootDir := path.Join(path.Dir(filename), "../..")
+	client := github.NewReleaseClient(nil)
+
+	version := "v0.0.0-rel-test"
+
+	env := github.NewReleaseEnvironment(ghContext, github.RunnerContext{}, version, client)
+
+	stmt, err := env.GenerateProvenanceStatement(ctx, rootDir)
+	assert.EqualError(err, "artifactPath has to be an empty directory")
+	assert.Nil(stmt)
+
+	stmt, err = env.GenerateProvenanceStatement(ctx, path.Join(rootDir, "README.md"))
+	assert.EqualError(err, fmt.Sprintf("mkdir %s: not a directory", path.Join(rootDir, "README.md")))
+	assert.Nil(stmt)
+}
+
 func assertRecipe(assert *assert.Assertions, recipe intoto.Recipe) {
 	assert.Equal(github.RecipeType, recipe.Type)
 	assert.Equal(0, recipe.DefinedInMaterial)
