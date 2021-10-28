@@ -3,6 +3,7 @@ name: Integration test file provenance
 on:
   push:
   pull_request:
+    types: [ opened, reopened ]
   workflow_dispatch:
 
 jobs:
