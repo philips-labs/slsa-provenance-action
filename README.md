@@ -155,6 +155,9 @@ An action to generate SLSA build provenance for an artifact
 | output_path | path to write build provenance file | `true` | build.provenance |
 | github_context | internal (do not set): the "github" context object in json | `true` | ${{ toJSON(github) }} |
 | runner_context | internal (do not set): the "runner" context object in json | `true` | ${{ toJSON(runner) }} |
+| tag_name | The github release to generate provenance on.
+(if set the artifacts will be downloaded from the release and the provenance will be added as an additional release asset.)
+ | `false` |  |
 
 
 
