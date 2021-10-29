@@ -103,19 +103,19 @@ The following IDE is recommended when working on this codebase:
 ### Docker Image
 Our Docker images are available at both GitHub Container Registry (ghcr) and Docker Hub.
 
-**Docker Hub**  
-See all available images [here.](https://hub.docker.com/r/philipssoftware/slsa-provenance/tags)  
+**Docker Hub**
+See all available images [here.](https://hub.docker.com/r/philipssoftware/slsa-provenance/tags)
 Run the Docker image by doing:
 
 ```sh
-docker run philipssoftware/slsa-provenance:v0.2.0-rc3
+docker run philipssoftware/slsa-provenance:v0.2.0
 ```
-**GitHub Container Registry**  
-See all available images [here.](https://github.com/philips-labs/slsa-provenance-action/pkgs/container/slsa-provenance)  
+**GitHub Container Registry**
+See all available images [here.](https://github.com/philips-labs/slsa-provenance-action/pkgs/container/slsa-provenance)
 Run the Docker image by doing:
 
 ```sh
-docker run ghcr.io/philips-labs/slsa-provenance:v0.2.0-rc3
+docker run ghcr.io/philips-labs/slsa-provenance:v0.2.0
 ```
 
 The Docker image includes the working binary that can be executed by using the ``slsa-provenance`` command.

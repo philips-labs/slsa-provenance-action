@@ -121,7 +121,7 @@ jobs:
 
     steps:
       - name: Generate provenance for Release
-        uses: philips-labs/slsa-provenance-action@v0.2.0-rc3
+        uses: philips-labs/slsa-provenance-action@v0.2.0
         with:
           artifact_path: release-assets
           output_path: 'build.provenance'
