@@ -40,6 +40,8 @@ dockers:
     image_templates:
       - "philipssoftware/{{ .ProjectName }}:{{ .Tag }}"
       - "philipssoftware/{{ .ProjectName }}:{{ .Env.GIT_HASH }}"
+      - "ghcr.io/philips-labs/{{ .ProjectName }}:{{ .Tag }}"
+      - "ghcr.io/philips-labs/{{ .ProjectName }}:{{ .Env.GIT_HASH }}"
     build_flag_templates:
       - "--pull"
       - "--label=com.opencontainers.image.created={{.Date}}"

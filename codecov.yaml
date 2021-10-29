@@ -1,0 +1,11 @@
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        # adjust accordingly based on how flaky your tests are
+        # this allows a 8% drop from the previous base commit coverage
+        threshold: 8%
+    patch:
+      default:
+        informational: true

@@ -2,15 +2,11 @@ package cli
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
-	"io/fs"
 	"os"
-	"path/filepath"
 
 	"github.com/peterbourgon/ff/v3/ffcli"
 	"github.com/pkg/errors"
@@ -19,58 +15,17 @@ import (
 	"github.com/philips-labs/slsa-provenance-action/lib/intoto"
 )
 
-const (
-	gitHubHostedIDSuffix = "/Attestations/GitHubHostedActions@v1"
-	selfHostedIDSuffix   = "/Attestations/SelfHostedActions@v1"
-	recipeType           = "https://github.com/Attestations/GitHubActionsWorkflow@v1"
-	payloadContentType   = "application/vnd.in-toto+json"
-)
-
-// RequiredFlagError creates an error flag error for the given flag name
+// RequiredFlagError creates a required flag error for the given flag name
 func RequiredFlagError(flagName string) error {
 	return fmt.Errorf("no value found for required flag: %s", flagName)
-}
-
-// subjects walks the file or directory at "root" and hashes all files.
-func subjects(root string) ([]intoto.Subject, error) {
-	var s []intoto.Subject
-	return s, filepath.Walk(root, func(abspath string, info fs.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if info.IsDir() {
-			return nil
-		}
-		relpath, err := filepath.Rel(root, abspath)
-		if err != nil {
-			return err
-		}
-		// Note: filepath.Rel() returns "." when "root" and "abspath" point to the same file.
-		if relpath == "." {
-			relpath = filepath.Base(root)
-		}
-		contents, err := os.ReadFile(abspath)
-		if err != nil {
-			return err
-		}
-		sha := sha256.Sum256(contents)
-		shaHex := hex.EncodeToString(sha[:])
-		s = append(s, intoto.Subject{Name: relpath, Digest: intoto.DigestSet{"sha256": shaHex}})
-		return nil
-	})
-}
-
-func builderID(repoURI string) string {
-	if os.Getenv("GITHUB_ACTIONS") == "true" {
-		return repoURI + gitHubHostedIDSuffix
-	}
-	return repoURI + selfHostedIDSuffix
 }
 
 // Generate creates an instance of *ffcli.Command to generate provenance
 func Generate(w io.Writer) *ffcli.Command {
 	var (
-		flagset       = flag.NewFlagSet("slsa-provenance generate", flag.ExitOnError)
+		flagset = flag.NewFlagSet("slsa-provenance generate", flag.ExitOnError)
+		tagName = flagset.String("tag_name", "", `The github release to generate provenance on.
+(if set the artifacts will be downloaded from the release and the provenance will be added as an additional release asset.)`)
 		artifactPath  = flagset.String("artifact_path", "", "The file or dir path of the artifacts for which provenance should be generated.")
 		outputPath    = flagset.String("output_path", "build.provenance", "The path to which the generated provenance should be written.")
 		githubContext = flagset.String("github_context", "", "The '${github}' context value.")
@@ -102,56 +57,43 @@ func Generate(w io.Writer) *ffcli.Command {
 				return RequiredFlagError("-runner_context")
 			}
 
-			subjects, err := subjects(*artifactPath)
-			if os.IsNotExist(err) {
-				return fmt.Errorf("resource path not found: [provided=%s]", *artifactPath)
-			} else if err != nil {
-				return err
-			}
-
-			anyCtx := github.AnyContext{}
-			if err := json.Unmarshal([]byte(*githubContext), &anyCtx.Context); err != nil {
+			var gh github.Context
+			if err := json.Unmarshal([]byte(*githubContext), &gh); err != nil {
 				return errors.Wrap(err, "failed to unmarshal github context json")
 			}
-			if err := json.Unmarshal([]byte(*runnerContext), &anyCtx.RunnerContext); err != nil {
+
+			var runner github.RunnerContext
+			if err := json.Unmarshal([]byte(*runnerContext), &runner); err != nil {
 				return errors.Wrap(err, "failed to unmarshal runner context json")
 			}
-			gh := anyCtx.Context
-			event := github.AnyEvent{}
-			if err := json.Unmarshal(gh.Event, &event); err != nil {
-				return errors.Wrap(err, "failed to unmarshal github context event json")
+
+			ghToken := os.Getenv("GITHUB_TOKEN")
+			if ghToken == "" {
+				return errors.New("GITHUB_TOKEN environment variable not set")
 			}
 
-			// NOTE: Re-runs are not uniquely identified and can cause run ID collisions.
-			repoURI := "https://github.com/" + gh.Repository
-
-			stmt := intoto.SLSAProvenanceStatement(
-				intoto.WithSubject(subjects),
-				intoto.WithBuilder(builderID(repoURI)),
-				intoto.WithMetadata(repoURI+"/actions/runs/"+gh.RunID),
-				// NOTE: This is inexact as multiple workflows in a repo can have the same name.
-				// See https://github.com/github/feedback/discussions/4188
-				intoto.WithRecipe(
-					recipeType,
-					gh.Workflow,
-					event.Inputs,
-					[]intoto.Item{
-						{URI: "git+" + repoURI, Digest: intoto.DigestSet{"sha1": gh.SHA}},
-					},
-				),
-			)
-
-			// NOTE: At L1, writing the in-toto Statement type is sufficient but, at
-			// higher SLSA levels, the Statement must be encoded and wrapped in an
-			// Envelope to support attaching signatures.
-			payload, _ := json.MarshalIndent(stmt, "", "  ")
-			fmt.Fprintf(w, "Saving provenance to %s:\n\n%s\n", *outputPath, string(payload))
-
-			if err := os.WriteFile(*outputPath, payload, 0755); err != nil {
-				return errors.Wrap(err, "failed to write provenance")
+			tc := github.NewOAuth2Client(ctx, func() string { return ghToken })
+			rc := github.NewReleaseClient(tc)
+			env := createEnvironment(gh, runner, *tagName, rc)
+			stmt, err := env.GenerateProvenanceStatement(ctx, *artifactPath)
+			if err != nil {
+				return errors.Wrap(err, "failed to generate provenance")
 			}
 
-			return nil
+			fmt.Fprintf(w, "Saving provenance to %s\n", *outputPath)
+
+			return env.PersistProvenanceStatement(ctx, stmt, *outputPath)
 		},
+	}
+}
+
+func createEnvironment(gh github.Context, runner github.RunnerContext, tagName string, rc *github.ReleaseClient) intoto.Provenancer {
+	if tagName != "" {
+		return github.NewReleaseEnvironment(gh, runner, tagName, rc)
+	}
+
+	return &github.Environment{
+		Context: &gh,
+		Runner:  &runner,
 	}
 }

@@ -1,11 +1,23 @@
 package intoto
 
 import (
+	"context"
 	"encoding/json"
 	"time"
-
-	"github.com/philips-labs/slsa-provenance-action/lib/github"
 )
+
+const (
+	// SlsaPredicateType the predicate type for SLSA intoto statements
+	SlsaPredicateType = "https://slsa.dev/provenance/v0.1"
+	// StatementType the type of the intoto statement
+	StatementType = "https://in-toto.io/Statement/v0.1"
+)
+
+// Provenancer generates provenance statements for given artifacts
+type Provenancer interface {
+	GenerateProvenanceStatement(ctx context.Context, artifactPath string) (*Statement, error)
+	PersistProvenanceStatement(ctx context.Context, stmt *Statement, path string) error
+}
 
 // Envelope wraps an in-toto statement to be able to attach signatures to the Statement
 type Envelope struct {
@@ -16,7 +28,7 @@ type Envelope struct {
 
 // SLSAProvenanceStatement builds a in-toto statement with predicate type https://slsa.dev/provenance/v0.1
 func SLSAProvenanceStatement(opts ...StatementOption) *Statement {
-	stmt := &Statement{PredicateType: "https://slsa.dev/provenance/v0.1", Type: "https://in-toto.io/Statement/v0.1"}
+	stmt := &Statement{PredicateType: SlsaPredicateType, Type: StatementType}
 	for _, opt := range opts {
 		opt(stmt)
 	}
@@ -57,7 +69,7 @@ func WithMetadata(buildInvocationID string) StatementOption {
 }
 
 // WithRecipe sets the Predicate Recipe and Materials
-func WithRecipe(predicateType string, entryPoint string, arguments json.RawMessage, materials []Item) StatementOption {
+func WithRecipe(predicateType string, entryPoint string, environment json.RawMessage, arguments json.RawMessage, materials []Item) StatementOption {
 	return func(s *Statement) {
 		s.Predicate.Recipe = Recipe{
 			Type:       predicateType,
@@ -68,6 +80,7 @@ func WithRecipe(predicateType string, entryPoint string, arguments json.RawMessa
 			// Omit this field (or use null) if the recipe doesn't come from a material.
 			// TODO: What if there is more than one material?
 			DefinedInMaterial: 0,
+			Environment:       environment,
 		}
 		s.Predicate.Materials = append(s.Predicate.Materials, materials...)
 	}
@@ -122,11 +135,11 @@ type Metadata struct {
 
 // Recipe Identifies the configuration used for the build. When combined with materials, this SHOULD fully describe the build, such that re-running this recipe results in bit-for-bit identical output (if the build is reproducible).
 type Recipe struct {
-	Type              string             `json:"type"`
-	DefinedInMaterial int                `json:"definedInMaterial"`
-	EntryPoint        string             `json:"entryPoint"`
-	Arguments         json.RawMessage    `json:"arguments"`
-	Environment       *github.AnyContext `json:"environment"`
+	Type              string          `json:"type"`
+	DefinedInMaterial int             `json:"definedInMaterial"`
+	EntryPoint        string          `json:"entryPoint"`
+	Arguments         json.RawMessage `json:"arguments"`
+	Environment       json.RawMessage `json:"environment"`
 }
 
 // Completeness Indicates that the builder claims certain fields in this message to be complete.

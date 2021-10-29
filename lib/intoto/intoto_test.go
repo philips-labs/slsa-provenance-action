@@ -10,31 +10,29 @@ import (
 func TestSLSAProvenanceStatement(t *testing.T) {
 	assert := assert.New(t)
 
-	predicateType := "https://slsa.dev/provenance/v0.1"
-	statementType := "https://in-toto.io/Statement/v0.1"
 	repoURI := "https://github.com/philips-labs/slsa-provenance-action"
 	builderID := repoURI + "/Attestations/GitHubHostedActions@v1"
 	buildInvocationID := repoURI + "/actions/runs/123498765"
 	recipeType := "https://github.com/Attestations/GitHubActionsWorkflow@v1"
 
 	stmt := SLSAProvenanceStatement()
-	assert.Equal(predicateType, stmt.PredicateType)
-	assert.Equal(statementType, stmt.Type)
+	assert.Equal(SlsaPredicateType, stmt.PredicateType)
+	assert.Equal(StatementType, stmt.Type)
 	assert.Len(stmt.Subject, 0)
 
 	stmt = SLSAProvenanceStatement(
 		WithSubject(make([]Subject, 4)),
 	)
-	assert.Equal(predicateType, stmt.PredicateType)
-	assert.Equal(statementType, stmt.Type)
+	assert.Equal(SlsaPredicateType, stmt.PredicateType)
+	assert.Equal(StatementType, stmt.Type)
 	assert.Len(stmt.Subject, 4)
 
 	stmt = SLSAProvenanceStatement(
 		WithSubject(make([]Subject, 3)),
 		WithBuilder(builderID),
 	)
-	assert.Equal(predicateType, stmt.PredicateType)
-	assert.Equal(statementType, stmt.Type)
+	assert.Equal(SlsaPredicateType, stmt.PredicateType)
+	assert.Equal(StatementType, stmt.Type)
 	assert.Len(stmt.Subject, 3)
 	assert.Equal(builderID, stmt.Predicate.Builder.ID)
 
@@ -43,8 +41,8 @@ func TestSLSAProvenanceStatement(t *testing.T) {
 		WithBuilder(builderID),
 	)
 	m := stmt.Predicate.Metadata
-	assert.Equal(predicateType, stmt.PredicateType)
-	assert.Equal(statementType, stmt.Type)
+	assert.Equal(SlsaPredicateType, stmt.PredicateType)
+	assert.Equal(StatementType, stmt.Type)
 	assert.Len(stmt.Subject, 0)
 	assert.Equal(builderID, stmt.Predicate.Builder.ID)
 	assert.Equal(buildInvocationID, m.BuildInvocationID)
@@ -68,12 +66,13 @@ func TestSLSAProvenanceStatement(t *testing.T) {
 			recipeType,
 			"CI workflow",
 			nil,
+			nil,
 			provenanceActionMaterial,
 		),
 	)
 	r := stmt.Predicate.Recipe
-	assert.Equal(predicateType, stmt.PredicateType)
-	assert.Equal(statementType, stmt.Type)
+	assert.Equal(SlsaPredicateType, stmt.PredicateType)
+	assert.Equal(StatementType, stmt.Type)
 	assert.Len(stmt.Subject, 1)
 	assert.Equal(builderID, stmt.Predicate.Builder.ID)
 	assert.Equal(recipeType, r.Type)
