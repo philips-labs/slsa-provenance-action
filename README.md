@@ -101,6 +101,7 @@ The following IDE is recommended when working on this codebase:
    ```
 
 ### Docker Image
+
 Our Docker images are available at both GitHub Container Registry (ghcr) and Docker Hub.
 
 **Docker Hub**
@@ -110,6 +111,7 @@ Run the Docker image by doing:
 ```sh
 docker run philipssoftware/slsa-provenance:v0.2.0
 ```
+
 **GitHub Container Registry**
 See all available images [here.](https://github.com/philips-labs/slsa-provenance-action/pkgs/container/slsa-provenance)
 Run the Docker image by doing:
@@ -126,10 +128,43 @@ The Docker image includes the working binary that can be executed by using the `
 
 The easiest way to use this action is to add the following into your workflow file. Additional configuration might be necessary to fit your usecase.
 
-1. Add the following part in your workflow file:
+<details>
+  <summary>GitHub Releases</summary>
 
-   ```yaml
-   generate-provenance:
+  Add the following part in your workflow file:
+
+  See [ci workflow](.github/workflows/ci.yaml) for a full example using GitHub releases.
+
+  > :warning: **NOTE:** this job depends on a release job that publishes the release assets to a GitHub Release.
+
+  ```yaml
+  provenance:
+    name: provenance
+    needs: [release]
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Generate provenance for Release
+        uses: philips-labs/slsa-provenance-action@v0.2.0
+        with:
+          artifact_path: release-assets
+          output_path: 'build.provenance'
+          tag_name: ${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+  ```
+
+</details>
+
+<details>
+  <summary>GitHub artifacts</summary>
+
+  Add the following part in your workflow file:
+
+  See [example workflow](.github/workflows/example-publish.yaml) for a full example using GitHub artifacts.
+
+  ```yaml
+  generate-provenance:
     name: Generate build provenance
     runs-on: ubuntu-latest
     steps:
@@ -147,7 +182,9 @@ The easiest way to use this action is to add the following into your workflow fi
         uses: actions/upload-artifact@v2
         with:
           path: build.provenance
-   ```
+  ```
+
+</details>
 
 <!-- action-docs-description -->
 ### Description
