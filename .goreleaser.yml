@@ -39,9 +39,9 @@ dockers:
     goarch: amd64
     image_templates:
       - "philipssoftware/{{ .ProjectName }}:{{ .Tag }}"
-      - "philipssoftware/{{ .ProjectName }}:{{ .Env.GIT_HASH }}"
+      - "philipssoftware/{{ .ProjectName }}:{{ .FullCommit }}"
       - "ghcr.io/philips-labs/{{ .ProjectName }}:{{ .Tag }}"
-      - "ghcr.io/philips-labs/{{ .ProjectName }}:{{ .Env.GIT_HASH }}"
+      - "ghcr.io/philips-labs/{{ .ProjectName }}:{{ .FullCommit }}"
     build_flag_templates:
       - "--pull"
       - "--label=org.opencontainers.image.created={{.Date}}"
