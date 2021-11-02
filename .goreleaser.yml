@@ -44,7 +44,7 @@ dockers:
       - "ghcr.io/philips-labs/{{ .ProjectName }}:{{ .Env.GIT_HASH }}"
     build_flag_templates:
       - "--pull"
-      - "--label=com.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.created={{.Date}}"
       - "--label=org.opencontainers.image.title={{.ProjectName}}"
       - "--label=org.opencontainers.image.description={{.ProjectName}}"
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
