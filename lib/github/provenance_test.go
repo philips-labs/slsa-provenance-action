@@ -307,7 +307,7 @@ func TestGenerateProvenanceFromGitHubRelease(t *testing.T) {
 	tc := github.NewOAuth2Client(ctx, tokenRetriever)
 	client := github.NewReleaseClient(tc)
 
-	version := "v0.0.0-rel-test"
+	version := fmt.Sprintf("v0.0.0-rel-test-%d", time.Now().UnixNano())
 	releaseId, err := createGitHubRelease(
 		ctx,
 		client,
@@ -377,7 +377,7 @@ func TestGenerateProvenanceFromGitHubReleaseErrors(t *testing.T) {
 	rootDir := path.Join(path.Dir(filename), "../..")
 	client := github.NewReleaseClient(nil)
 
-	version := "v0.0.0-rel-test"
+	version := fmt.Sprintf("v0.0.0-rel-test-%d", time.Now().UnixNano())
 
 	env := github.NewReleaseEnvironment(ghContext, github.RunnerContext{}, version, client)
 
