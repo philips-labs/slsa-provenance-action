@@ -75,13 +75,12 @@ $(GO_PATH)/bin/goreleaser:
 
 .PHONY: snapshot-release
 snapshot-release: $(GO_PATH)/bin/goreleaser ## creates a snapshot release using goreleaser
-	LDFLAGS=$(LDFLAGS) GIT_TAG=$(GIT_TAG) GIT_HASH=$(GIT_HASH) goreleaser release --snapshot --rm-dist
+	LDFLAGS=$(LDFLAGS) goreleaser release --snapshot --rm-dist
 
 .PHONY: release
 release: $(GO_PATH)/bin/goreleaser ## creates a release using goreleaser
-	LDFLAGS=$(LDFLAGS) GIT_TAG=$(GIT_TAG) GIT_HASH=$(GIT_HASH) goreleaser release
+	LDFLAGS=$(LDFLAGS) goreleaser release
 
 .PHONY: release-vars
 release-vars: ## print the release variables for goreleaser
 	@echo export LDFLAGS=\"$(LDFLAGS)\"
-	@echo export GIT_HASH=$(GIT_HASH)
