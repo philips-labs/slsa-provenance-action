@@ -125,6 +125,12 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
+      - name: Fetch docker images from repositories
+        run: |
+          docker pull philipssoftware/slsa-provenance -a
+          docker pull ghcr.io/philips-labs/slsa-provenance -a
+          docker inspect ghcr.io/slsa-provenance@${{ needs.release.outputs.container_digest }}
+
       - name: Generate provenance for Release
         uses: philips-labs/slsa-provenance-action@v0.2.2
         with:
