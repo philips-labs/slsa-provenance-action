@@ -12,5 +12,5 @@ func TestCli(t *testing.T) {
 	assert := assert.New(t)
 
 	cli := cli.New()
-	assert.Len(cli.Commands(), 2)
+	assert.Len(cli.Commands(), 3)
 }

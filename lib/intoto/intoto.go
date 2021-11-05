@@ -11,6 +11,9 @@ const (
 	SlsaPredicateType = "https://slsa.dev/provenance/v0.2"
 	// StatementType the type of the intoto statement
 	StatementType = "https://in-toto.io/Statement/v0.1"
+	// InTotoPayloadType is the MIME-type for PayloadType in the Envelope
+	// see https://github.com/in-toto/attestation/blob/main/spec/README.md#envelope
+	InTotoPayloadType = "application/vnd.in-toto+json"
 )
 
 // Provenancer generates provenance statements for given artifacts

@@ -11,6 +11,8 @@ import (
 	"github.com/philips-labs/slsa-provenance-action/lib/intoto"
 )
 
+const defaultGenerateOutputPath = "provenance.json"
+
 // GenerateOptions Commandline flags used for the generate command.
 type GenerateOptions struct {
 	GitHubContext  string
@@ -76,6 +78,6 @@ func (o *GenerateOptions) GetExtraMaterials() ([]intoto.Item, error) {
 func (o *GenerateOptions) AddFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().StringVar(&o.GitHubContext, "github-context", "", "The '${github}' context value.")
 	cmd.PersistentFlags().StringVar(&o.RunnerContext, "runner-context", "", "The '${runner}' context value.")
-	cmd.PersistentFlags().StringVar(&o.OutputPath, "output-path", "provenance.json", "The path to which the generated provenance should be written.")
+	cmd.PersistentFlags().StringVar(&o.OutputPath, "output-path", defaultGenerateOutputPath, "The path to which the generated provenance should be written.")
 	cmd.PersistentFlags().StringSliceVarP(&o.ExtraMaterials, "extra-materials", "m", nil, "The '${runner}' context value.")
 }

@@ -36,6 +36,7 @@ func New() *cobra.Command {
 
 	cmd.AddCommand(Version())
 	cmd.AddCommand(Generate())
+	cmd.AddCommand(Sign())
 
 	return cmd
 }
