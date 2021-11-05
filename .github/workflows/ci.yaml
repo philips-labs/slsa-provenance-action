@@ -129,13 +129,13 @@ jobs:
         run: |
           docker pull philipssoftware/slsa-provenance -a
           docker pull ghcr.io/philips-labs/slsa-provenance -a
-          docker inspect ghcr.io/slsa-provenance@${{ needs.release.outputs.container_digest }}
+          docker inspect ghcr.io/philips-labs/slsa-provenance@${{ needs.release.outputs.container_digest }}
 
       - name: Generate provenance for Release
         uses: philips-labs/slsa-provenance-action@v0.2.2
         with:
           artifact_path: release-assets
-          output_path: 'build.provenance'
+          output_path: 'provenance.json'
           tag_name: ${{ github.ref_name }}
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
