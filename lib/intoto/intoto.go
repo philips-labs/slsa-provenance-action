@@ -68,10 +68,10 @@ func WithMetadata(buildInvocationID string) StatementOption {
 	}
 }
 
-// WithRecipe sets the Predicate Recipe and Materials
-func WithRecipe(predicateType string, entryPoint string, environment json.RawMessage, arguments json.RawMessage, materials []Item) StatementOption {
+// WithInvocation sets the Predicate Invocation and Materials
+func WithInvocation(predicateType string, entryPoint string, environment json.RawMessage, arguments json.RawMessage, materials []Item) StatementOption {
 	return func(s *Statement) {
-		s.Predicate.Recipe = Recipe{
+		s.Predicate.Invocation = Invocation{
 			Type:       predicateType,
 			EntryPoint: entryPoint,
 			Arguments:  arguments,
@@ -108,10 +108,10 @@ type Subject struct {
 //
 // A predicate has a required predicateType (TypeURI) identifying what the predicate means, plus an optional predicate (object) containing additional, type-dependent parameters.
 type Predicate struct {
-	Builder   `json:"builder"`
-	Metadata  `json:"metadata"`
-	Recipe    `json:"recipe"`
-	Materials []Item `json:"materials"`
+	Builder    `json:"builder"`
+	Metadata   `json:"metadata"`
+	Invocation `json:"invocation"`
+	Materials  []Item `json:"materials"`
 }
 
 // Builder Identifies the entity that executed the recipe, which is trusted to have correctly performed the operation and populated this provenance.
@@ -133,8 +133,8 @@ type Metadata struct {
 	BuildFinishedOn string `json:"buildFinishedOn"`
 }
 
-// Recipe Identifies the configuration used for the build. When combined with materials, this SHOULD fully describe the build, such that re-running this recipe results in bit-for-bit identical output (if the build is reproducible).
-type Recipe struct {
+// Invocation Identifies the configuration used for the build. When combined with materials, this SHOULD fully describe the build, such that re-running this recipe results in bit-for-bit identical output (if the build is reproducible).
+type Invocation struct {
 	Type              string          `json:"type"`
 	DefinedInMaterial int             `json:"definedInMaterial"`
 	EntryPoint        string          `json:"entryPoint"`

@@ -62,7 +62,7 @@ func TestSLSAProvenanceStatement(t *testing.T) {
 	stmt = SLSAProvenanceStatement(
 		WithSubject(make([]Subject, 1)),
 		WithBuilder(builderID),
-		WithRecipe(
+		WithInvocation(
 			recipeType,
 			"CI workflow",
 			nil,
@@ -70,14 +70,14 @@ func TestSLSAProvenanceStatement(t *testing.T) {
 			provenanceActionMaterial,
 		),
 	)
-	r := stmt.Predicate.Recipe
+	i := stmt.Predicate.Invocation
 	assert.Equal(SlsaPredicateType, stmt.PredicateType)
 	assert.Equal(StatementType, stmt.Type)
 	assert.Len(stmt.Subject, 1)
 	assert.Equal(builderID, stmt.Predicate.Builder.ID)
-	assert.Equal(recipeType, r.Type)
-	assert.Equal("CI workflow", r.EntryPoint)
-	assert.Nil(r.Arguments)
-	assert.Equal(0, r.DefinedInMaterial)
+	assert.Equal(recipeType, i.Type)
+	assert.Equal("CI workflow", i.EntryPoint)
+	assert.Nil(i.Arguments)
+	assert.Equal(0, i.DefinedInMaterial)
 	assert.Equal(provenanceActionMaterial, stmt.Predicate.Materials)
 }
