@@ -209,7 +209,7 @@ func TestSignSignature(t *testing.T) {
 	// TODO check if we indeed generate a good signature
 }
 
-func BenchSign(b *testing.B) {
+func BenchmarkSign(b *testing.B) {
 	_, filename, _, _ := runtime.Caller(0)
 	rootDir := path.Join(path.Dir(filename), "../../..")
 	provenanceFile := path.Join(rootDir, "bin/unittest.provenance")
