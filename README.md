@@ -212,7 +212,9 @@ An action to generate SLSA build provenance for an artifact
 | tag_name | The github release to generate provenance on.
 (if set the artifacts will be downloaded from the release and the provenance will be added as an additional release asset.)
  | `false` |  |
-| extra_materials | paths to files containing SLSA v0.1 formatted materials (JSON array) in to include in the provenance | `false` | |
+| extra_materials | paths to files containing SLSA v0.1 formatted materials (JSON array) in to include in the provenance | `false` |  |
+
+
 
 <!-- action-docs-inputs -->
 <!-- action-docs-outputs -->
