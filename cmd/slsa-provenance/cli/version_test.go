@@ -33,7 +33,7 @@ Platform:      %s/%s
 	assert.Equal(expected, sb.String())
 }
 
-func TestVersionCliJson(t *testing.T) {
+func TestVersionCliJSON(t *testing.T) {
 	assert := assert.New(t)
 
 	sb := strings.Builder{}
