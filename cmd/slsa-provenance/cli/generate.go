@@ -34,7 +34,7 @@ func Generate(w io.Writer) *ffcli.Command {
 		runnerContext  = flagset.String("runner_context", "", "The '${runner}' context value.")
 		extraMaterials = []string{}
 	)
-	flagset.Func("extra_materials", "Files that contain JSON encoded provenance to be included into the provenance", func(s string) error {
+	flagset.Func("extra_materials", "paths to files containing SLSA v0.1 formatted materials (JSON array) in to include in the provenance", func(s string) error {
 		extraMaterials = append(extraMaterials, strings.Fields(s)...)
 		return nil
 	})

@@ -25,7 +25,7 @@ inputs:
       (if set the artifacts will be downloaded from the release and the provenance will be added as an additional release asset.)
     required: false
   extra_materials:
-    description: 'paths to files containing a JSON representation of extra materials to include in the provenance'
+    description: 'paths to files containing SLSA v0.1 formatted materials (JSON array) in to include in the provenance'
     required: false
 runs:
   using: 'docker'
