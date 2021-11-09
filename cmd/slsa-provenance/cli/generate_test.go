@@ -376,7 +376,7 @@ func TestGenerateCliOptions(t *testing.T) {
 		},
 		{
 			name: "With broken extra materials (no uri)",
-			err:  fmt.Errorf("Empty or missing \"uri\" field in /home/lieter/src/SLSA/slsa-provenance-action/test-data/materials-no-uri.json"),
+			err:  fmt.Errorf("Empty or missing \"uri\" field in %s", path.Join(rootDir, "test-data/materials-no-uri.json")),
 			arguments: []string{
 				"-artifact_path",
 				path.Join(rootDir, "bin/slsa-provenance"),
@@ -392,7 +392,7 @@ func TestGenerateCliOptions(t *testing.T) {
 		},
 		{
 			name: "With broken extra materials (no digest)",
-			err:  fmt.Errorf("Empty or missing \"digest\" in /home/lieter/src/SLSA/slsa-provenance-action/test-data/materials-no-digest.json"),
+			err:  fmt.Errorf("Empty or missing \"digest\" in %s", path.Join(rootDir, "test-data/materials-no-digest.json")),
 			arguments: []string{
 				"-artifact_path",
 				path.Join(rootDir, "bin/slsa-provenance"),
