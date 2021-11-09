@@ -6,7 +6,9 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
+	"strings"
 
 	"github.com/peterbourgon/ff/v3/ffcli"
 	"github.com/pkg/errors"
@@ -26,11 +28,16 @@ func Generate(w io.Writer) *ffcli.Command {
 		flagset = flag.NewFlagSet("slsa-provenance generate", flag.ExitOnError)
 		tagName = flagset.String("tag_name", "", `The github release to generate provenance on.
 (if set the artifacts will be downloaded from the release and the provenance will be added as an additional release asset.)`)
-		artifactPath  = flagset.String("artifact_path", "", "The file or dir path of the artifacts for which provenance should be generated.")
-		outputPath    = flagset.String("output_path", "build.provenance", "The path to which the generated provenance should be written.")
-		githubContext = flagset.String("github_context", "", "The '${github}' context value.")
-		runnerContext = flagset.String("runner_context", "", "The '${runner}' context value.")
+		artifactPath   = flagset.String("artifact_path", "", "The file or dir path of the artifacts for which provenance should be generated.")
+		outputPath     = flagset.String("output_path", "build.provenance", "The path to which the generated provenance should be written.")
+		githubContext  = flagset.String("github_context", "", "The '${github}' context value.")
+		runnerContext  = flagset.String("runner_context", "", "The '${runner}' context value.")
+		extraMaterials = []string{}
 	)
+	flagset.Func("extra_materials", "paths to files containing SLSA v0.1 formatted materials (JSON array) in to include in the provenance", func(s string) error {
+		extraMaterials = append(extraMaterials, strings.Fields(s)...)
+		return nil
+	})
 
 	flagset.SetOutput(w)
 
@@ -78,6 +85,26 @@ func Generate(w io.Writer) *ffcli.Command {
 			stmt, err := env.GenerateProvenanceStatement(ctx, *artifactPath)
 			if err != nil {
 				return errors.Wrap(err, "failed to generate provenance")
+			}
+
+			for _, extra := range extraMaterials {
+				content, err := ioutil.ReadFile(extra)
+				if err != nil {
+					return errors.Wrapf(err, "Could not load extra materials from %s", extra)
+				}
+				var materials []intoto.Item
+				if err = json.Unmarshal(content, &materials); err != nil {
+					return errors.Wrapf(err, "Invalid JSON in extra materials file %s", extra)
+				}
+				for _, material := range materials {
+					if material.URI == "" {
+						return errors.Errorf("Empty or missing \"uri\" field in %s", extra)
+					}
+					if len(material.Digest) == 0 {
+						return errors.Errorf("Empty or missing \"digest\" in %s", extra)
+					}
+				}
+				stmt.Predicate.Materials = append(stmt.Predicate.Materials, materials...)
 			}
 
 			fmt.Fprintf(w, "Saving provenance to %s\n", *outputPath)

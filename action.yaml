@@ -24,6 +24,9 @@ inputs:
       The github release to generate provenance on.
       (if set the artifacts will be downloaded from the release and the provenance will be added as an additional release asset.)
     required: false
+  extra_materials:
+    description: 'paths to files containing SLSA v0.1 formatted materials (JSON array) in to include in the provenance'
+    required: false
 runs:
   using: 'docker'
   image: 'docker://ghcr.io/philips-labs/slsa-provenance:v0.2.2'
@@ -39,3 +42,5 @@ runs:
     - '${{ inputs.runner_context }}'
     - "-tag_name"
     - '${{ inputs.tag_name }}'
+    - "-extra_materials"
+    - '${{ inputs.extra_materials }}'

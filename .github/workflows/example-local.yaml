@@ -49,11 +49,16 @@ jobs:
       - name: Download build artifact
         uses: actions/download-artifact@v2
 
+      - name: Generate some extra materials (this usually happens as part of the build process)
+        run: |
+          echo '[{"uri": "pkg:deb/debian/stunnel4@5.50-3?arch=amd64", "digest": {"sha256": "e1731ae217fcbc64d4c00d707dcead45c828c5f762bcf8cc56d87de511e096fa"}}]' > extra-materials.json
+
       - name: Generate provenance
         # use action in the root directory
         uses: ./
         with:
           artifact_path: artifact/
+          extra_materials: extra-materials.json
 
       - name: Upload provenance
         uses: actions/upload-artifact@v2

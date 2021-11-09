@@ -1,0 +1,8 @@
+[
+  {
+    "uri": "pkg:deb/debian/stunnel4@5.50-3?arch=amd64",
+    "not-digest": {
+      "sha256": "e1731ae217fcbc64d4c00d707dcead45c828c5f762bcf8cc56d87de511e096fa"
+    }
+  }
+]

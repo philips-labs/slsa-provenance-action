@@ -173,10 +173,17 @@ The easiest way to use this action is to add the following into your workflow fi
         with:
           path: artifact/
 
+      - name: Download extra materials for provenance
+        uses: actions/download-artifact@v2
+        with:
+          name: extra-materials
+          path: extra-materials/
+
       - name: Generate provenance
         uses: philips-labs/SLSA-Provenance-Action@8c78a6b34703824b9561a26b1ae5893beea9a332
         with:
           artifact_path: artifact/
+          extra_materials: extra-materials/file1.json extra-materials/some-more.json
 
       - name: Upload provenance
         uses: actions/upload-artifact@v2
@@ -205,6 +212,7 @@ An action to generate SLSA build provenance for an artifact
 | tag_name | The github release to generate provenance on.
 (if set the artifacts will be downloaded from the release and the provenance will be added as an additional release asset.)
  | `false` |  |
+| extra_materials | paths to files containing SLSA v0.1 formatted materials (JSON array) in to include in the provenance | `false` |  |
 
 
 
