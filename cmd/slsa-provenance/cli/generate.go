@@ -96,6 +96,14 @@ func Generate(w io.Writer) *ffcli.Command {
 				if err = json.Unmarshal(content, &materials); err != nil {
 					return errors.Wrapf(err, "Invalid JSON in extra materials file %s", extra)
 				}
+				for _, material := range materials {
+					if material.URI == "" {
+						return errors.Errorf("Empty or missing \"uri\" field in %s", extra)
+					}
+					if len(material.Digest) == 0 {
+						return errors.Errorf("Empty or missing \"digest\" in %s", extra)
+					}
+				}
 				stmt.Predicate.Materials = append(stmt.Predicate.Materials, materials...)
 			}
 

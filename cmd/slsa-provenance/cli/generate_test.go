@@ -374,6 +374,38 @@ func TestGenerateCliOptions(t *testing.T) {
 				fmt.Sprintf("%s %s", path.Join(rootDir, "test-data/materials-valid.json"), "non-existing-folder/unknown-file"),
 			},
 		},
+		{
+			name: "With broken extra materials (no uri)",
+			err:  fmt.Errorf("Empty or missing \"uri\" field in /home/lieter/src/SLSA/slsa-provenance-action/test-data/materials-no-uri.json"),
+			arguments: []string{
+				"-artifact_path",
+				path.Join(rootDir, "bin/slsa-provenance"),
+				"-github_context",
+				githubContext,
+				"-output_path",
+				provenanceFile,
+				"-runner_context",
+				runnerContext,
+				"-extra_materials",
+				path.Join(rootDir, "test-data/materials-no-uri.json"),
+			},
+		},
+		{
+			name: "With broken extra materials (no digest)",
+			err:  fmt.Errorf("Empty or missing \"digest\" in /home/lieter/src/SLSA/slsa-provenance-action/test-data/materials-no-digest.json"),
+			arguments: []string{
+				"-artifact_path",
+				path.Join(rootDir, "bin/slsa-provenance"),
+				"-github_context",
+				githubContext,
+				"-output_path",
+				provenanceFile,
+				"-runner_context",
+				runnerContext,
+				"-extra_materials",
+				path.Join(rootDir, "test-data/materials-no-digest.json"),
+			},
+		},
 	}
 
 	for _, tc := range testCases {
