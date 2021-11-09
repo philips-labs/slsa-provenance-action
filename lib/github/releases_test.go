@@ -101,7 +101,7 @@ func TestAddProvenanceToRelease(t *testing.T) {
 
 	_, filename, _, _ := runtime.Caller(0)
 	rootDir := path.Join(path.Dir(filename), "../..")
-	provenanceFile := path.Join(rootDir, ".github/test_resource/example_build.provenance")
+	provenanceFile := path.Join(rootDir, ".github/test_resource/example_provenance.json")
 
 	ctx := context.Background()
 	tc := github.NewOAuth2Client(ctx, tokenRetriever)
@@ -125,7 +125,7 @@ func TestAddProvenanceToRelease(t *testing.T) {
 	if !assert.NoError(err) && assert.Nil(stat) {
 		return
 	}
-	assert.Equal("example_build.provenance", stat.Name())
+	assert.Equal("example_provenance.json", stat.Name())
 
 	asset, err := client.AddProvenanceToRelease(ctx, owner, repo, releaseId, provenance)
 	if !assert.NoError(err) && assert.Nil(asset) {
