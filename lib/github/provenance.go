@@ -39,7 +39,7 @@ func (e *Environment) GenerateProvenanceStatement(ctx context.Context, artifactP
 		// NOTE: This is inexact as multiple workflows in a repo can have the same name.
 		// See https://github.com/github/feedback/discussions/4188
 		intoto.WithInvocation(
-			RecipeType,
+			BuildType,
 			e.Context.Workflow,
 			nil,
 			event.Inputs,

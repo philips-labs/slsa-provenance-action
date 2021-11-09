@@ -271,6 +271,7 @@ func TestGenerateProvenance(t *testing.T) {
 	assert.Equal(intoto.StatementType, stmt.Type)
 
 	predicate := stmt.Predicate
+	assert.Equal(github.BuildType, predicate.BuildType)
 	assert.Equal(fmt.Sprintf("%s%s", repoURL, github.HostedIDSuffix), predicate.ID)
 	assert.Equal(materials, predicate.Materials)
 	assert.Equal(fmt.Sprintf("%s%s", repoURL, github.HostedIDSuffix), predicate.Builder.ID)
@@ -351,6 +352,7 @@ func TestGenerateProvenanceFromGitHubRelease(t *testing.T) {
 	assert.Equal(fmt.Sprintf("%s%s", repoURL, github.HostedIDSuffix), predicate.ID)
 	assert.Equal(materials, predicate.Materials)
 	assert.Equal(fmt.Sprintf("%s%s", repoURL, github.HostedIDSuffix), predicate.Builder.ID)
+	assert.Equal(github.BuildType, predicate.BuildType)
 
 	assertMetadata(assert, predicate.Metadata, ghContext, repoURL)
 	assertInvocation(assert, predicate.Invocation)
@@ -394,7 +396,6 @@ func TestGenerateProvenanceFromGitHubReleaseErrors(t *testing.T) {
 }
 
 func assertInvocation(assert *assert.Assertions, recipe intoto.Invocation) {
-	assert.Equal(github.RecipeType, recipe.Type)
 	assert.Equal(0, recipe.DefinedInMaterial)
 	assert.Equal("", recipe.EntryPoint)
 	assert.Nil(recipe.Environment)

@@ -13,7 +13,7 @@ func TestSLSAProvenanceStatement(t *testing.T) {
 	repoURI := "https://github.com/philips-labs/slsa-provenance-action"
 	builderID := repoURI + "/Attestations/GitHubHostedActions@v1"
 	buildInvocationID := repoURI + "/actions/runs/123498765"
-	recipeType := "https://github.com/Attestations/GitHubActionsWorkflow@v1"
+	buildType := "https://github.com/Attestations/GitHubActionsWorkflow@v1"
 
 	stmt := SLSAProvenanceStatement()
 	assert.Equal(SlsaPredicateType, stmt.PredicateType)
@@ -63,7 +63,7 @@ func TestSLSAProvenanceStatement(t *testing.T) {
 		WithSubject(make([]Subject, 1)),
 		WithBuilder(builderID),
 		WithInvocation(
-			recipeType,
+			buildType,
 			"CI workflow",
 			nil,
 			nil,
@@ -75,7 +75,7 @@ func TestSLSAProvenanceStatement(t *testing.T) {
 	assert.Equal(StatementType, stmt.Type)
 	assert.Len(stmt.Subject, 1)
 	assert.Equal(builderID, stmt.Predicate.Builder.ID)
-	assert.Equal(recipeType, i.Type)
+	assert.Equal(buildType, stmt.Predicate.BuildType)
 	assert.Equal("CI workflow", i.EntryPoint)
 	assert.Nil(i.Arguments)
 	assert.Equal(0, i.DefinedInMaterial)

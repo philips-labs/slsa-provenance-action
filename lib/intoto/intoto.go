@@ -69,10 +69,10 @@ func WithMetadata(buildInvocationID string) StatementOption {
 }
 
 // WithInvocation sets the Predicate Invocation and Materials
-func WithInvocation(predicateType string, entryPoint string, environment json.RawMessage, arguments json.RawMessage, materials []Item) StatementOption {
+func WithInvocation(buildType, entryPoint string, environment json.RawMessage, arguments json.RawMessage, materials []Item) StatementOption {
 	return func(s *Statement) {
+		s.Predicate.BuildType = buildType
 		s.Predicate.Invocation = Invocation{
-			Type:       predicateType,
 			EntryPoint: entryPoint,
 			Arguments:  arguments,
 			// Subject to change and simplify https://github.com/slsa-framework/slsa/issues/178
@@ -109,6 +109,7 @@ type Subject struct {
 // A predicate has a required predicateType (TypeURI) identifying what the predicate means, plus an optional predicate (object) containing additional, type-dependent parameters.
 type Predicate struct {
 	Builder    `json:"builder"`
+	BuildType  string `json:"buildType"`
 	Metadata   `json:"metadata"`
 	Invocation `json:"invocation"`
 	Materials  []Item `json:"materials"`
@@ -135,7 +136,6 @@ type Metadata struct {
 
 // Invocation Identifies the configuration used for the build. When combined with materials, this SHOULD fully describe the build, such that re-running this recipe results in bit-for-bit identical output (if the build is reproducible).
 type Invocation struct {
-	Type              string          `json:"type"`
 	DefinedInMaterial int             `json:"definedInMaterial"`
 	EntryPoint        string          `json:"entryPoint"`
 	Arguments         json.RawMessage `json:"arguments"`

@@ -10,8 +10,8 @@ const (
 	HostedIDSuffix = "/Attestations/GitHubHostedActions@v1"
 	// SelfHostedIDSuffix the GitHub self hosted attestation type
 	SelfHostedIDSuffix = "/Attestations/SelfHostedActions@v1"
-	// RecipeType the attestion type for a recipe
-	RecipeType = "https://github.com/Attestations/GitHubActionsWorkflow@v1"
+	// BuildType URI indicating what type of build was performed. It determines the meaning of invocation, buildConfig and materials.
+	BuildType = "https://github.com/Attestations/GitHubActionsWorkflow@v1"
 	// PayloadContentType used to define the Envelope content type
 	// See: https://github.com/in-toto/attestation#provenance-example
 	PayloadContentType = "application/vnd.in-toto+json"
