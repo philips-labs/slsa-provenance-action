@@ -74,14 +74,22 @@ func Generate(w io.Writer) *ffcli.Command {
 				return errors.Wrap(err, "failed to unmarshal runner context json")
 			}
 
-			ghToken := os.Getenv("GITHUB_TOKEN")
-			if ghToken == "" {
-				return errors.New("GITHUB_TOKEN environment variable not set")
+			var env intoto.Provenancer
+			env = &github.Environment{
+				Context: &gh,
+				Runner:  &runner,
 			}
 
-			tc := github.NewOAuth2Client(ctx, func() string { return ghToken })
-			rc := github.NewReleaseClient(tc)
-			env := createEnvironment(gh, runner, *tagName, rc)
+			if *tagName != "" {
+				ghToken := os.Getenv("GITHUB_TOKEN")
+				if ghToken == "" {
+					return errors.New("GITHUB_TOKEN environment variable not set")
+				}
+				tc := github.NewOAuth2Client(ctx, func() string { return ghToken })
+				rc := github.NewReleaseClient(tc)
+				env = github.NewReleaseEnvironment(gh, runner, *tagName, rc)
+			}
+
 			stmt, err := env.GenerateProvenanceStatement(ctx, *artifactPath)
 			if err != nil {
 				return errors.Wrap(err, "failed to generate provenance")
@@ -111,16 +119,5 @@ func Generate(w io.Writer) *ffcli.Command {
 
 			return env.PersistProvenanceStatement(ctx, stmt, *outputPath)
 		},
-	}
-}
-
-func createEnvironment(gh github.Context, runner github.RunnerContext, tagName string, rc *github.ReleaseClient) intoto.Provenancer {
-	if tagName != "" {
-		return github.NewReleaseEnvironment(gh, runner, tagName, rc)
-	}
-
-	return &github.Environment{
-		Context: &gh,
-		Runner:  &runner,
 	}
 }

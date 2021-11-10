@@ -52,6 +52,9 @@ func TestFetchRelease(t *testing.T) {
 }
 
 func TestDownloadReleaseAssets(t *testing.T) {
+	if tokenRetriever() == "" {
+		t.Skip("skipping as GITHUB_TOKEN environment variable isn't set")
+	}
 	assert := assert.New(t)
 
 	ctx := context.Background()

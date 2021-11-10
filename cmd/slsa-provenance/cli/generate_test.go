@@ -436,6 +436,10 @@ func TestGenerateCliOptions(t *testing.T) {
 }
 
 func TestProvenenaceGitHubRelease(t *testing.T) {
+	githubToken := os.Getenv("GITHUB_TOKEN")
+	if githubToken == "" {
+		t.Skip("skipping as GITHUB_TOKEN environment variable isn't set")
+	}
 	assert := assert.New(t)
 
 	_, filename, _, _ := runtime.Caller(0)
@@ -445,7 +449,7 @@ func TestProvenenaceGitHubRelease(t *testing.T) {
 
 	ctx := context.Background()
 	owner, repo := "philips-labs", "slsa-provenance-action"
-	oauthClient := github.NewOAuth2Client(ctx, func() string { return os.Getenv("GITHUB_TOKEN") })
+	oauthClient := github.NewOAuth2Client(ctx, func() string { return githubToken })
 	client := github.NewReleaseClient(oauthClient)
 
 	releaseID, err := createGitHubRelease(
