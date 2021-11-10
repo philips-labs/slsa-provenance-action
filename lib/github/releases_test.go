@@ -153,6 +153,9 @@ func TestListReleaseAssets(t *testing.T) {
 		return
 	}
 	assert.Len(assets, 7)
+
+	_, err = client.ListReleaseAssets(ctx, owner, repo, 0, opt)
+	assert.EqualError(err, "failed to list release assets: GET https://api.github.com/repos/philips-labs/slsa-provenance-action/releases/0/assets?per_page=10: 404 Not Found []")
 }
 
 func TestListReleases(t *testing.T) {
@@ -173,6 +176,10 @@ func TestListReleases(t *testing.T) {
 		return
 	}
 	assert.GreaterOrEqual(len(releases), 2)
+
+	opt = gh.ListOptions{PerPage: 2}
+	_, err = client.ListReleases(ctx, owner, repo+"-fake", opt)
+	assert.EqualError(err, "failed to list releases: GET https://api.github.com/repos/philips-labs/slsa-provenance-action-fake/releases?per_page=2: 404 Not Found []")
 }
 
 func createReleaseClient(ctx context.Context) *github.ReleaseClient {
