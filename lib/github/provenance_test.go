@@ -396,7 +396,6 @@ func TestGenerateProvenanceFromGitHubReleaseErrors(t *testing.T) {
 }
 
 func assertInvocation(assert *assert.Assertions, recipe intoto.Invocation) {
-	assert.Equal(0, recipe.DefinedInMaterial)
 	assert.Equal("", recipe.ConfigSource.EntryPoint)
 	assert.Nil(recipe.Environment)
 	assert.Nil(recipe.Parameters)

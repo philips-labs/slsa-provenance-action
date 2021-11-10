@@ -78,13 +78,8 @@ func WithInvocation(buildType, entryPoint string, environment json.RawMessage, p
 				URI:        materials[0].URI,
 				Digest:     materials[0].Digest,
 			},
-			Parameters: parameters,
-			// Subject to change and simplify https://github.com/slsa-framework/slsa/issues/178
-			// Index in materials containing the recipe steps that are not implied by recipe.type. For example, if the recipe type were "make", then this would point to the source containing the Makefile, not the make program itself.
-			// Omit this field (or use null) if the recipe doesn't come from a material.
-			// TODO: What if there is more than one material?
-			DefinedInMaterial: 0,
-			Environment:       environment,
+			Parameters:  parameters,
+			Environment: environment,
 		}
 		s.Predicate.Materials = append(s.Predicate.Materials, materials...)
 	}
@@ -146,10 +141,9 @@ type Metadata struct {
 
 // Invocation Identifies the configuration used for the build. When combined with materials, this SHOULD fully describe the build, such that re-running this recipe results in bit-for-bit identical output (if the build is reproducible).
 type Invocation struct {
-	DefinedInMaterial int             `json:"definedInMaterial"`
-	ConfigSource      ConfigSource    `json:"configSource"`
-	Parameters        json.RawMessage `json:"parameters"`
-	Environment       json.RawMessage `json:"environment"`
+	ConfigSource ConfigSource    `json:"configSource"`
+	Parameters   json.RawMessage `json:"parameters"`
+	Environment  json.RawMessage `json:"environment"`
 }
 
 // ConfigSource Describes where the config file that kicked off the build came from.
