@@ -83,6 +83,7 @@ func assertStatement(assert *assert.Assertions, stmt *Statement, builderID, buil
 	assert.Equal(builderID, stmt.Predicate.Builder.ID)
 	assert.Equal(buildType, stmt.Predicate.BuildType)
 	assertConfigSource(assert, i.ConfigSource, stmt.Predicate.Materials)
+	assert.Nil(stmt.Predicate.BuildConfig)
 	assert.Equal(parameters, i.Parameters)
 	assert.Equal(0, i.DefinedInMaterial)
 	assert.Equal(material, stmt.Predicate.Materials)

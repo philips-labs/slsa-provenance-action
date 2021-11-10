@@ -112,11 +112,17 @@ type Subject struct {
 //
 // A predicate has a required predicateType (TypeURI) identifying what the predicate means, plus an optional predicate (object) containing additional, type-dependent parameters.
 type Predicate struct {
-	Builder    `json:"builder"`
-	BuildType  string `json:"buildType"`
-	Metadata   `json:"metadata"`
-	Invocation `json:"invocation"`
-	Materials  []Item `json:"materials"`
+	Builder     `json:"builder"`
+	BuildType   string `json:"buildType"`
+	Invocation  `json:"invocation"`
+	BuildConfig *BuildConfig `json:"build_config,omitempty"`
+	Metadata    `json:"metadata,omitempty"`
+	Materials   []Item `json:"materials"`
+}
+
+// BuildConfig Lists the steps in the build.
+// If invocation.sourceConfig is not available, buildConfig can be used to verify information about the build.
+type BuildConfig struct {
 }
 
 // Builder Identifies the entity that executed the recipe, which is trusted to have correctly performed the operation and populated this provenance.
