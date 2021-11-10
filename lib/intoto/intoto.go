@@ -8,7 +8,7 @@ import (
 
 const (
 	// SlsaPredicateType the predicate type for SLSA intoto statements
-	SlsaPredicateType = "https://slsa.dev/provenance/v0.1"
+	SlsaPredicateType = "https://slsa.dev/provenance/v0.2"
 	// StatementType the type of the intoto statement
 	StatementType = "https://in-toto.io/Statement/v0.1"
 )
@@ -73,8 +73,10 @@ func WithInvocation(buildType, entryPoint string, environment json.RawMessage, a
 	return func(s *Statement) {
 		s.Predicate.BuildType = buildType
 		s.Predicate.Invocation = Invocation{
-			EntryPoint: entryPoint,
-			Arguments:  arguments,
+			ConfigSource: ConfigSource{
+				EntryPoint: entryPoint,
+			},
+			Arguments: arguments,
 			// Subject to change and simplify https://github.com/slsa-framework/slsa/issues/178
 			// Index in materials containing the recipe steps that are not implied by recipe.type. For example, if the recipe type were "make", then this would point to the source containing the Makefile, not the make program itself.
 			// Omit this field (or use null) if the recipe doesn't come from a material.
@@ -137,9 +139,15 @@ type Metadata struct {
 // Invocation Identifies the configuration used for the build. When combined with materials, this SHOULD fully describe the build, such that re-running this recipe results in bit-for-bit identical output (if the build is reproducible).
 type Invocation struct {
 	DefinedInMaterial int             `json:"definedInMaterial"`
-	EntryPoint        string          `json:"entryPoint"`
+	ConfigSource      ConfigSource    `json:"configSource"`
 	Arguments         json.RawMessage `json:"arguments"`
 	Environment       json.RawMessage `json:"environment"`
+}
+
+// ConfigSource Describes where the config file that kicked off the build came from.
+// This is effectively a pointer to the source where buildConfig came from.
+type ConfigSource struct {
+	EntryPoint string `json:"entryPoint"`
 }
 
 // Completeness Indicates that the builder claims certain fields in this message to be complete.

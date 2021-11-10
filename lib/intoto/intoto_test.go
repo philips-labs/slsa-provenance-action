@@ -1,6 +1,8 @@
 package intoto
 
 import (
+	"encoding/json"
+	"fmt"
 	"testing"
 	"time"
 
@@ -64,20 +66,90 @@ func TestSLSAProvenanceStatement(t *testing.T) {
 		WithBuilder(builderID),
 		WithInvocation(
 			buildType,
-			"CI workflow",
+			"ci.yaml:build",
 			nil,
 			nil,
 			provenanceActionMaterial,
 		),
 	)
+	assertStatement(assert, stmt, builderID, buildType, provenanceActionMaterial)
+}
+
+func assertStatement(assert *assert.Assertions, stmt *Statement, builderID, buildType string, material []Item) {
 	i := stmt.Predicate.Invocation
 	assert.Equal(SlsaPredicateType, stmt.PredicateType)
 	assert.Equal(StatementType, stmt.Type)
 	assert.Len(stmt.Subject, 1)
 	assert.Equal(builderID, stmt.Predicate.Builder.ID)
 	assert.Equal(buildType, stmt.Predicate.BuildType)
-	assert.Equal("CI workflow", i.EntryPoint)
+	assert.Equal("ci.yaml:build", i.ConfigSource.EntryPoint)
 	assert.Nil(i.Arguments)
 	assert.Equal(0, i.DefinedInMaterial)
-	assert.Equal(provenanceActionMaterial, stmt.Predicate.Materials)
+	assert.Equal(material, stmt.Predicate.Materials)
+}
+
+func TestSLSAProvenanceStatementJSON(t *testing.T) {
+	assert := assert.New(t)
+
+	builderID := "https://github.com/philips-labs/slsa-provenance-action/Attestations/GitHubHostedActions@v1"
+	buildType := "https://github.com/Attestations/GitHubActionsWorkflow@v1"
+	materialJSON := `[
+		{
+		  "uri": "git+https://github.com/philips-labs/slsa-provenance-action",
+		  "digest": {
+			"sha1": "a3bc1c27230caa1cc3c27961f7e9cab43cd208dc"
+		  }
+		}
+	  ]`
+	var material []Item
+	err := json.Unmarshal([]byte(materialJSON), &material)
+	assert.NoError(err)
+
+	jsonStatement := fmt.Sprintf(`{
+		"_type": "https://in-toto.io/Statement/v0.1",
+		"subject": [
+		  {
+			"name": "salsa.txt",
+			"digest": {
+			  "sha256": "f8161d035cdf328c7bb124fce192cb90b603f34ca78d73e33b736b4f6bddf993"
+			}
+		  }
+		],
+		"predicateType": "https://slsa.dev/provenance/v0.2",
+		"predicate": {
+		  "builder": {
+			"id": "%s"
+		  },
+		  "buildType": "%s",
+		  "invocation": {
+			"configSource": {
+			  "entryPoint": "ci.yaml:build",
+			  "uri": "git+https://github.com/philips-labs/slsa-provenance-action",
+			  "digest": {
+				"sha1": "a3bc1c27230caa1cc3c27961f7e9cab43cd208dc"
+			  }
+			},
+			"parameters": null,
+			"environment": null
+		  },
+		  "buildConfig": null,
+		  "metadata": {
+			"buildInvocationId": "https://github.com/philips-labs/slsa-provenance-action/actions/runs/1303916967",
+			"buildFinishedOn": "2021-10-04T11:08:34Z",
+			"completeness": {
+			  "parameters": true,
+			  "environment": false,
+			  "materials": false
+			},
+			"reproducible": false
+		  },
+		  "materials": %s
+		}
+	  }
+`, builderID, buildType, materialJSON)
+
+	var stmt Statement
+	err = json.Unmarshal([]byte(jsonStatement), &stmt)
+	assert.NoError(err)
+	assertStatement(assert, &stmt, builderID, buildType, material)
 }
