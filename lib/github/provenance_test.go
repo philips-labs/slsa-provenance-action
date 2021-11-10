@@ -399,7 +399,7 @@ func assertInvocation(assert *assert.Assertions, recipe intoto.Invocation) {
 	assert.Equal(0, recipe.DefinedInMaterial)
 	assert.Equal("", recipe.ConfigSource.EntryPoint)
 	assert.Nil(recipe.Environment)
-	assert.Nil(recipe.Arguments)
+	assert.Nil(recipe.Parameters)
 }
 
 func assertMetadata(assert *assert.Assertions, meta intoto.Metadata, gh github.Context, repoURL string) {
@@ -407,7 +407,7 @@ func assertMetadata(assert *assert.Assertions, meta intoto.Metadata, gh github.C
 	assert.NoError(err)
 	assert.WithinDuration(time.Now().UTC(), bft, 1200*time.Millisecond)
 	assert.Equal(fmt.Sprintf("%s/%s/%s", repoURL, "actions/runs", gh.RunID), meta.BuildInvocationID)
-	assert.Equal(true, meta.Completeness.Arguments)
+	assert.Equal(true, meta.Completeness.Parameters)
 	assert.Equal(false, meta.Completeness.Environment)
 	assert.Equal(false, meta.Completeness.Materials)
 	assert.Equal(false, meta.Reproducible)

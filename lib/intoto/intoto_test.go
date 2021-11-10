@@ -51,7 +51,7 @@ func TestSLSAProvenanceStatement(t *testing.T) {
 	bft, err := time.Parse(time.RFC3339, m.BuildFinishedOn)
 	assert.NoError(err)
 	assert.WithinDuration(time.Now().UTC(), bft, 1200*time.Millisecond)
-	assert.Equal(Completeness{Arguments: true, Environment: false, Materials: false}, stmt.Predicate.Metadata.Completeness)
+	assert.Equal(Completeness{Parameters: true, Environment: false, Materials: false}, stmt.Predicate.Metadata.Completeness)
 	assert.False(m.Reproducible)
 
 	provenanceActionMaterial := []Item{
@@ -72,10 +72,10 @@ func TestSLSAProvenanceStatement(t *testing.T) {
 			provenanceActionMaterial,
 		),
 	)
-	assertStatement(assert, stmt, builderID, buildType, provenanceActionMaterial)
+	assertStatement(assert, stmt, builderID, buildType, provenanceActionMaterial, nil)
 }
 
-func assertStatement(assert *assert.Assertions, stmt *Statement, builderID, buildType string, material []Item) {
+func assertStatement(assert *assert.Assertions, stmt *Statement, builderID, buildType string, material []Item, parameters json.RawMessage) {
 	i := stmt.Predicate.Invocation
 	assert.Equal(SlsaPredicateType, stmt.PredicateType)
 	assert.Equal(StatementType, stmt.Type)
@@ -83,7 +83,7 @@ func assertStatement(assert *assert.Assertions, stmt *Statement, builderID, buil
 	assert.Equal(builderID, stmt.Predicate.Builder.ID)
 	assert.Equal(buildType, stmt.Predicate.BuildType)
 	assertConfigSource(assert, i.ConfigSource, stmt.Predicate.Materials)
-	assert.Nil(i.Arguments)
+	assert.Equal(parameters, i.Parameters)
 	assert.Equal(0, i.DefinedInMaterial)
 	assert.Equal(material, stmt.Predicate.Materials)
 }
@@ -107,6 +107,7 @@ func TestSLSAProvenanceStatementJSON(t *testing.T) {
 		  }
 		}
 	  ]`
+	parametersJSON := `{ "inputs": { "skip_integration": true } }`
 	var material []Item
 	err := json.Unmarshal([]byte(materialJSON), &material)
 	assert.NoError(err)
@@ -135,7 +136,7 @@ func TestSLSAProvenanceStatementJSON(t *testing.T) {
 				"sha1": "a3bc1c27230caa1cc3c27961f7e9cab43cd208dc"
 			  }
 			},
-			"parameters": null,
+			"parameters": %s,
 			"environment": null
 		  },
 		  "buildConfig": null,
@@ -152,10 +153,10 @@ func TestSLSAProvenanceStatementJSON(t *testing.T) {
 		  "materials": %s
 		}
 	  }
-`, builderID, buildType, materialJSON)
+`, builderID, buildType, parametersJSON, materialJSON)
 
 	var stmt Statement
 	err = json.Unmarshal([]byte(jsonStatement), &stmt)
 	assert.NoError(err)
-	assertStatement(assert, &stmt, builderID, buildType, material)
+	assertStatement(assert, &stmt, builderID, buildType, material, []byte(parametersJSON))
 }

@@ -57,7 +57,7 @@ func WithMetadata(buildInvocationID string) StatementOption {
 	return func(s *Statement) {
 		s.Predicate.Metadata = Metadata{
 			Completeness: Completeness{
-				Arguments:   true,
+				Parameters:  true,
 				Environment: false,
 				Materials:   false,
 			},
@@ -69,7 +69,7 @@ func WithMetadata(buildInvocationID string) StatementOption {
 }
 
 // WithInvocation sets the Predicate Invocation and Materials
-func WithInvocation(buildType, entryPoint string, environment json.RawMessage, arguments json.RawMessage, materials []Item) StatementOption {
+func WithInvocation(buildType, entryPoint string, environment json.RawMessage, parameters json.RawMessage, materials []Item) StatementOption {
 	return func(s *Statement) {
 		s.Predicate.BuildType = buildType
 		s.Predicate.Invocation = Invocation{
@@ -78,7 +78,7 @@ func WithInvocation(buildType, entryPoint string, environment json.RawMessage, a
 				URI:        materials[0].URI,
 				Digest:     materials[0].Digest,
 			},
-			Arguments: arguments,
+			Parameters: parameters,
 			// Subject to change and simplify https://github.com/slsa-framework/slsa/issues/178
 			// Index in materials containing the recipe steps that are not implied by recipe.type. For example, if the recipe type were "make", then this would point to the source containing the Makefile, not the make program itself.
 			// Omit this field (or use null) if the recipe doesn't come from a material.
@@ -142,7 +142,7 @@ type Metadata struct {
 type Invocation struct {
 	DefinedInMaterial int             `json:"definedInMaterial"`
 	ConfigSource      ConfigSource    `json:"configSource"`
-	Arguments         json.RawMessage `json:"arguments"`
+	Parameters        json.RawMessage `json:"parameters"`
 	Environment       json.RawMessage `json:"environment"`
 }
 
@@ -156,7 +156,7 @@ type ConfigSource struct {
 
 // Completeness Indicates that the builder claims certain fields in this message to be complete.
 type Completeness struct {
-	Arguments   bool `json:"arguments"`
+	Parameters  bool `json:"parameters"`
 	Environment bool `json:"environment"`
 	Materials   bool `json:"materials"`
 }
