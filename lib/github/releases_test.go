@@ -43,7 +43,7 @@ func TestFetchRelease(t *testing.T) {
 	client := createReleaseClient(ctx)
 	release, err := client.FetchRelease(ctx, owner, repo, "v0.1.1")
 
-	if !assert.NoError(err) && assert.Nil(release) {
+	if !assert.NoError(err) && !assert.NotNil(release) {
 		return
 	}
 	assert.Equal(int64(51517953), release.GetID())
@@ -59,7 +59,7 @@ func TestDownloadReleaseAssets(t *testing.T) {
 	client := createReleaseClient(ctx)
 
 	release, err := client.FetchRelease(ctx, owner, repo, "v0.1.1")
-	if !assert.NoError(err) && assert.Nil(release) {
+	if !assert.NoError(err) || !assert.NotNil(release) {
 		return
 	}
 	assert.Equal(int64(51517953), release.GetID())
@@ -117,18 +117,18 @@ func TestAddProvenanceToRelease(t *testing.T) {
 	}()
 
 	provenance, err := os.Open(provenanceFile)
-	if !assert.NoError(err) && assert.Nil(provenance) {
+	if !assert.NoError(err) || !assert.NotNil(provenance) {
 		return
 	}
 
 	stat, err := provenance.Stat()
-	if !assert.NoError(err) && assert.Nil(stat) {
+	if !assert.NoError(err) || !assert.NotNil(stat) {
 		return
 	}
 	assert.Equal("example_provenance.json", stat.Name())
 
 	asset, err := client.AddProvenanceToRelease(ctx, owner, repo, releaseId, provenance)
-	if !assert.NoError(err) && assert.Nil(asset) {
+	if !assert.NoError(err) || !assert.NotNil(asset) {
 		return
 	}
 	assert.Equal(stat.Name(), asset.GetName())
@@ -153,6 +153,9 @@ func TestListReleaseAssets(t *testing.T) {
 		return
 	}
 	assert.Len(assets, 7)
+
+	_, err = client.ListReleaseAssets(ctx, owner, repo, 0, opt)
+	assert.EqualError(err, "failed to list release assets: GET https://api.github.com/repos/philips-labs/slsa-provenance-action/releases/0/assets?per_page=10: 404 Not Found []")
 }
 
 func TestListReleases(t *testing.T) {
@@ -173,6 +176,10 @@ func TestListReleases(t *testing.T) {
 		return
 	}
 	assert.GreaterOrEqual(len(releases), 2)
+
+	opt = gh.ListOptions{PerPage: 2}
+	_, err = client.ListReleases(ctx, owner, repo+"-fake", opt)
+	assert.EqualError(err, "failed to list releases: GET https://api.github.com/repos/philips-labs/slsa-provenance-action-fake/releases?per_page=2: 404 Not Found []")
 }
 
 func createReleaseClient(ctx context.Context) *github.ReleaseClient {
