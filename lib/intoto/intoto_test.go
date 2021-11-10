@@ -82,10 +82,16 @@ func assertStatement(assert *assert.Assertions, stmt *Statement, builderID, buil
 	assert.Len(stmt.Subject, 1)
 	assert.Equal(builderID, stmt.Predicate.Builder.ID)
 	assert.Equal(buildType, stmt.Predicate.BuildType)
-	assert.Equal("ci.yaml:build", i.ConfigSource.EntryPoint)
+	assertConfigSource(assert, i.ConfigSource, stmt.Predicate.Materials)
 	assert.Nil(i.Arguments)
 	assert.Equal(0, i.DefinedInMaterial)
 	assert.Equal(material, stmt.Predicate.Materials)
+}
+
+func assertConfigSource(assert *assert.Assertions, cs ConfigSource, materials []Item) {
+	assert.Equal("ci.yaml:build", cs.EntryPoint)
+	assert.Equal(materials[0].URI, cs.URI)
+	assert.Equal(materials[0].Digest, cs.Digest)
 }
 
 func TestSLSAProvenanceStatementJSON(t *testing.T) {

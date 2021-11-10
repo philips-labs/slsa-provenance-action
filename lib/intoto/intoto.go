@@ -75,6 +75,8 @@ func WithInvocation(buildType, entryPoint string, environment json.RawMessage, a
 		s.Predicate.Invocation = Invocation{
 			ConfigSource: ConfigSource{
 				EntryPoint: entryPoint,
+				URI:        materials[0].URI,
+				Digest:     materials[0].Digest,
 			},
 			Arguments: arguments,
 			// Subject to change and simplify https://github.com/slsa-framework/slsa/issues/178
@@ -147,7 +149,9 @@ type Invocation struct {
 // ConfigSource Describes where the config file that kicked off the build came from.
 // This is effectively a pointer to the source where buildConfig came from.
 type ConfigSource struct {
-	EntryPoint string `json:"entryPoint"`
+	EntryPoint string    `json:"entryPoint"`
+	URI        string    `json:"uri,omitempty"`
+	Digest     DigestSet `json:"digest,omitempty"`
 }
 
 // Completeness Indicates that the builder claims certain fields in this message to be complete.
