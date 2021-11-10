@@ -100,63 +100,79 @@ func TestSLSAProvenanceStatementJSON(t *testing.T) {
 	builderID := "https://github.com/philips-labs/slsa-provenance-action/Attestations/GitHubHostedActions@v1"
 	buildType := "https://github.com/Attestations/GitHubActionsWorkflow@v1"
 	materialJSON := `[
-		{
-		  "uri": "git+https://github.com/philips-labs/slsa-provenance-action",
-		  "digest": {
-			"sha1": "a3bc1c27230caa1cc3c27961f7e9cab43cd208dc"
-		  }
-		}
-	  ]`
-	parametersJSON := `{ "inputs": { "skip_integration": true } }`
+			{
+				"uri": "git+https://github.com/philips-labs/slsa-provenance-action",
+				"digest": {
+					"sha1": "a3bc1c27230caa1cc3c27961f7e9cab43cd208dc"
+				}
+			}
+		]`
+	parametersJSON := `{
+				"inputs": {
+					"skip_integration": true
+				}
+			}`
+	buildFinishedOn := time.Now().UTC().Format(time.RFC3339)
+
 	var material []Item
 	err := json.Unmarshal([]byte(materialJSON), &material)
 	assert.NoError(err)
 
 	jsonStatement := fmt.Sprintf(`{
-		"_type": "https://in-toto.io/Statement/v0.1",
-		"subject": [
-		  {
+	"_type": "https://in-toto.io/Statement/v0.1",
+	"subject": [
+		{
 			"name": "salsa.txt",
 			"digest": {
-			  "sha256": "f8161d035cdf328c7bb124fce192cb90b603f34ca78d73e33b736b4f6bddf993"
+				"sha256": "f8161d035cdf328c7bb124fce192cb90b603f34ca78d73e33b736b4f6bddf993"
 			}
-		  }
-		],
-		"predicateType": "https://slsa.dev/provenance/v0.2",
-		"predicate": {
-		  "builder": {
+		}
+	],
+	"predicateType": "https://slsa.dev/provenance/v0.2",
+	"predicate": {
+		"builder": {
 			"id": "%s"
-		  },
-		  "buildType": "%s",
-		  "invocation": {
+		},
+		"buildType": "%s",
+		"invocation": {
 			"configSource": {
-			  "entryPoint": "ci.yaml:build",
-			  "uri": "git+https://github.com/philips-labs/slsa-provenance-action",
-			  "digest": {
-				"sha1": "a3bc1c27230caa1cc3c27961f7e9cab43cd208dc"
-			  }
+				"entryPoint": "ci.yaml:build",
+				"uri": "git+https://github.com/philips-labs/slsa-provenance-action",
+				"digest": {
+					"sha1": "a3bc1c27230caa1cc3c27961f7e9cab43cd208dc"
+				}
 			},
 			"parameters": %s,
 			"environment": null
-		  },
-		  "buildConfig": null,
-		  "metadata": {
+		},
+		"metadata": {
 			"buildInvocationId": "https://github.com/philips-labs/slsa-provenance-action/actions/runs/1303916967",
-			"buildFinishedOn": "2021-10-04T11:08:34Z",
+			"buildFinishedOn": "%s",
 			"completeness": {
-			  "parameters": true,
-			  "environment": false,
-			  "materials": false
+				"parameters": true,
+				"environment": false,
+				"materials": false
 			},
 			"reproducible": false
-		  },
-		  "materials": %s
-		}
-	  }
-`, builderID, buildType, parametersJSON, materialJSON)
+		},
+		"materials": %s
+	}
+}`, builderID, buildType, parametersJSON, buildFinishedOn, materialJSON)
 
 	var stmt Statement
 	err = json.Unmarshal([]byte(jsonStatement), &stmt)
 	assert.NoError(err)
 	assertStatement(assert, &stmt, builderID, buildType, material, []byte(parametersJSON))
+
+	newStmt := SLSAProvenanceStatement(
+		WithSubject([]Subject{{Name: "salsa.txt", Digest: DigestSet{"sha256": "f8161d035cdf328c7bb124fce192cb90b603f34ca78d73e33b736b4f6bddf993"}}}),
+		WithBuilder(builderID),
+		WithMetadata("https://github.com/philips-labs/slsa-provenance-action/actions/runs/1303916967"),
+		WithInvocation(buildType, "ci.yaml:build", nil, []byte(parametersJSON), material),
+	)
+
+	newStmtJSON, err := json.MarshalIndent(newStmt, "", "\t")
+	assert.NoError(err)
+
+	assert.Equal(jsonStatement, string(newStmtJSON))
 }

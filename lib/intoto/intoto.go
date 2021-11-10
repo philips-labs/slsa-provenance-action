@@ -133,10 +133,10 @@ type Builder struct {
 // Metadata Other properties of the build.
 type Metadata struct {
 	BuildInvocationID string `json:"buildInvocationId"`
-	Completeness      `json:"completeness"`
-	Reproducible      bool `json:"reproducible"`
 	// BuildStartedOn not defined as it's not available from a GitHub Action.
 	BuildFinishedOn string `json:"buildFinishedOn"`
+	Completeness    `json:"completeness"`
+	Reproducible    bool `json:"reproducible"`
 }
 
 // Invocation Identifies the configuration used for the build. When combined with materials, this SHOULD fully describe the build, such that re-running this recipe results in bit-for-bit identical output (if the build is reproducible).
