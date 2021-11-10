@@ -9,13 +9,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const (
+	repoURI           = "https://github.com/philips-labs/slsa-provenance-action"
+	builderID         = repoURI + "/Attestations/GitHubHostedActions@v1"
+	buildInvocationID = repoURI + "/actions/runs/123498765"
+	buildType         = "https://github.com/Attestations/GitHubActionsWorkflow@v1"
+)
+
 func TestSLSAProvenanceStatement(t *testing.T) {
 	assert := assert.New(t)
-
-	repoURI := "https://github.com/philips-labs/slsa-provenance-action"
-	builderID := repoURI + "/Attestations/GitHubHostedActions@v1"
-	buildInvocationID := repoURI + "/actions/runs/123498765"
-	buildType := "https://github.com/Attestations/GitHubActionsWorkflow@v1"
 
 	stmt := SLSAProvenanceStatement()
 	assert.Equal(SlsaPredicateType, stmt.PredicateType)
@@ -62,8 +64,9 @@ func TestSLSAProvenanceStatement(t *testing.T) {
 	}
 
 	stmt = SLSAProvenanceStatement(
-		WithSubject(make([]Subject, 1)),
+		WithSubject([]Subject{{Name: "salsa.txt", Digest: DigestSet{"sha256": "f8161d035cdf328c7bb124fce192cb90b603f34ca78d73e33b736b4f6bddf993"}}}),
 		WithBuilder(builderID),
+		WithMetadata("https://github.com/philips-labs/slsa-provenance-action/actions/runs/1303916967"),
 		WithInvocation(
 			buildType,
 			"ci.yaml:build",
@@ -75,30 +78,9 @@ func TestSLSAProvenanceStatement(t *testing.T) {
 	assertStatement(assert, stmt, builderID, buildType, provenanceActionMaterial, nil)
 }
 
-func assertStatement(assert *assert.Assertions, stmt *Statement, builderID, buildType string, material []Item, parameters json.RawMessage) {
-	i := stmt.Predicate.Invocation
-	assert.Equal(SlsaPredicateType, stmt.PredicateType)
-	assert.Equal(StatementType, stmt.Type)
-	assert.Len(stmt.Subject, 1)
-	assert.Equal(builderID, stmt.Predicate.Builder.ID)
-	assert.Equal(buildType, stmt.Predicate.BuildType)
-	assertConfigSource(assert, i.ConfigSource, stmt.Predicate.Materials)
-	assert.Nil(stmt.Predicate.BuildConfig)
-	assert.Equal(parameters, i.Parameters)
-	assert.Equal(material, stmt.Predicate.Materials)
-}
-
-func assertConfigSource(assert *assert.Assertions, cs ConfigSource, materials []Item) {
-	assert.Equal("ci.yaml:build", cs.EntryPoint)
-	assert.Equal(materials[0].URI, cs.URI)
-	assert.Equal(materials[0].Digest, cs.Digest)
-}
-
 func TestSLSAProvenanceStatementJSON(t *testing.T) {
 	assert := assert.New(t)
 
-	builderID := "https://github.com/philips-labs/slsa-provenance-action/Attestations/GitHubHostedActions@v1"
-	buildType := "https://github.com/Attestations/GitHubActionsWorkflow@v1"
 	materialJSON := `[
 			{
 				"uri": "git+https://github.com/philips-labs/slsa-provenance-action",
@@ -175,4 +157,36 @@ func TestSLSAProvenanceStatementJSON(t *testing.T) {
 	assert.NoError(err)
 
 	assert.Equal(jsonStatement, string(newStmtJSON))
+}
+
+func assertStatement(assert *assert.Assertions, stmt *Statement, builderID, buildType string, material []Item, parameters json.RawMessage) {
+	i := stmt.Predicate.Invocation
+	assert.Equal(SlsaPredicateType, stmt.PredicateType)
+	assert.Equal(StatementType, stmt.Type)
+	assert.Len(stmt.Subject, 1)
+	assert.Equal(Subject{Name: "salsa.txt", Digest: DigestSet{"sha256": "f8161d035cdf328c7bb124fce192cb90b603f34ca78d73e33b736b4f6bddf993"}}, stmt.Subject[0])
+	assert.Equal(builderID, stmt.Predicate.Builder.ID)
+	assert.Equal(buildType, stmt.Predicate.BuildType)
+	assertConfigSource(assert, i.ConfigSource, stmt.Predicate.Materials)
+	assert.Nil(stmt.Predicate.BuildConfig)
+	assert.Equal(parameters, i.Parameters)
+	assert.Equal(material, stmt.Predicate.Materials)
+	assertMetadata(assert, stmt.Predicate.Metadata)
+}
+
+func assertConfigSource(assert *assert.Assertions, cs ConfigSource, materials []Item) {
+	assert.Equal("ci.yaml:build", cs.EntryPoint)
+	assert.Equal(materials[0].URI, cs.URI)
+	assert.Equal(materials[0].Digest, cs.Digest)
+}
+
+func assertMetadata(assert *assert.Assertions, md Metadata) {
+	assert.Equal("https://github.com/philips-labs/slsa-provenance-action/actions/runs/1303916967", md.BuildInvocationID)
+	bft, err := time.Parse(time.RFC3339, md.BuildFinishedOn)
+	assert.NoError(err)
+	assert.WithinDuration(time.Now().UTC(), bft, 1200*time.Millisecond)
+	assert.True(md.Completeness.Parameters)
+	assert.False(md.Completeness.Materials)
+	assert.False(md.Completeness.Environment)
+	assert.False(md.Reproducible)
 }
