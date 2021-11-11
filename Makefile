@@ -84,3 +84,16 @@ release: $(GO_PATH)/bin/goreleaser ## creates a release using goreleaser
 .PHONY: release-vars
 release-vars: ## print the release variables for goreleaser
 	@echo export LDFLAGS=\"$(LDFLAGS)\"
+
+.PHONY: gh-release
+gh-release: ## Creates a new release by creating a new tag and pushing it
+	git stash
+	sed -i 's/$(OLD_VERSION)/$(NEW_VERSION)/g' .github/workflows/*.yaml
+	sed -i 's/$(OLD_VERSION)/$(NEW_VERSION)/g' *.yaml *.md
+	git add .
+	git commit -s -m "$(DESCRIPTION)"
+	git tag -sam "$(DESCRIPTION)" $(NEW_VERSION)
+	git push $(NEW_VERSION)
+	@echo ATTENTION: MANUAL ACTION REQUIRED!! -- Wait for the release workflow to finish, then push the main branch using git push
+	git stash pop
+
