@@ -1,20 +1,31 @@
-# Automated release procedure
+# Release procedures
 
-A make script has been created to automate the manual procedure.
-Execute the following command:
+## Automated release procedure
+
+To make a new release you can make use of the following `make` task.
+
 ```bash
 make gh-release NEW_VERSION=v0.6.0 OLD_VERSION=v0.5.0 DESCRIPTION="A test release to see how it works"
 ```
 
-`NEW_VERSION` is the version that you want to release.
-`OLD_VERSION` is the previous version you wish to overwrite in the markdown and yaml files.
-`DESCRIPTION` is the description to use in the annotation of the tag and commit description.
+`NEW_VERSION` the version that you want to release.
+`OLD_VERSION` the current version you wish to replace in the markdown and yaml files.
+`DESCRIPTION` the annotation used when tagging the release.
 
-# Manual release procedure
+### ⚠ Important alert for MacOS users ⚠
+
+On MacOS `sed` has different behaviour and therefore doesn't work out of the box.
+A workaround to make it work is to install gnu-sed and alias it in your bashrc/zshrc:
+
+```bash
+brew install gnu-sed
+echo "alias sed=gsed" >> ~/.zshrc
+```
+
+## Manual release procedure
 
 1. Upgrade version number in all repository files, find & replace previous version number with new version number.
 1. Commit the changed files.
 1. Tag the new commit using `git tag -sam "What is this release about?" v0.1.0`.
 1. Push the tag to remote using `git push v0.1.0`
 1. Wait for the release workflow to finish, then push the main branch using `git push`
-
