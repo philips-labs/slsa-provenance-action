@@ -84,3 +84,21 @@ release: $(GO_PATH)/bin/goreleaser ## creates a release using goreleaser
 .PHONY: release-vars
 release-vars: ## print the release variables for goreleaser
 	@echo export LDFLAGS=\"$(LDFLAGS)\"
+
+.PHONY: gh-release
+gh-release: ## Creates a new release by creating a new tag and pushing it
+	@git stash -u
+	@echo Bumping $(OLD_VERSION) to $(NEW_VERSION)…
+	@sed -i 's/$(OLD_VERSION)/$(NEW_VERSION)/g' .github/workflows/*.yaml *.yaml *.md
+	@git add .
+	@git commit -s -m "Bump $(OLD_VERSION) to $(NEW_VERSION) for release"
+	@git tag -sam "$(DESCRIPTION)" $(NEW_VERSION)
+	@git push $(NEW_VERSION)
+	@echo ATTENTION: MANUAL ACTION REQUIRED!! -- Wait for the release workflow to finish
+	@echo
+	@echo Check status here https://github.com/philips-labs/slsa-provenance-action/actions/workflows/ci.yaml
+	@echo
+	@echo Once finished, push the main branch using 'git push'
+	@echo
+	@git stash pop
+
