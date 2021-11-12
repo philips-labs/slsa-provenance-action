@@ -12,6 +12,9 @@ make gh-release NEW_VERSION=v0.6.0 OLD_VERSION=v0.5.0 DESCRIPTION="A test releas
 `OLD_VERSION` the current version you wish to replace in the markdown and yaml files.
 `DESCRIPTION` the annotation used when tagging the release.
 
+Visit <https://github.com/philips-labs/slsa-provenance-action/releases>.
+Edit the release and save it to publish to GitHub Marketplace.
+
 ### ⚠ Important alert for MacOS users ⚠
 
 On MacOS `sed` has different behaviour and therefore doesn't work out of the box.
@@ -27,5 +30,7 @@ echo "alias sed=gsed" >> ~/.zshrc
 1. Upgrade version number in all repository files, find & replace previous version number with new version number.
 1. Commit the changed files.
 1. Tag the new commit using `git tag -sam "What is this release about?" v0.1.0`.
-1. Push the tag to remote using `git push v0.1.0`
+1. Push the tag to remote using `git push origin v0.1.0`
 1. Wait for the release workflow to finish, then push the main branch using `git push`
+1. Visit <https://github.com/philips-labs/slsa-provenance-action/releases>.
+1. Edit the release and save it to publish to GitHub Marketplace.
