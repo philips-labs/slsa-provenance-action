@@ -8,7 +8,7 @@ import (
 
 const (
 	// SlsaPredicateType the predicate type for SLSA intoto statements
-	SlsaPredicateType = "https://slsa.dev/provenance/v0.1"
+	SlsaPredicateType = "https://slsa.dev/provenance/v0.2"
 	// StatementType the type of the intoto statement
 	StatementType = "https://in-toto.io/Statement/v0.1"
 )
@@ -57,7 +57,7 @@ func WithMetadata(buildInvocationID string) StatementOption {
 	return func(s *Statement) {
 		s.Predicate.Metadata = Metadata{
 			Completeness: Completeness{
-				Arguments:   true,
+				Parameters:  true,
 				Environment: false,
 				Materials:   false,
 			},
@@ -68,19 +68,18 @@ func WithMetadata(buildInvocationID string) StatementOption {
 	}
 }
 
-// WithRecipe sets the Predicate Recipe and Materials
-func WithRecipe(predicateType string, entryPoint string, environment json.RawMessage, arguments json.RawMessage, materials []Item) StatementOption {
+// WithInvocation sets the Predicate Invocation and Materials
+func WithInvocation(buildType, entryPoint string, environment json.RawMessage, parameters json.RawMessage, materials []Item) StatementOption {
 	return func(s *Statement) {
-		s.Predicate.Recipe = Recipe{
-			Type:       predicateType,
-			EntryPoint: entryPoint,
-			Arguments:  arguments,
-			// Subject to change and simplify https://github.com/slsa-framework/slsa/issues/178
-			// Index in materials containing the recipe steps that are not implied by recipe.type. For example, if the recipe type were "make", then this would point to the source containing the Makefile, not the make program itself.
-			// Omit this field (or use null) if the recipe doesn't come from a material.
-			// TODO: What if there is more than one material?
-			DefinedInMaterial: 0,
-			Environment:       environment,
+		s.Predicate.BuildType = buildType
+		s.Predicate.Invocation = Invocation{
+			ConfigSource: ConfigSource{
+				EntryPoint: entryPoint,
+				URI:        materials[0].URI,
+				Digest:     materials[0].Digest,
+			},
+			Parameters:  parameters,
+			Environment: environment,
 		}
 		s.Predicate.Materials = append(s.Predicate.Materials, materials...)
 	}
@@ -108,10 +107,17 @@ type Subject struct {
 //
 // A predicate has a required predicateType (TypeURI) identifying what the predicate means, plus an optional predicate (object) containing additional, type-dependent parameters.
 type Predicate struct {
-	Builder   `json:"builder"`
-	Metadata  `json:"metadata"`
-	Recipe    `json:"recipe"`
-	Materials []Item `json:"materials"`
+	Builder     `json:"builder"`
+	BuildType   string `json:"buildType"`
+	Invocation  `json:"invocation"`
+	BuildConfig *BuildConfig `json:"build_config,omitempty"`
+	Metadata    `json:"metadata,omitempty"`
+	Materials   []Item `json:"materials"`
+}
+
+// BuildConfig Lists the steps in the build.
+// If invocation.sourceConfig is not available, buildConfig can be used to verify information about the build.
+type BuildConfig struct {
 }
 
 // Builder Identifies the entity that executed the recipe, which is trusted to have correctly performed the operation and populated this provenance.
@@ -127,24 +133,30 @@ type Builder struct {
 // Metadata Other properties of the build.
 type Metadata struct {
 	BuildInvocationID string `json:"buildInvocationId"`
-	Completeness      `json:"completeness"`
-	Reproducible      bool `json:"reproducible"`
 	// BuildStartedOn not defined as it's not available from a GitHub Action.
 	BuildFinishedOn string `json:"buildFinishedOn"`
+	Completeness    `json:"completeness"`
+	Reproducible    bool `json:"reproducible"`
 }
 
-// Recipe Identifies the configuration used for the build. When combined with materials, this SHOULD fully describe the build, such that re-running this recipe results in bit-for-bit identical output (if the build is reproducible).
-type Recipe struct {
-	Type              string          `json:"type"`
-	DefinedInMaterial int             `json:"definedInMaterial"`
-	EntryPoint        string          `json:"entryPoint"`
-	Arguments         json.RawMessage `json:"arguments"`
-	Environment       json.RawMessage `json:"environment"`
+// Invocation Identifies the configuration used for the build. When combined with materials, this SHOULD fully describe the build, such that re-running this recipe results in bit-for-bit identical output (if the build is reproducible).
+type Invocation struct {
+	ConfigSource ConfigSource    `json:"configSource"`
+	Parameters   json.RawMessage `json:"parameters"`
+	Environment  json.RawMessage `json:"environment"`
+}
+
+// ConfigSource Describes where the config file that kicked off the build came from.
+// This is effectively a pointer to the source where buildConfig came from.
+type ConfigSource struct {
+	EntryPoint string    `json:"entryPoint"`
+	URI        string    `json:"uri,omitempty"`
+	Digest     DigestSet `json:"digest,omitempty"`
 }
 
 // Completeness Indicates that the builder claims certain fields in this message to be complete.
 type Completeness struct {
-	Arguments   bool `json:"arguments"`
+	Parameters  bool `json:"parameters"`
 	Environment bool `json:"environment"`
 	Materials   bool `json:"materials"`
 }

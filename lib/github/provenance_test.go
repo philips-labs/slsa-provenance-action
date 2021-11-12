@@ -271,12 +271,13 @@ func TestGenerateProvenance(t *testing.T) {
 	assert.Equal(intoto.StatementType, stmt.Type)
 
 	predicate := stmt.Predicate
+	assert.Equal(github.BuildType, predicate.BuildType)
 	assert.Equal(fmt.Sprintf("%s%s", repoURL, github.HostedIDSuffix), predicate.ID)
 	assert.Equal(materials, predicate.Materials)
 	assert.Equal(fmt.Sprintf("%s%s", repoURL, github.HostedIDSuffix), predicate.Builder.ID)
 
 	assertMetadata(assert, predicate.Metadata, gh, repoURL)
-	assertRecipe(assert, predicate.Recipe)
+	assertInvocation(assert, predicate.Invocation)
 }
 
 func TestGenerateProvenanceFromGitHubRelease(t *testing.T) {
@@ -351,9 +352,10 @@ func TestGenerateProvenanceFromGitHubRelease(t *testing.T) {
 	assert.Equal(fmt.Sprintf("%s%s", repoURL, github.HostedIDSuffix), predicate.ID)
 	assert.Equal(materials, predicate.Materials)
 	assert.Equal(fmt.Sprintf("%s%s", repoURL, github.HostedIDSuffix), predicate.Builder.ID)
+	assert.Equal(github.BuildType, predicate.BuildType)
 
 	assertMetadata(assert, predicate.Metadata, ghContext, repoURL)
-	assertRecipe(assert, predicate.Recipe)
+	assertInvocation(assert, predicate.Invocation)
 
 	stmtPath := path.Join(artifactPath, "build.provenance")
 
@@ -393,12 +395,10 @@ func TestGenerateProvenanceFromGitHubReleaseErrors(t *testing.T) {
 	assert.Nil(stmt)
 }
 
-func assertRecipe(assert *assert.Assertions, recipe intoto.Recipe) {
-	assert.Equal(github.RecipeType, recipe.Type)
-	assert.Equal(0, recipe.DefinedInMaterial)
-	assert.Equal("", recipe.EntryPoint)
+func assertInvocation(assert *assert.Assertions, recipe intoto.Invocation) {
+	assert.Equal("", recipe.ConfigSource.EntryPoint)
 	assert.Nil(recipe.Environment)
-	assert.Nil(recipe.Arguments)
+	assert.Nil(recipe.Parameters)
 }
 
 func assertMetadata(assert *assert.Assertions, meta intoto.Metadata, gh github.Context, repoURL string) {
@@ -406,7 +406,7 @@ func assertMetadata(assert *assert.Assertions, meta intoto.Metadata, gh github.C
 	assert.NoError(err)
 	assert.WithinDuration(time.Now().UTC(), bft, 1200*time.Millisecond)
 	assert.Equal(fmt.Sprintf("%s/%s/%s", repoURL, "actions/runs", gh.RunID), meta.BuildInvocationID)
-	assert.Equal(true, meta.Completeness.Arguments)
+	assert.Equal(true, meta.Completeness.Parameters)
 	assert.Equal(false, meta.Completeness.Environment)
 	assert.Equal(false, meta.Completeness.Materials)
 	assert.Equal(false, meta.Reproducible)

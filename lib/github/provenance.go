@@ -38,8 +38,8 @@ func (e *Environment) GenerateProvenanceStatement(ctx context.Context, artifactP
 		intoto.WithMetadata(fmt.Sprintf("%s/actions/runs/%s", repoURI, e.Context.RunID)),
 		// NOTE: This is inexact as multiple workflows in a repo can have the same name.
 		// See https://github.com/github/feedback/discussions/4188
-		intoto.WithRecipe(
-			RecipeType,
+		intoto.WithInvocation(
+			BuildType,
 			e.Context.Workflow,
 			nil,
 			event.Inputs,
