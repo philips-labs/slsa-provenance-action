@@ -13,7 +13,7 @@ func TestGenerate(t *testing.T) {
 
 	cmd := cli.Generate()
 
-	assert.Len(cmd.Commands(), 2)
+	assert.Len(cmd.Commands(), 3)
 	output, err := executeCommand(cmd)
 
 	assert.NoError(err)

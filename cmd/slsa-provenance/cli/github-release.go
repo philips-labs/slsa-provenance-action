@@ -9,6 +9,7 @@ import (
 
 	"github.com/philips-labs/slsa-provenance-action/cmd/slsa-provenance/cli/options"
 	"github.com/philips-labs/slsa-provenance-action/lib/github"
+	"github.com/philips-labs/slsa-provenance-action/lib/intoto"
 	"github.com/philips-labs/slsa-provenance-action/lib/transport"
 )
 
@@ -59,9 +60,10 @@ func GitHubRelease() *cobra.Command {
 				Writer:       cmd.OutOrStdout(),
 			}
 			rc := github.NewReleaseClient(tc)
-			env := github.NewReleaseEnvironment(*gh, *runner, tagName, rc)
+			env := github.NewReleaseEnvironment(*gh, *runner, tagName, rc, artifactPath)
 
-			stmt, err := env.GenerateProvenanceStatement(cmd.Context(), artifactPath, materials...)
+			subjecter := intoto.NewFilePathSubjecter(artifactPath)
+			stmt, err := env.GenerateProvenanceStatement(cmd.Context(), subjecter, materials...)
 			if err != nil {
 				return fmt.Errorf("failed to generate provenance: %w", err)
 			}
