@@ -1,6 +1,10 @@
 package cli_test
 
 import (
+	"bytes"
+	"crypto/ed25519"
+	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
@@ -9,6 +13,8 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/sigstore/sigstore/pkg/signature"
+	"github.com/sigstore/sigstore/pkg/signature/dsse"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/philips-labs/slsa-provenance-action/cmd/slsa-provenance/cli"
@@ -46,8 +52,8 @@ const (
 			"type": "https://github.com/Attestations/GitHubActionsWorkflow@v1",
 			"definedInMaterial": 0,
 			"entryPoint": "Integration test file provenance",
-			"arguments": null,
-			"environment": null
+			"arguments": {},
+			"environment": {}
 		  },
 		  "materials": [
 			{
@@ -206,7 +212,67 @@ func TestSignCliOptions(t *testing.T) {
 }
 
 func TestSignSignature(t *testing.T) {
-	// TODO check if we indeed generate a good signature
+	assert := assert.New(t)
+	_, filename, _, _ := runtime.Caller(0)
+	rootDir := path.Join(path.Dir(filename), "../../..")
+	provenanceFile := path.Join(rootDir, "bin/unittest.provenance")
+	key := "0305334e381af78f141cb666f6199f57bc3495335a256a95bd2a55bf546663f6"
+	outFile := path.Join(rootDir, "bin/provenance.signed")
+
+	ioutil.WriteFile(provenanceFile, []byte(provenanceData), 0644)
+	defer (func() {
+		_ = os.Remove(provenanceFile)
+		_ = os.Remove(outFile)
+	})()
+
+	_, err := executeCommand(cli.Sign(),
+		"--provenance-path",
+		provenanceFile,
+		"--key",
+		key,
+		"--output-path",
+		outFile,
+	)
+	assert.NoError(err)
+	if err != nil {
+		t.FailNow()
+	}
+
+	var seed []byte
+	seed, err = hex.DecodeString(key)
+	assert.NoError(err)
+	privkey := ed25519.NewKeyFromSeed(seed)
+	var verifier *signature.ED25519SignerVerifier
+	verifier, err = signature.LoadED25519SignerVerifier(privkey)
+	assert.NoError(err)
+	wsv := dsse.WrapSignerVerifier(verifier, intoto.InTotoPayloadType)
+
+	var message []byte
+	message, err = ioutil.ReadFile(outFile)
+	assert.NoError(err)
+
+	t.Run("Verify signature", func(t *testing.T) {
+		err = wsv.VerifySignature(bytes.NewReader(message), nil)
+		assert.NoError(err)
+	})
+
+	t.Run("Test if signed payload matches original", func(t *testing.T) {
+		var env intoto.Envelope
+		err = json.Unmarshal(message, &env)
+		assert.NoError(err)
+
+		var tmp []byte
+		tmp, err = base64.StdEncoding.DecodeString(env.Payload)
+		assert.NoError(err)
+		var prov intoto.Statement
+		err = json.Unmarshal(tmp, &prov)
+		assert.NoError(err)
+		var expected intoto.Statement
+		err = json.Unmarshal([]byte(provenanceData), &expected)
+		assert.NoError(err)
+
+		assert.EqualValues(expected, prov)
+	})
 }
 
 func BenchmarkSign(b *testing.B) {
