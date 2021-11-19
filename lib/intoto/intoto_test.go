@@ -144,13 +144,16 @@ func TestSLSAProvenanceStatementJSON(t *testing.T) {
 	var stmt Statement
 	err = json.Unmarshal([]byte(jsonStatement), &stmt)
 	assert.NoError(err)
-	assertStatement(assert, &stmt, builderID, buildType, material, []byte(parametersJSON))
+	var params map[string]interface{}
+	err = json.Unmarshal([]byte(parametersJSON), &params)
+	assert.NoError(err)
+	assertStatement(assert, &stmt, builderID, buildType, material, params)
 
 	newStmt := SLSAProvenanceStatement(
 		WithSubject([]Subject{{Name: "salsa.txt", Digest: DigestSet{"sha256": "f8161d035cdf328c7bb124fce192cb90b603f34ca78d73e33b736b4f6bddf993"}}}),
 		WithBuilder(builderID),
 		WithMetadata("https://github.com/philips-labs/slsa-provenance-action/actions/runs/1303916967"),
-		WithInvocation(buildType, "ci.yaml:build", nil, []byte(parametersJSON), material),
+		WithInvocation(buildType, "ci.yaml:build", nil, params, material),
 	)
 
 	newStmtJSON, err := json.MarshalIndent(newStmt, "", "\t")
@@ -159,7 +162,7 @@ func TestSLSAProvenanceStatementJSON(t *testing.T) {
 	assert.Equal(jsonStatement, string(newStmtJSON))
 }
 
-func assertStatement(assert *assert.Assertions, stmt *Statement, builderID, buildType string, material []Item, parameters json.RawMessage) {
+func assertStatement(assert *assert.Assertions, stmt *Statement, builderID, buildType string, material []Item, parameters map[string]interface{}) {
 	i := stmt.Predicate.Invocation
 	assert.Equal(SlsaPredicateType, stmt.PredicateType)
 	assert.Equal(StatementType, stmt.Type)

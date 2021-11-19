@@ -2,7 +2,6 @@ package intoto
 
 import (
 	"context"
-	"encoding/json"
 	"time"
 )
 
@@ -72,7 +71,7 @@ func WithMetadata(buildInvocationID string) StatementOption {
 }
 
 // WithInvocation sets the Predicate Invocation and Materials
-func WithInvocation(buildType, entryPoint string, environment json.RawMessage, parameters json.RawMessage, materials []Item) StatementOption {
+func WithInvocation(buildType, entryPoint string, environment map[string]interface{}, parameters map[string]interface{}, materials []Item) StatementOption {
 	return func(s *Statement) {
 		s.Predicate.BuildType = buildType
 		s.Predicate.Invocation = Invocation{
@@ -144,9 +143,9 @@ type Metadata struct {
 
 // Invocation Identifies the configuration used for the build. When combined with materials, this SHOULD fully describe the build, such that re-running this recipe results in bit-for-bit identical output (if the build is reproducible).
 type Invocation struct {
-	ConfigSource ConfigSource    `json:"configSource"`
-	Parameters   json.RawMessage `json:"parameters"`
-	Environment  json.RawMessage `json:"environment"`
+	ConfigSource ConfigSource           `json:"configSource"`
+	Parameters   map[string]interface{} `json:"parameters"`
+	Environment  map[string]interface{} `json:"environment"`
 }
 
 // ConfigSource Describes where the config file that kicked off the build came from.
