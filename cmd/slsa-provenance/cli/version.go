@@ -11,7 +11,6 @@ import (
 	"text/tabwriter"
 
 	"github.com/peterbourgon/ff/v3/ffcli"
-	"github.com/pkg/errors"
 )
 
 // Base version information.
@@ -50,7 +49,7 @@ func Version(w io.Writer) *ffcli.Command {
 			if *outJSON {
 				j, err := v.JSONString()
 				if err != nil {
-					return errors.Wrap(err, "unable to generate JSON from version info")
+					return fmt.Errorf("unable to generate JSON from version info: %w", err)
 				}
 				res = j
 			}

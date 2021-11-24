@@ -3,12 +3,11 @@ package github
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
 	"strings"
-
-	"github.com/pkg/errors"
 
 	"github.com/philips-labs/slsa-provenance-action/lib/intoto"
 )
@@ -28,7 +27,7 @@ func (e *Environment) GenerateProvenanceStatement(ctx context.Context, artifactP
 
 	event := AnyEvent{}
 	if err := json.Unmarshal(e.Context.Event, &event); err != nil {
-		return nil, errors.Wrap(err, "failed to unmarshal github context event json")
+		return nil, fmt.Errorf("failed to unmarshal github context event json: %w", err)
 	}
 
 	stmt := intoto.SLSAProvenanceStatement(
