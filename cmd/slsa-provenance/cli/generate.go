@@ -3,6 +3,7 @@ package cli
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -11,7 +12,6 @@ import (
 	"strings"
 
 	"github.com/peterbourgon/ff/v3/ffcli"
-	"github.com/pkg/errors"
 
 	"github.com/philips-labs/slsa-provenance-action/lib/github"
 	"github.com/philips-labs/slsa-provenance-action/lib/intoto"
@@ -66,12 +66,12 @@ func Generate(w io.Writer) *ffcli.Command {
 
 			var gh github.Context
 			if err := json.Unmarshal([]byte(*githubContext), &gh); err != nil {
-				return errors.Wrap(err, "failed to unmarshal github context json")
+				return fmt.Errorf("failed to unmarshal github context json: %w", err)
 			}
 
 			var runner github.RunnerContext
 			if err := json.Unmarshal([]byte(*runnerContext), &runner); err != nil {
-				return errors.Wrap(err, "failed to unmarshal runner context json")
+				return fmt.Errorf("failed to unmarshal runner context json: %w", err)
 			}
 
 			var env intoto.Provenancer
@@ -92,24 +92,24 @@ func Generate(w io.Writer) *ffcli.Command {
 
 			stmt, err := env.GenerateProvenanceStatement(ctx, *artifactPath)
 			if err != nil {
-				return errors.Wrap(err, "failed to generate provenance")
+				return fmt.Errorf("failed to generate provenance: %w", err)
 			}
 
 			for _, extra := range extraMaterials {
 				content, err := ioutil.ReadFile(extra)
 				if err != nil {
-					return errors.Wrapf(err, "Could not load extra materials from %s", extra)
+					return fmt.Errorf("could not load extra materials from %s: %w", extra, err)
 				}
 				var materials []intoto.Item
 				if err = json.Unmarshal(content, &materials); err != nil {
-					return errors.Wrapf(err, "Invalid JSON in extra materials file %s", extra)
+					return fmt.Errorf("invalid JSON in extra materials file %s: %w", extra, err)
 				}
 				for _, material := range materials {
 					if material.URI == "" {
-						return errors.Errorf("Empty or missing \"uri\" field in %s", extra)
+						return fmt.Errorf("empty or missing \"uri\" field in %s", extra)
 					}
 					if len(material.Digest) == 0 {
-						return errors.Errorf("Empty or missing \"digest\" in %s", extra)
+						return fmt.Errorf("empty or missing \"digest\" in %s", extra)
 					}
 				}
 				stmt.Predicate.Materials = append(stmt.Predicate.Materials, materials...)

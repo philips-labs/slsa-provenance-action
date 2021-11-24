@@ -5,7 +5,6 @@ go 1.17
 require (
 	github.com/google/go-github/v39 v39.2.0
 	github.com/peterbourgon/ff/v3 v3.1.2
-	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.7.0
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 )

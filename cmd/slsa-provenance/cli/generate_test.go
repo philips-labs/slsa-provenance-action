@@ -344,7 +344,7 @@ func TestGenerateCliOptions(t *testing.T) {
 		},
 		{
 			name: "With broken extra materials",
-			err:  fmt.Errorf("Invalid JSON in extra materials file %s: unexpected end of JSON input", path.Join(rootDir, "test-data/materials-broken.not-json")),
+			err:  fmt.Errorf("invalid JSON in extra materials file %s: unexpected end of JSON input", path.Join(rootDir, "test-data/materials-broken.not-json")),
 			arguments: []string{
 				"-artifact_path",
 				path.Join(rootDir, "bin/slsa-provenance"),
@@ -360,7 +360,7 @@ func TestGenerateCliOptions(t *testing.T) {
 		},
 		{
 			name: "With non-existent extra materials",
-			err:  fmt.Errorf("Could not load extra materials from non-existing-folder/unknown-file: open non-existing-folder/unknown-file: no such file or directory"),
+			err:  fmt.Errorf("could not load extra materials from non-existing-folder/unknown-file: open non-existing-folder/unknown-file: no such file or directory"),
 			arguments: []string{
 				"-artifact_path",
 				path.Join(rootDir, "bin/slsa-provenance"),
@@ -376,7 +376,7 @@ func TestGenerateCliOptions(t *testing.T) {
 		},
 		{
 			name: "With broken extra materials (no uri)",
-			err:  fmt.Errorf("Empty or missing \"uri\" field in %s", path.Join(rootDir, "test-data/materials-no-uri.json")),
+			err:  fmt.Errorf("empty or missing \"uri\" field in %s", path.Join(rootDir, "test-data/materials-no-uri.json")),
 			arguments: []string{
 				"-artifact_path",
 				path.Join(rootDir, "bin/slsa-provenance"),
@@ -392,7 +392,7 @@ func TestGenerateCliOptions(t *testing.T) {
 		},
 		{
 			name: "With broken extra materials (no digest)",
-			err:  fmt.Errorf("Empty or missing \"digest\" in %s", path.Join(rootDir, "test-data/materials-no-digest.json")),
+			err:  fmt.Errorf("empty or missing \"digest\" in %s", path.Join(rootDir, "test-data/materials-no-digest.json")),
 			arguments: []string{
 				"-artifact_path",
 				path.Join(rootDir, "bin/slsa-provenance"),
