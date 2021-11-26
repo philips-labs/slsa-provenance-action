@@ -2,41 +2,26 @@ package main
 
 import (
 	"context"
-	"flag"
 	"fmt"
 	"log"
 	"os"
-
-	"github.com/peterbourgon/ff/v3/ffcli"
+	"strings"
 
 	"github.com/philips-labs/slsa-provenance-action/cmd/slsa-provenance/cli"
 )
 
 func main() {
-	rootFlagSet := flag.NewFlagSet("slsa-provenance", flag.ExitOnError)
-
-	v := cli.Version(os.Stdout)
-
-	app := &ffcli.Command{
-		Name:    "slsa-provenance [flags] <subcommand>",
-		FlagSet: rootFlagSet,
-		Subcommands: []*ffcli.Command{
-			cli.Generate(os.Stdout),
-			v,
-		},
-		Exec: func(ctx context.Context, args []string) error {
-			fmt.Println("slsa-provenance")
-			fmt.Println()
-
-			return v.Exec(ctx, args)
-		},
+	for i, arg := range os.Args {
+		if (strings.HasPrefix(arg, "-") && len(arg) == 2) || (strings.HasPrefix(arg, "--") && len(arg) >= 4) {
+			continue
+		} else if strings.HasPrefix(arg, "-") {
+			newArg := fmt.Sprintf("-%s", arg)
+			fmt.Fprintf(os.Stderr, "WARNING: the flag %s is deprecated and will be removed in a future release. Please use the flag %s.\n", arg, newArg)
+			os.Args[i] = newArg
+		}
 	}
 
-	if err := app.Parse(os.Args[1:]); err != nil {
-		log.Fatal(err)
-	}
-
-	if err := app.Run(context.Background()); err != nil {
-		log.Fatal(err)
+	if err := cli.New().ExecuteContext(context.Background()); err != nil {
+		log.Fatalf("error during command execution: %v", err)
 	}
 }

@@ -5,7 +5,6 @@ import (
 	"os"
 	"path"
 	"runtime"
-	"strings"
 	"testing"
 
 	gh "github.com/google/go-github/v39/github"
@@ -48,25 +47,22 @@ func TestProvenenaceGitHubRelease(t *testing.T) {
 		_, err = client.Repositories.DeleteRelease(ctx, owner, repo, releaseID)
 	}()
 
-	sb := strings.Builder{}
-	cli := cli.GitHubRelease(&sb)
-	err = cli.ParseAndRun(
-		context.Background(),
-		[]string{
-			"-artifact_path",
-			artifactPath,
-			"-github_context",
-			githubContext,
-			"-output_path",
-			provenanceFile,
-			"-runner_context",
-			runnerContext,
-			"-tag_name",
-			"v0.0.0-generate-test",
-		},
+	output, err := executeCommand(cli.GitHubRelease(),
+		"--artifact-path",
+		artifactPath,
+		"--github-context",
+		githubContext,
+		"--output-path",
+		provenanceFile,
+		"--runner-context",
+		runnerContext,
+		"--tag-name",
+		"v0.0.0-generate-test",
 	)
+
 	assert.NoError(err)
-	assert.Contains(sb.String(), "Saving provenance to")
+	assert.Contains(output, "Saving provenance to")
+
 	if assert.FileExists(provenanceFile) {
 		content, err := os.ReadFile(provenanceFile)
 		assert.NoError(err)

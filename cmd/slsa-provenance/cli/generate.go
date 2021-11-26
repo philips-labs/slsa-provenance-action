@@ -38,14 +38,11 @@ func Generate(w io.Writer) *ffcli.Command {
 	flagset.SetOutput(w)
 
 	return &ffcli.Command{
-		Name:       "generate",
-		ShortUsage: "slsa-provenance generate",
-		ShortHelp:  "Generates the slsa provenance file",
-		FlagSet:    flagset,
-		Subcommands: []*ffcli.Command{
-			Files(w),
-			GitHubRelease(w),
-		},
+		Name:        "generate",
+		ShortUsage:  "slsa-provenance generate",
+		ShortHelp:   "Generates the slsa provenance file",
+		FlagSet:     flagset,
+		Subcommands: []*ffcli.Command{},
 		Exec: func(ctx context.Context, args []string) error {
 			if *outputPath == "" {
 				flagset.Usage()

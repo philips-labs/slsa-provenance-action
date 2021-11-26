@@ -16,8 +16,8 @@ func Version() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "version",
-		Short: fmt.Sprintf("Prints the %s version", CLIName),
-		Long:  fmt.Sprintf("Prints the %s version", CLIName),
+		Short: fmt.Sprintf("Prints the %s version", cliName),
+		Long:  fmt.Sprintf("Prints the %s version", cliName),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			v := VersionInfo()
 			res := v.String()
