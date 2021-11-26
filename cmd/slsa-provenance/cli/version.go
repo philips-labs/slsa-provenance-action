@@ -1,17 +1,42 @@
 package cli
 
 import (
-	"context"
 	"encoding/json"
-	"flag"
 	"fmt"
-	"io"
 	"runtime"
 	"strings"
 	"text/tabwriter"
 
-	"github.com/peterbourgon/ff/v3/ffcli"
+	"github.com/spf13/cobra"
 )
+
+// Version creates an instance of *cobra.Command to print version info
+func Version() *cobra.Command {
+	var outputJSON bool
+
+	cmd := &cobra.Command{
+		Use:   "version",
+		Short: fmt.Sprintf("Prints the %s version", CLIName),
+		Long:  fmt.Sprintf("Prints the %s version", CLIName),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			v := VersionInfo()
+			res := v.String()
+			if outputJSON {
+				j, err := v.JSONString()
+				if err != nil {
+					return fmt.Errorf("unable to generate JSON from version info: %w", err)
+				}
+				res = j
+			}
+			fmt.Fprintln(cmd.OutOrStdout(), res)
+			return nil
+		},
+	}
+
+	cmd.Flags().BoolVar(&outputJSON, "json", false, "print version information as JSON")
+
+	return cmd
+}
 
 // Base version information.
 //
@@ -28,37 +53,6 @@ var (
 	// Build date in ISO8601 format, output of $(date -u +'%Y-%m-%dT%H:%M:%SZ')
 	buildDate = "unknown"
 )
-
-// Version creates an instance of *ffcli.Command to print version info
-func Version(w io.Writer) *ffcli.Command {
-	var (
-		flagset = flag.NewFlagSet("slsa-provenance version", flag.ExitOnError)
-		outJSON = flagset.Bool("json", false, "print JSON instead of text")
-	)
-
-	flagset.SetOutput(w)
-
-	return &ffcli.Command{
-		Name:       "version",
-		ShortUsage: "slsa-provenance version",
-		ShortHelp:  "Prints the slsa-provenance version",
-		FlagSet:    flagset,
-		Exec: func(ctx context.Context, args []string) error {
-			v := VersionInfo()
-			res := v.String()
-			if *outJSON {
-				j, err := v.JSONString()
-				if err != nil {
-					return fmt.Errorf("unable to generate JSON from version info: %w", err)
-				}
-				res = j
-			}
-
-			fmt.Fprintln(w, res)
-			return nil
-		},
-	}
-}
 
 // Info holds the version information of the binary
 type Info struct {
