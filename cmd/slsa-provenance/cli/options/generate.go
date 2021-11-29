@@ -11,6 +11,7 @@ import (
 	"github.com/philips-labs/slsa-provenance-action/lib/intoto"
 )
 
+// GenerateOptions Commandline flags used for the generate command.
 type GenerateOptions struct {
 	GitHubContext  string
 	RunnerContext  string
@@ -18,6 +19,7 @@ type GenerateOptions struct {
 	ExtraMaterials []string
 }
 
+// GetGitHubContext The '${github}' context value, retrieved in a GitHub workflow.
 func (o *GenerateOptions) GetGitHubContext() (*github.Context, error) {
 	if o.GitHubContext == "" {
 		return nil, RequiredFlagError("github-context")
@@ -29,6 +31,7 @@ func (o *GenerateOptions) GetGitHubContext() (*github.Context, error) {
 	return &gh, nil
 }
 
+// GetRunnerContext The '${runner}' context value, retrieved in a GitHub workflow.
 func (o *GenerateOptions) GetRunnerContext() (*github.RunnerContext, error) {
 	if o.RunnerContext == "" {
 		return nil, RequiredFlagError("runner-context")
@@ -40,13 +43,15 @@ func (o *GenerateOptions) GetRunnerContext() (*github.RunnerContext, error) {
 	return &runner, nil
 }
 
-func (o *FilesOptions) GetOutputPath() (string, error) {
+// GetOutputPath The location to write the provenance file.
+func (o *GenerateOptions) GetOutputPath() (string, error) {
 	if o.OutputPath == "" {
 		return "", RequiredFlagError("output-path")
 	}
 	return o.OutputPath, nil
 }
 
+// GetExtraMaterials Additional material files to be used when generating provenance.
 func (o *GenerateOptions) GetExtraMaterials() ([]intoto.Item, error) {
 	var materials []intoto.Item
 
@@ -72,6 +77,7 @@ func (o *GenerateOptions) GetExtraMaterials() ([]intoto.Item, error) {
 	return materials, nil
 }
 
+// AddFlags Registers the flags with the cobra.Command.
 func (o *GenerateOptions) AddFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().StringVar(&o.GitHubContext, "github-context", "", "The '${github}' context value.")
 	cmd.PersistentFlags().StringVar(&o.RunnerContext, "runner-context", "", "The '${runner}' context value.")

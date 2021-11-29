@@ -3,9 +3,10 @@ package cli
 import (
 	"fmt"
 
+	"github.com/spf13/cobra"
+
 	"github.com/philips-labs/slsa-provenance-action/cmd/slsa-provenance/cli/options"
 	"github.com/philips-labs/slsa-provenance-action/lib/github"
-	"github.com/spf13/cobra"
 )
 
 // Files creates an instance of *cobra.Command to manage file provenance

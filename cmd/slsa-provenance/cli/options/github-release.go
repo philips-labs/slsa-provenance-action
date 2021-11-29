@@ -4,12 +4,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GitHubReleaseOptions Commandline flags used for the generate command.
 type GitHubReleaseOptions struct {
 	GenerateOptions
 	ArtifactPath string
 	TagName      string
 }
 
+// GetArtifactPath The location to store the GitHub Release artifact
 func (o *GitHubReleaseOptions) GetArtifactPath() (string, error) {
 	if o.ArtifactPath == "" {
 		return "", RequiredFlagError("artifact-path")
@@ -17,13 +19,7 @@ func (o *GitHubReleaseOptions) GetArtifactPath() (string, error) {
 	return o.ArtifactPath, nil
 }
 
-func (o *GitHubReleaseOptions) GetOutputPath() (string, error) {
-	if o.ArtifactPath == "" {
-		return "", RequiredFlagError("output-path")
-	}
-	return o.OutputPath, nil
-}
-
+// GetTagName The name of the GitHub tag/release
 func (o *GitHubReleaseOptions) GetTagName() (string, error) {
 	if o.TagName == "" {
 		return "", RequiredFlagError("tag-name")
@@ -31,6 +27,7 @@ func (o *GitHubReleaseOptions) GetTagName() (string, error) {
 	return o.TagName, nil
 }
 
+// AddFlags Registers the flags with the cobra.Command.
 func (o *GitHubReleaseOptions) AddFlags(cmd *cobra.Command) {
 	o.GenerateOptions.AddFlags(cmd)
 	cmd.PersistentFlags().StringVar(&o.ArtifactPath, "artifact-path", "", "The file(s) or directory of artifacts to include in provenance.")
