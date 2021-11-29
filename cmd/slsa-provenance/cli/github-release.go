@@ -11,14 +11,13 @@ import (
 	"github.com/philips-labs/slsa-provenance-action/lib/github"
 )
 
-// GitHubRelease creates an instance of *ffcli.Command to manage GitHub release provenance
+// GitHubRelease creates an instance of *cobra.Command to manage GitHub release provenance
 func GitHubRelease() *cobra.Command {
 	o := options.GitHubReleaseOptions{}
 
 	cmd := &cobra.Command{
 		Use:   "github-release",
-		Short: "slsa-provenance generate github-release",
-		Long:  "Generates slsa provenance for assets in a GitHub release",
+		Short: "Generate provenance on GitHub release assets",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			artifactPath, err := o.GetArtifactPath()
 			if err != nil {

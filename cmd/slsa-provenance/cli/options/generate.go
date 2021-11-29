@@ -14,6 +14,7 @@ import (
 type GenerateOptions struct {
 	GitHubContext  string
 	RunnerContext  string
+	OutputPath     string
 	ExtraMaterials []string
 }
 
@@ -37,6 +38,13 @@ func (o *GenerateOptions) GetRunnerContext() (*github.RunnerContext, error) {
 		return nil, fmt.Errorf("failed to unmarshal runner context json: %w", err)
 	}
 	return &runner, nil
+}
+
+func (o *FilesOptions) GetOutputPath() (string, error) {
+	if o.OutputPath == "" {
+		return "", RequiredFlagError("output-path")
+	}
+	return o.OutputPath, nil
 }
 
 func (o *GenerateOptions) GetExtraMaterials() ([]intoto.Item, error) {
@@ -67,5 +75,6 @@ func (o *GenerateOptions) GetExtraMaterials() ([]intoto.Item, error) {
 func (o *GenerateOptions) AddFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().StringVar(&o.GitHubContext, "github-context", "", "The '${github}' context value.")
 	cmd.PersistentFlags().StringVar(&o.RunnerContext, "runner-context", "", "The '${runner}' context value.")
+	cmd.PersistentFlags().StringVar(&o.OutputPath, "output-path", "provenance.json", "The path to which the generated provenance should be written.")
 	cmd.PersistentFlags().StringSliceVarP(&o.ExtraMaterials, "extra-materials", "m", nil, "The '${runner}' context value.")
 }

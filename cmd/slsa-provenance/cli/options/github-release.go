@@ -7,7 +7,6 @@ import (
 type GitHubReleaseOptions struct {
 	GenerateOptions
 	ArtifactPath string
-	OutputPath   string
 	TagName      string
 }
 
@@ -35,7 +34,6 @@ func (o *GitHubReleaseOptions) GetTagName() (string, error) {
 func (o *GitHubReleaseOptions) AddFlags(cmd *cobra.Command) {
 	o.GenerateOptions.AddFlags(cmd)
 	cmd.PersistentFlags().StringVar(&o.ArtifactPath, "artifact-path", "", "The file(s) or directory of artifacts to include in provenance.")
-	cmd.PersistentFlags().StringVar(&o.OutputPath, "output-path", "provenance.json", "The path to which the generated provenance should be written.")
 	cmd.PersistentFlags().StringVar(&o.TagName, "tag-name", "", `The github release to generate provenance on.
 	(if set the artifacts will be downloaded from the release and the provenance will be added as an additional release asset.)`)
 }

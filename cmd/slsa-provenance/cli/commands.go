@@ -1,6 +1,8 @@
 package cli
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 
 	"github.com/philips-labs/slsa-provenance-action/cmd/slsa-provenance/cli/options"
@@ -13,6 +15,11 @@ const (
 var (
 	ro = &options.RootOptions{}
 )
+
+// RequiredFlagError creates a required flag error for the given flag name
+func RequiredFlagError(flagName string) error {
+	return fmt.Errorf("no value found for required flag: %s", flagName)
+}
 
 // New creates a new instance of the slsa-provenance commandline interface
 func New() *cobra.Command {
@@ -28,7 +35,7 @@ func New() *cobra.Command {
 	ro.AddFlags(cmd)
 
 	cmd.AddCommand(Version())
-	cmd.AddCommand(Files())
+	cmd.AddCommand(Generate())
 
 	return cmd
 }
