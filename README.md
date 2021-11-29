@@ -148,7 +148,7 @@ The easiest way to use this action is to add the following into your workflow fi
         uses: philips-labs/slsa-provenance-action@v0.4.0
         with:
           artifact_path: release-assets
-          output_path: 'build.provenance'
+          output_path: 'provenance.json'
           tag_name: ${{ github.ref_name }}
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
@@ -188,7 +188,7 @@ The easiest way to use this action is to add the following into your workflow fi
       - name: Upload provenance
         uses: actions/upload-artifact@v2
         with:
-          path: build.provenance
+          path: provenance.json
   ```
 
 </details>
@@ -206,7 +206,7 @@ An action to generate SLSA build provenance for an artifact
 | parameter | description | required | default |
 | - | - | - | - |
 | artifact_path | path to artifact or directory of artifacts | `true` |  |
-| output_path | path to write build provenance file | `true` | build.provenance |
+| output_path | path to write build provenance file | `true` | provenance.json |
 | github_context | internal (do not set): the "github" context object in json | `true` | ${{ toJSON(github) }} |
 | runner_context | internal (do not set): the "runner" context object in json | `true` | ${{ toJSON(runner) }} |
 | tag_name | The github release to generate provenance on.

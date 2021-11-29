@@ -33,4 +33,4 @@ jobs:
       - name: Upload provenance
         uses: actions/upload-artifact@v2
         with:
-          path: build.provenance
+          path: provenance.json

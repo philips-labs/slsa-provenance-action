@@ -10,7 +10,7 @@ inputs:
   output_path:
     description: 'path to write build provenance file'
     required: true
-    default: 'build.provenance'
+    default: 'provenance.json'
   github_context:
     description: 'internal (do not set): the "github" context object in json'
     required: true
