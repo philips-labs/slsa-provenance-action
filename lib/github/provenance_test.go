@@ -357,7 +357,7 @@ func TestGenerateProvenanceFromGitHubRelease(t *testing.T) {
 	assertMetadata(assert, predicate.Metadata, ghContext, repoURL)
 	assertInvocation(assert, predicate.Invocation)
 
-	stmtPath := path.Join(artifactPath, "build.provenance")
+	stmtPath := path.Join(artifactPath, "provenance.json")
 
 	err = env.PersistProvenanceStatement(ctx, stmt, stmtPath)
 	assert.NoError(err)

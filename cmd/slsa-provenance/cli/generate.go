@@ -29,7 +29,7 @@ func Generate(w io.Writer) *ffcli.Command {
 		tagName = flagset.String("tag_name", "", `The github release to generate provenance on.
 (if set the artifacts will be downloaded from the release and the provenance will be added as an additional release asset.)`)
 		artifactPath   = flagset.String("artifact_path", "", "The file or dir path of the artifacts for which provenance should be generated.")
-		outputPath     = flagset.String("output_path", "build.provenance", "The path to which the generated provenance should be written.")
+		outputPath     = flagset.String("output_path", "provenance.json", "The path to which the generated provenance should be written.")
 		githubContext  = flagset.String("github_context", "", "The '${github}' context value.")
 		runnerContext  = flagset.String("runner_context", "", "The '${runner}' context value.")
 		extraMaterials = []string{}
