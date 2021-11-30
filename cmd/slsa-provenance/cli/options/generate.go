@@ -56,22 +56,17 @@ func (o *GenerateOptions) GetExtraMaterials() ([]intoto.Item, error) {
 	var materials []intoto.Item
 
 	for _, extra := range o.ExtraMaterials {
-		content, err := os.ReadFile(extra)
+		file, err := os.Open(extra)
 		if err != nil {
 			return nil, fmt.Errorf("failed retrieving extra materials: %w", err)
 		}
-		if err = json.Unmarshal(content, &materials); err != nil {
-			return nil, fmt.Errorf("failed retrieving extra materials: invalid JSON in extra materials file %s: %w", extra, err)
+		defer file.Close()
+
+		m, err := intoto.ReadMaterials(file)
+		if err != nil {
+			return nil, fmt.Errorf("failed retrieving extra materials for %s: %w", extra, err)
 		}
-		for _, material := range materials {
-			if material.URI == "" {
-				return nil, fmt.Errorf("failed retrieving extra materials: empty or missing \"uri\" field in %s", extra)
-			}
-			if len(material.Digest) == 0 {
-				return nil, fmt.Errorf("failed retrieving extra materials: empty or missing \"digest\" in %s", extra)
-			}
-			materials = append(materials, material)
-		}
+		materials = append(materials, m...)
 	}
 
 	return materials, nil

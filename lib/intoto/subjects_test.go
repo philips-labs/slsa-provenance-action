@@ -38,11 +38,13 @@ func TestSubjects(t *testing.T) {
 	assert.NoError(err)
 	assert.NotNil(s)
 
-	assert.Len(s, 4)
+	assert.Len(s, 6)
 	assertSubject(assert, s, "intoto_test.go", path.Join(".", "intoto_test.go"))
 	assertSubject(assert, s, "intoto.go", path.Join(".", "intoto.go"))
 	assertSubject(assert, s, "subjects_test.go", path.Join(".", "subjects_test.go"))
 	assertSubject(assert, s, "subjects.go", path.Join(".", "subjects.go"))
+	assertSubject(assert, s, "materials_test.go", path.Join(".", "materials_test.go"))
+	assertSubject(assert, s, "materials.go", path.Join(".", "materials.go"))
 }
 
 func assertSubject(assert *assert.Assertions, subject []Subject, binaryName, binaryPath string) {

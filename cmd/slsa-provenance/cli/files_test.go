@@ -91,7 +91,7 @@ func TestGenerateFilesCliOptions(t *testing.T) {
 		},
 		{
 			name: "With broken extra materials",
-			err:  fmt.Errorf("failed retrieving extra materials: invalid JSON in extra materials file %s: unexpected end of JSON input", path.Join(rootDir, "test-data/materials-broken.not-json")),
+			err:  fmt.Errorf("failed retrieving extra materials for %s: unexpected EOF", path.Join(rootDir, "test-data/materials-broken.not-json")),
 			arguments: []string{
 				"--artifact-path",
 				path.Join(rootDir, "bin/slsa-provenance"),
@@ -123,7 +123,7 @@ func TestGenerateFilesCliOptions(t *testing.T) {
 		},
 		{
 			name: "With broken extra materials (no uri)",
-			err:  fmt.Errorf("failed retrieving extra materials: empty or missing \"uri\" field in %s", path.Join(rootDir, "test-data/materials-no-uri.json")),
+			err:  fmt.Errorf("failed retrieving extra materials for %s: empty or missing \"uri\" for material", path.Join(rootDir, "test-data/materials-no-uri.json")),
 			arguments: []string{
 				"--artifact-path",
 				path.Join(rootDir, "bin/slsa-provenance"),
@@ -139,7 +139,7 @@ func TestGenerateFilesCliOptions(t *testing.T) {
 		},
 		{
 			name: "With broken extra materials (no digest)",
-			err:  fmt.Errorf("failed retrieving extra materials: empty or missing \"digest\" in %s", path.Join(rootDir, "test-data/materials-no-digest.json")),
+			err:  fmt.Errorf("failed retrieving extra materials for %s: empty or missing \"digest\" for material", path.Join(rootDir, "test-data/materials-no-digest.json")),
 			arguments: []string{
 				"--artifact-path",
 				path.Join(rootDir, "bin/slsa-provenance"),
