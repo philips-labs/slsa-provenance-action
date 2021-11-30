@@ -46,12 +46,10 @@ func Files() *cobra.Command {
 				Runner:  runner,
 			}
 
-			stmt, err := env.GenerateProvenanceStatement(cmd.Context(), artifactPath)
+			stmt, err := env.GenerateProvenanceStatement(cmd.Context(), artifactPath, materials...)
 			if err != nil {
 				return fmt.Errorf("failed to generate provenance: %w", err)
 			}
-
-			stmt.Predicate.Materials = append(stmt.Predicate.Materials, materials...)
 
 			fmt.Fprintf(cmd.OutOrStdout(), "Saving provenance to %s\n", outputPath)
 

@@ -85,6 +85,13 @@ func WithInvocation(buildType, entryPoint string, environment json.RawMessage, p
 	}
 }
 
+// WithMaterials adds additional materials to the predicate
+func WithMaterials(materials []Item) StatementOption {
+	return func(s *Statement) {
+		s.Predicate.Materials = append(s.Predicate.Materials, materials...)
+	}
+}
+
 // Statement The Statement is the middle layer of the attestation, binding it to a particular subject and unambiguously identifying the types of the predicate.
 type Statement struct {
 	Type          string    `json:"_type"`
