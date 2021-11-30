@@ -19,9 +19,16 @@ jobs:
           tocLevel: 3
           actionFile: action.yaml
 
-      - name: Update readme in the repository
-        if: github.event_name != 'pull_request'
-        uses: stefanzweifel/git-auto-commit-action@v4.12.0
-        with:
-          commit_message: ":memo: Update Readme"
-          file_pattern: README.md
+      - name: Verify docs are updated
+        run: |
+          if [ "$(git status --porcelain)" != "" ] ; then
+            git diff
+            exit 1
+          fi
+
+      # - name: Update readme in the repository
+      #   if: github.event_name != 'pull_request'
+      #   uses: stefanzweifel/git-auto-commit-action@v4.12.0
+      #   with:
+      #     commit_message: ":memo: Update Readme"
+      #     file_pattern: README.md
