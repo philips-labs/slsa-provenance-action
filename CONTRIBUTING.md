@@ -1,4 +1,4 @@
-# Contributing to gothermostat
+# Contributing slsa-provenance-action
 
 :+1::tada: First off, thanks for taking the time to contribute! :tada::+1:
 
@@ -31,3 +31,7 @@ In summary:
   - tabwidth of 2
 - Files end with a newline
 - Whitespace is trimmed from the end of a line
+
+### Update README.md
+
+Update README.md when input parameters change.

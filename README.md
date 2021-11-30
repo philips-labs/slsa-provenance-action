@@ -193,14 +193,10 @@ The easiest way to use this action is to add the following into your workflow fi
 
 </details>
 
-<!-- action-docs-description -->
 ### Description
 
 An action to generate SLSA build provenance for an artifact
 
-
-<!-- action-docs-description -->
-<!-- action-docs-inputs -->
 ### Inputs
 
 | parameter | description | required | default |
@@ -209,17 +205,8 @@ An action to generate SLSA build provenance for an artifact
 | output_path | path to write build provenance file | `true` | provenance.json |
 | github_context | internal (do not set): the "github" context object in json | `true` | ${{ toJSON(github) }} |
 | runner_context | internal (do not set): the "runner" context object in json | `true` | ${{ toJSON(runner) }} |
-| tag_name | The github release to generate provenance on.
-(if set the artifacts will be downloaded from the release and the provenance will be added as an additional release asset.)
- | `false` |  |
+| tag_name | The github release to generate provenance on.\n (if set the artifacts will be downloaded from the release and the provenance will be added as an additional release asset.) | `false` |  |
 | extra_materials | paths to files containing SLSA v0.1 formatted materials (JSON array) in to include in the provenance | `false` |  |
-
-
-
-<!-- action-docs-inputs -->
-<!-- action-docs-outputs -->
-
-<!-- action-docs-outputs -->
 
 ### Available commands
 
