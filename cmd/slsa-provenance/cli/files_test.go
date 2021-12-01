@@ -12,6 +12,10 @@ import (
 	"github.com/philips-labs/slsa-provenance-action/cmd/slsa-provenance/cli"
 )
 
+const (
+	unknownFile = "non-existing-folder/unknown-file"
+)
+
 func TestGenerateFilesCliOptions(t *testing.T) {
 	_, filename, _, _ := runtime.Caller(0)
 	rootDir := path.Join(path.Dir(filename), "../../..")
@@ -49,10 +53,10 @@ func TestGenerateFilesCliOptions(t *testing.T) {
 		},
 		{
 			name: "invalid --artifact-path",
-			err:  fmt.Errorf("failed to generate provenance: resource path not found: [provided=non-existing-folder/unknown-file]"),
+			err:  fmt.Errorf("failed to generate provenance: resource path not found: [provided=%s]", unknownFile),
 			arguments: []string{
 				"--artifact-path",
-				"non-existing-folder/unknown-file",
+				unknownFile,
 				"--github-context",
 				githubContext,
 				"--runner-context",
@@ -107,7 +111,7 @@ func TestGenerateFilesCliOptions(t *testing.T) {
 		},
 		{
 			name: "With non-existent extra materials",
-			err:  fmt.Errorf("failed retrieving extra materials: open %s: no such file or directory", "non-existing-folder/unknown-file"),
+			err:  fmt.Errorf("failed retrieving extra materials: open %s: no such file or directory", unknownFile),
 			arguments: []string{
 				"--artifact-path",
 				path.Join(rootDir, "bin/slsa-provenance"),
@@ -118,7 +122,7 @@ func TestGenerateFilesCliOptions(t *testing.T) {
 				"--runner-context",
 				runnerContext,
 				"--extra-materials",
-				fmt.Sprintf("%s,%s", path.Join(rootDir, "test-data/materials-valid.json"), "non-existing-folder/unknown-file"),
+				fmt.Sprintf("%s,%s", path.Join(rootDir, "test-data/materials-valid.json"), unknownFile),
 			},
 		},
 		{
