@@ -86,6 +86,7 @@ func createGitHubRelease(ctx context.Context, client *github.ReleaseClient, owne
 		if err != nil {
 			return 0, err
 		}
+		defer asset.Close()
 		client.AddProvenanceToRelease(ctx, owner, repo, rel.GetID(), asset)
 	}
 

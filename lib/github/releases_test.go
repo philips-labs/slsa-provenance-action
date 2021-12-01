@@ -123,6 +123,7 @@ func TestAddProvenanceToRelease(t *testing.T) {
 	if !assert.NoError(err) || !assert.NotNil(provenance) {
 		return
 	}
+	defer provenance.Close()
 
 	stat, err := provenance.Stat()
 	if !assert.NoError(err) || !assert.NotNil(stat) {
@@ -212,6 +213,8 @@ func createGitHubRelease(ctx context.Context, client *github.ReleaseClient, owne
 		if err != nil {
 			return 0, err
 		}
+		defer asset.Close()
+
 		client.AddProvenanceToRelease(ctx, owner, repo, rel.GetID(), asset)
 	}
 

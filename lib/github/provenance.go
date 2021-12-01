@@ -133,6 +133,7 @@ func (e *ReleaseEnvironment) PersistProvenanceStatement(ctx context.Context, stm
 	if err != nil {
 		return fmt.Errorf("failed to open provenance statement: %w", err)
 	}
+	defer stmtFile.Close()
 
 	owner := e.Context.RepositoryOwner
 	repo := repositoryName(e.Context.Repository)
