@@ -64,7 +64,7 @@ jobs:
     name: release
     needs: [build]
     outputs:
-      container_digest: ${{ steps.container_digest.outputs.container_digest }}
+      container_digest: ${{ steps.container_info.outputs.container_digest }}
     runs-on: ubuntu-20.04
 
     steps:
@@ -107,10 +107,13 @@ jobs:
           LDFLAGS: ${{ steps.release-vars.outputs.LDFLAGS }}
           GIT_HASH: ${{ steps.release-vars.outputs.GIT_HASH }}
 
-      - name: Get container digest
-        id: container_digest
+      - name: Get container info
+        id: container_info
         if: startsWith(github.ref, 'refs/tags/')
-        run: echo "::set-output name=container_digest::$(make container-digest GITHUB_REF=${GITHUB_REF})"
+        run: |
+          echo "::set-output name=container_digest::$(make container-digest GITHUB_REF=${GITHUB_REF})"
+          echo "::set-output name=container_tags::${GITHUB_REF}"
+          echo "::set-output name=container_repos::$(make container-repos)"
 
       - name: Logout from Container registries
         if: ${{ always() }}
@@ -127,8 +130,8 @@ jobs:
     steps:
       - name: Fetch docker images from repositories
         run: |
-          docker pull philipssoftware/slsa-provenance -a
-          docker pull ghcr.io/philips-labs/slsa-provenance -a
+          docker pull philipssoftware/slsa-provenance:${{ needs.release.outputs.container_tags }}
+          docker pull ghcr.io/philips-labs/slsa-provenance:${{ needs.release.outputs.container_tags }}
           docker inspect ghcr.io/philips-labs/slsa-provenance@${{ needs.release.outputs.container_digest }}
 
       - name: Generate provenance for Release
