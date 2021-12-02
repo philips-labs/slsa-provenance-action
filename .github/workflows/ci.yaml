@@ -64,7 +64,10 @@ jobs:
     name: release
     needs: [build]
     outputs:
-      container_digest: ${{ steps.container_digest.outputs.container_digest }}
+      container_digest: ${{ steps.container_info.outputs.container_digest }}
+      container_tags: ${{ steps.container_info.outputs.container_tags }}
+      container_repos: ${{ steps.container_info.outputs.container_repos }}
+
     runs-on: ubuntu-20.04
 
     steps:
@@ -107,10 +110,13 @@ jobs:
           LDFLAGS: ${{ steps.release-vars.outputs.LDFLAGS }}
           GIT_HASH: ${{ steps.release-vars.outputs.GIT_HASH }}
 
-      - name: Get container digest
-        id: container_digest
+      - name: Get container info
+        id: container_info
         if: startsWith(github.ref, 'refs/tags/')
-        run: echo "::set-output name=container_digest::$(make container-digest GITHUB_REF=${GITHUB_REF})"
+        run: |
+          echo "::set-output name=container_digest::$(make container-digest GITHUB_REF=${{ github.ref_name }})"
+          echo "::set-output name=container_tags::$(make container-tags CONTAINER_DIGEST=${{ steps.container_info.outputs.container_digest }})"
+          echo "::set-output name=container_repos::$(echo "[$(make container-repos GITHUB_REF=${GITHUB_REF} | paste -s -d ',' -)]")"
 
       - name: Logout from Container registries
         if: ${{ always() }}
