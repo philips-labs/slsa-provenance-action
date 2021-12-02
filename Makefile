@@ -81,10 +81,10 @@ build: $(addprefix bin/,$(COMMANDS)) ## builds binaries
 .PHONY: image
 image: ## build the binary in a docker image
 	docker build \
-		-t "philipssoftware/slsa-provenance:$(GIT_TAG)" \
-		-t "philipssoftware/slsa-provenance:$(GIT_HASH)" \
-		-t "ghcr.io/philips-labs/slsa-provenance:$(GIT_TAG)" \
-		-t "ghcr.io/philips-labs/slsa-provenance:$(GIT_HASH)" \
+		-t "$(HUB_REPO):$(GIT_TAG)" \
+		-t "$(HUB_REPO):$(GIT_HASH)" \
+		-t "$(GHCR_REPO):$(GIT_TAG)" \
+		-t "$(GHCR_REPO):$(GIT_HASH)" \
 		.
 
 $(GO_PATH)/bin/goreleaser:
