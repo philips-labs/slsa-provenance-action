@@ -4,12 +4,16 @@ branding:
   icon: lock
   color: purple
 inputs:
+  subcommand:
+    description: 'The subcommand to use when generating provenance'
+    required: false
+    default: 'files'
   artifact_path:
     description: 'path to artifact or directory of artifacts'
     required: true
   output_path:
     description: 'path to write build provenance file'
-    required: true
+    required: false
     default: 'provenance.json'
   github_context:
     description: 'internal (do not set): the "github" context object in json'
@@ -32,6 +36,7 @@ runs:
   image: 'docker://ghcr.io/philips-labs/slsa-provenance:v0.4.0'
   args:
     - "generate"
+    - '${{ inputs.subcommand }}'
     - "-artifact_path"
     - '${{ inputs.artifact_path }}'
     - "-output_path"

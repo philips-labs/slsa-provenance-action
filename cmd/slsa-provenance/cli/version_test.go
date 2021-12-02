@@ -1,10 +1,8 @@
 package cli_test
 
 import (
-	"context"
 	"fmt"
 	"runtime"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -14,9 +12,6 @@ import (
 
 func TestVersionCliText(t *testing.T) {
 	assert := assert.New(t)
-
-	sb := strings.Builder{}
-	cli := cli.Version(&sb)
 
 	expected := fmt.Sprintf(`GitVersion:    devel
 GitCommit:     unknown
@@ -28,16 +23,13 @@ Platform:      %s/%s
 
 `, runtime.Version(), runtime.Compiler, runtime.GOOS, runtime.GOARCH)
 
-	err := cli.ParseAndRun(context.Background(), nil)
+	output, err := executeCommand(cli.Version())
 	assert.NoError(err)
-	assert.Equal(expected, sb.String())
+	assert.Equal(expected, output)
 }
 
 func TestVersionCliJSON(t *testing.T) {
 	assert := assert.New(t)
-
-	sb := strings.Builder{}
-	cli := cli.Version(&sb)
 
 	expected := fmt.Sprintf(`{
   "git_version": "devel",
@@ -50,7 +42,7 @@ func TestVersionCliJSON(t *testing.T) {
 }
 `, runtime.Version(), runtime.Compiler, runtime.GOOS, runtime.GOARCH)
 
-	err := cli.ParseAndRun(context.Background(), []string{"-json"})
+	output, err := executeCommand(cli.Version(), "--json")
 	assert.NoError(err)
-	assert.Equal(expected, sb.String())
+	assert.Equal(expected, output)
 }

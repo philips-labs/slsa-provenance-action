@@ -201,8 +201,9 @@ An action to generate SLSA build provenance for an artifact
 
 | parameter | description | required | default |
 | - | - | - | - |
+| subcommand | The subcommand to use when generating provenance | `false` | files |
 | artifact_path | path to artifact or directory of artifacts | `true` |  |
-| output_path | path to write build provenance file | `true` | provenance.json |
+| output_path | path to write build provenance file | `false` | provenance.json |
 | github_context | internal (do not set): the "github" context object in json | `true` | ${{ toJSON(github) }} |
 | runner_context | internal (do not set): the "runner" context object in json | `true` | ${{ toJSON(runner) }} |
 | tag_name | The github release to generate provenance on.\n (if set the artifacts will be downloaded from the release and the provenance will be added as an additional release asset.) | `false` |  |
