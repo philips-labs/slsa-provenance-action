@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"testing"
 
-	gh "github.com/google/go-github/v39/github"
+	gh "github.com/google/go-github/v41/github"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/philips-labs/slsa-provenance-action/lib/github"
