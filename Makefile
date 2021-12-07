@@ -48,6 +48,10 @@ lint: $(GO_PATH)/bin/goimports $(GO_PATH)/bin/golint ## runs linting
 
 .PHONY: test
 test: ## runs the tests
+	go test -v -count=1 ./...
+
+.PHONY: test-race
+test-race: ## runs the tests
 	go test -race -v -count=1 ./...
 
 coverage.out:
