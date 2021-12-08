@@ -110,11 +110,7 @@ func (e *ReleaseEnvironment) GenerateProvenanceStatement(ctx context.Context, ar
 	owner := e.Context.RepositoryOwner
 	repo := repositoryName(e.Context.Repository)
 
-	releaseID, err := e.GetReleaseID(ctx, e.tagName)
-	if err != nil {
-		return nil, err
-	}
-	_, err = e.rc.DownloadReleaseAssets(ctx, owner, repo, releaseID, artifactPath)
+	_, err = e.rc.DownloadReleaseAssets(ctx, owner, repo, e.tagName, artifactPath)
 	if err != nil {
 		return nil, err
 	}
@@ -143,22 +139,6 @@ func (e *ReleaseEnvironment) PersistProvenanceStatement(ctx context.Context, stm
 	}
 
 	return nil
-}
-
-// GetReleaseID fetches a release and caches the releaseID in the environment
-func (e *ReleaseEnvironment) GetReleaseID(ctx context.Context, tagName string) (int64, error) {
-	owner := e.Context.RepositoryOwner
-	repo := repositoryName(e.Context.Repository)
-
-	if e.releaseID == 0 {
-		rel, err := e.rc.FetchRelease(ctx, owner, repo, e.tagName)
-		if err != nil {
-			return 0, err
-		}
-		e.releaseID = rel.GetID()
-	}
-
-	return e.releaseID, nil
 }
 
 func isEmptyDirectory(p string) (bool, error) {

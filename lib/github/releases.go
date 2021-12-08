@@ -2,8 +2,10 @@ package github
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"path"
@@ -37,49 +39,35 @@ func NewReleaseClient(httpClient *http.Client) *ReleaseClient {
 	}
 }
 
-// FetchRelease get the release by its tagName
-func (p *ReleaseClient) FetchRelease(ctx context.Context, owner, repo, tagName string) (*github.RepositoryRelease, error) {
-	listCtx, cancel := context.WithTimeout(ctx, 1*time.Minute)
-	defer cancel()
-
-	allReleases, err := p.ListReleases(listCtx, owner, repo, github.ListOptions{PerPage: 10})
-	if err != nil {
-		return nil, err
-	}
-
-	var rel *github.RepositoryRelease
-	for _, r := range allReleases {
-		if *r.TagName == tagName {
-			rel = r
-			break
-		}
-	}
-
-	return rel, nil
-}
-
 // DownloadReleaseAssets download the assets for a release at the given storage location.
-func (p *ReleaseClient) DownloadReleaseAssets(ctx context.Context, owner, repo string, releaseID int64, storageLocation string) ([]*github.ReleaseAsset, error) {
-	listCtx, cancel := context.WithTimeout(ctx, 1*time.Minute)
-	defer cancel()
-
-	allAssets, err := p.ListReleaseAssets(listCtx, owner, repo, releaseID, github.ListOptions{PerPage: 10})
-	if err != nil {
-		return nil, err
-	}
-	assets := make([]*github.ReleaseAsset, len(allAssets))
-
+func (p *ReleaseClient) DownloadReleaseAssets(ctx context.Context, owner, repo, tag string, storageLocation string) ([]*github.ReleaseAsset, error) {
 	downloadCtx, cancel := context.WithTimeout(ctx, 2*time.Minute)
 	defer cancel()
 
+	relCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	r, _, err := p.Repositories.GetReleaseByTag(relCtx, owner, repo, tag)
+	if err != nil {
+		return nil, err
+	}
 	err = os.MkdirAll(storageLocation, 0755)
 	if err != nil {
 		return nil, err
 	}
 
-	for i, releaseAsset := range allAssets {
+	assets := make([]*github.ReleaseAsset, len(r.Assets))
+
+	for i, releaseAsset := range r.Assets {
 		asset, _, err := p.Repositories.DownloadReleaseAsset(downloadCtx, owner, repo, releaseAsset.GetID(), p.httpClient)
 		if err != nil {
+			var errResponse *github.ErrorResponse
+			if errors.As(err, &errResponse) {
+				b, err := ioutil.ReadAll(errResponse.Response.Body)
+				if err != nil {
+					fmt.Println(b)
+				}
+			}
 			return nil, err
 		}
 		err = saveFile(path.Join(storageLocation, releaseAsset.GetName()), asset)

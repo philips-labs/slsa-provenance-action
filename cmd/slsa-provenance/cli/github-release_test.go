@@ -24,7 +24,7 @@ func TestProvenenaceGitHubRelease(t *testing.T) {
 	_, filename, _, _ := runtime.Caller(0)
 	rootDir := path.Join(path.Dir(filename), "../../..")
 	artifactPath := path.Join(rootDir, "gh-release-test")
-	provenanceFile := path.Join(artifactPath, "unittest.provenance")
+	provenanceFile := path.Join(artifactPath, "unittest-provenance.json")
 
 	ctx := context.Background()
 	owner, repo := "philips-labs", "slsa-provenance-action"

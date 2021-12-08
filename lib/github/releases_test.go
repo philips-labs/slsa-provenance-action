@@ -36,21 +36,6 @@ func init() {
 	githubToken = tokenRetriever()
 }
 
-func TestFetchRelease(t *testing.T) {
-	assert := assert.New(t)
-	ctx := context.Background()
-
-	client := createReleaseClient(ctx)
-	release, err := client.FetchRelease(ctx, owner, repo, "v0.1.1")
-
-	if !assert.NoError(err) && !assert.NotNil(release) {
-		return
-	}
-	assert.Equal(int64(51517953), release.GetID())
-	assert.Equal("v0.1.1", release.GetTagName())
-	assert.Len(release.Assets, 7)
-}
-
 func TestDownloadReleaseAssets(t *testing.T) {
 	if tokenRetriever() == "" {
 		t.Skip("skipping as GITHUB_TOKEN environment variable isn't set")
@@ -61,16 +46,11 @@ func TestDownloadReleaseAssets(t *testing.T) {
 
 	client := createReleaseClient(ctx)
 
-	release, err := client.FetchRelease(ctx, owner, repo, "v0.1.1")
-	if !assert.NoError(err) || !assert.NotNil(release) {
-		return
-	}
-	assert.Equal(int64(51517953), release.GetID())
-
+	releaseTag := "v0.1.1"
 	_, filename, _, _ := runtime.Caller(0)
 	rootDir := path.Join(path.Dir(filename), "../..")
 	artifactPath := path.Join(rootDir, "download-test")
-	assets, err := client.DownloadReleaseAssets(ctx, owner, repo, release.GetID(), artifactPath)
+	assets, err := client.DownloadReleaseAssets(ctx, owner, repo, releaseTag, artifactPath)
 	if !assert.NoError(err) {
 		return
 	}
