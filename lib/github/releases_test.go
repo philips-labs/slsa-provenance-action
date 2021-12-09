@@ -2,15 +2,19 @@ package github_test
 
 import (
 	"context"
+	"fmt"
+	"net/http"
 	"os"
 	"path"
 	"runtime"
+	"strings"
 	"testing"
 
 	gh "github.com/google/go-github/v41/github"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/philips-labs/slsa-provenance-action/lib/github"
+	"github.com/philips-labs/slsa-provenance-action/lib/transport"
 )
 
 const (
@@ -40,7 +44,9 @@ func TestFetchRelease(t *testing.T) {
 	assert := assert.New(t)
 	ctx := context.Background()
 
-	client := createReleaseClient(ctx)
+	api := "https://api.github.com/repos/philips-labs/slsa-provenance-action/releases"
+
+	client, requestLogger := createReleaseClient(ctx)
 	release, err := client.FetchRelease(ctx, owner, repo, "v0.1.1")
 
 	if !assert.NoError(err) && !assert.NotNil(release) {
@@ -49,6 +55,7 @@ func TestFetchRelease(t *testing.T) {
 	assert.Equal(int64(51517953), release.GetID())
 	assert.Equal("v0.1.1", release.GetTagName())
 	assert.Len(release.Assets, 7)
+	assert.Equal(fmt.Sprintf("GET: %s?per_page=10\nGET: %s?page=2&per_page=10\n", api, api), requestLogger.String())
 }
 
 func TestDownloadReleaseAssets(t *testing.T) {
@@ -59,13 +66,17 @@ func TestDownloadReleaseAssets(t *testing.T) {
 
 	ctx := context.Background()
 
-	client := createReleaseClient(ctx)
-
-	release, err := client.FetchRelease(ctx, owner, repo, "v0.1.1")
+	api := "https://api.github.com/repos/philips-labs/slsa-provenance-action/releases"
+	version := "v0.1.1"
+	client, requestLogger := createReleaseClient(ctx)
+	release, _, err := client.Repositories.GetReleaseByTag(ctx, owner, repo, version)
 	if !assert.NoError(err) || !assert.NotNil(release) {
 		return
 	}
 	assert.Equal(int64(51517953), release.GetID())
+	assert.NotEmpty(requestLogger)
+	assert.Equal(fmt.Sprintf("GET: %s/tags/%s\n", api, version), requestLogger.String())
+	requestLogger.Reset()
 
 	_, filename, _, _ := runtime.Caller(0)
 	rootDir := path.Join(path.Dir(filename), "../..")
@@ -74,6 +85,17 @@ func TestDownloadReleaseAssets(t *testing.T) {
 	if !assert.NoError(err) {
 		return
 	}
+	assert.NotEmpty(requestLogger)
+	assert.Contains(requestLogger.String(), fmt.Sprintf("GET: %s/%d/assets?per_page=10", api, release.GetID()))
+	assert.Contains(requestLogger.String(), fmt.Sprintf("GET: %s/assets/%d", api, assets[0].GetID()))
+	assert.Contains(requestLogger.String(), fmt.Sprintf("GET: %s/assets/%d", api, assets[1].GetID()))
+	assert.Contains(requestLogger.String(), fmt.Sprintf("GET: %s/assets/%d", api, assets[2].GetID()))
+	assert.Contains(requestLogger.String(), fmt.Sprintf("GET: %s/assets/%d", api, assets[3].GetID()))
+	assert.Contains(requestLogger.String(), fmt.Sprintf("GET: %s/assets/%d", api, assets[4].GetID()))
+	assert.Contains(requestLogger.String(), fmt.Sprintf("GET: %s/assets/%d", api, assets[5].GetID()))
+	assert.Contains(requestLogger.String(), fmt.Sprintf("GET: %s/assets/%d", api, assets[6].GetID()))
+	assert.Contains(requestLogger.String(), "GET: https://objects.githubusercontent.com/github-production-release-asset")
+
 	defer func() {
 		_ = os.RemoveAll(artifactPath)
 	}()
@@ -143,13 +165,17 @@ func TestListReleaseAssets(t *testing.T) {
 	assert := assert.New(t)
 	ctx := context.Background()
 
-	client := createReleaseClient(ctx)
-	opt := gh.ListOptions{PerPage: 2}
+	api := "https://api.github.com/repos/philips-labs/slsa-provenance-action/releases/51517953/assets"
+
+	client, requestLogger := createReleaseClient(ctx)
+	opt := gh.ListOptions{PerPage: 4}
 	assets, err := client.ListReleaseAssets(ctx, owner, repo, 51517953, opt)
 	if !assert.NoError(err) {
 		return
 	}
 	assert.Len(assets, 7)
+	assert.NotEmpty(requestLogger)
+	assert.Equal(expectedRequestPages("GET", api, opt.PerPage, 2), requestLogger.String())
 
 	opt = gh.ListOptions{PerPage: 10}
 	assets, err = client.ListReleaseAssets(ctx, owner, repo, 51517953, opt)
@@ -166,12 +192,16 @@ func TestListReleases(t *testing.T) {
 	assert := assert.New(t)
 	ctx := context.Background()
 
-	client := createReleaseClient(ctx)
-	opt := gh.ListOptions{PerPage: 1}
+	api := "https://api.github.com/repos/philips-labs/slsa-provenance-action/releases"
+
+	client, requestLogger := createReleaseClient(ctx)
+	opt := gh.ListOptions{PerPage: 4}
 	releases, err := client.ListReleases(ctx, owner, repo, opt)
 	if !assert.NoError(err) {
 		return
 	}
+	assert.NotEmpty(requestLogger)
+	assert.Equal(expectedRequestPages("GET", api, opt.PerPage, 4), requestLogger.String())
 	assert.GreaterOrEqual(len(releases), 2)
 
 	opt = gh.ListOptions{PerPage: 2}
@@ -186,15 +216,40 @@ func TestListReleases(t *testing.T) {
 	assert.EqualError(err, "failed to list releases: GET https://api.github.com/repos/philips-labs/slsa-provenance-action-fake/releases?per_page=2: 404 Not Found []")
 }
 
-func createReleaseClient(ctx context.Context) *github.ReleaseClient {
+func expectedRequestPages(method string, api string, size int, count int) string {
+	w := &strings.Builder{}
+
+	for i := 1; i <= count; i++ {
+		if i == 1 {
+			fmt.Fprintf(w, "%s: %s?per_page=%d\n", method, api, size)
+		} else {
+			fmt.Fprintf(w, "%s: %s?page=%d&per_page=%d\n", method, api, i, size)
+		}
+	}
+
+	return w.String()
+}
+
+func createReleaseClient(ctx context.Context) (*github.ReleaseClient, *strings.Builder) {
 	var client *github.ReleaseClient
+	var writer strings.Builder
+
 	if githubToken != "" {
 		tc := github.NewOAuth2Client(ctx, tokenRetriever)
+		tc.Transport = transport.TeeRoundTripper{
+			RoundTripper: tc.Transport,
+			Writer:       &writer,
+		}
 		client = github.NewReleaseClient(tc)
 	} else {
-		client = github.NewReleaseClient(nil)
+		client = github.NewReleaseClient(&http.Client{
+			Transport: transport.TeeRoundTripper{
+				RoundTripper: http.DefaultTransport,
+				Writer:       &writer,
+			},
+		})
 	}
-	return client
+	return client, &writer
 }
 
 func createGitHubRelease(ctx context.Context, client *github.ReleaseClient, owner, repo, version string, assets ...string) (int64, error) {
