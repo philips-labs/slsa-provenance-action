@@ -9,6 +9,7 @@ import (
 
 	"github.com/philips-labs/slsa-provenance-action/cmd/slsa-provenance/cli/options"
 	"github.com/philips-labs/slsa-provenance-action/lib/github"
+	"github.com/philips-labs/slsa-provenance-action/lib/transport"
 )
 
 // GitHubRelease creates an instance of *cobra.Command to manage GitHub release provenance
@@ -53,6 +54,10 @@ func GitHubRelease() *cobra.Command {
 				return errors.New("GITHUB_TOKEN environment variable not set")
 			}
 			tc := github.NewOAuth2Client(cmd.Context(), func() string { return ghToken })
+			tc.Transport = transport.TeeRoundTripper{
+				RoundTripper: tc.Transport,
+				Writer:       cmd.OutOrStdout(),
+			}
 			rc := github.NewReleaseClient(tc)
 			env := github.NewReleaseEnvironment(*gh, *runner, tagName, rc)
 
