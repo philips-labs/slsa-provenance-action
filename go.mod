@@ -13,6 +13,7 @@ require (
 require (
 	github.com/google/go-containerregistry v0.6.0 // indirect
 	github.com/secure-systems-lab/go-securesystemslib v0.1.0 // indirect
+	github.com/shibumi/go-pathspec v1.2.0 // indirect
 	github.com/theupdateframework/go-tuf v0.0.0-20210722233521-90e262754396 // indirect
 	golang.org/x/sys v0.0.0-20211205182925-97ca703d548d // indirect
 	golang.org/x/term v0.0.0-20210615171337-6886f2dfbf5b // indirect
@@ -23,6 +24,7 @@ require (
 	github.com/docker/go v1.5.1-1
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
+	github.com/in-toto/in-toto-golang v0.3.3
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect

@@ -3,9 +3,11 @@ package cli_test
 import (
 	"bytes"
 	"crypto/ed25519"
+	"crypto/x509"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
+	"encoding/pem"
 	"errors"
 	"io/ioutil"
 	"os"
@@ -13,6 +15,8 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/in-toto/in-toto-golang/in_toto"
+	"github.com/in-toto/in-toto-golang/pkg/ssl"
 	"github.com/sigstore/sigstore/pkg/signature"
 	"github.com/sigstore/sigstore/pkg/signature/dsse"
 	"github.com/stretchr/testify/assert"
@@ -73,6 +77,18 @@ const (
 	  }
 	`
 )
+
+type MyVerifier struct {
+	K in_toto.Key
+}
+
+func (v MyVerifier) Verify(_ string, data, sig []byte) error {
+	s := in_toto.Signature{
+		KeyID: "",
+		Sig:   hex.EncodeToString(sig),
+	}
+	return in_toto.VerifySignature(v.K, s, data)
+}
 
 func TestSignCliOptions(t *testing.T) {
 	_, filename, _, _ := runtime.Caller(0)
@@ -272,6 +288,37 @@ func TestSignSignature(t *testing.T) {
 		assert.NoError(err)
 
 		assert.EqualValues(expected, prov)
+	})
+
+	t.Run("Test if in-toto tools like our signature", func(t *testing.T) {
+		var pubkey []byte
+		pubkey, err = x509.MarshalPKIXPublicKey(privkey.Public())
+		assert.NoError(err)
+
+		block := &pem.Block{
+			Type:  "PUBLIC KEY",
+			Bytes: pubkey,
+		}
+
+		pubKeyFile := path.Join(rootDir, "bin/public.key")
+		err = ioutil.WriteFile(pubKeyFile, pem.EncodeToMemory(block), 0644)
+		assert.NoError(err)
+		defer os.Remove(pubKeyFile)
+
+		var env ssl.Envelope
+		err = json.Unmarshal(message, &env)
+		assert.NoError(err)
+
+		var k in_toto.Key
+		k.LoadKeyDefaults(pubKeyFile)
+
+		v := MyVerifier{
+			K: k,
+		}
+
+		ev := ssl.NewEnvelopeVerifier(v)
+
+		assert.NoError(ev.Verify(&env))
 	})
 }
 
