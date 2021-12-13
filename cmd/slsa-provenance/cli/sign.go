@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 
+	cjson "github.com/docker/go/canonical/json"
 	"github.com/pkg/errors"
 	"github.com/sigstore/sigstore/pkg/signature"
 	"github.com/sigstore/sigstore/pkg/signature/dsse"
@@ -52,9 +53,8 @@ func Sign() *cobra.Command {
 
 			wrappedSigner := dsse.WrapSigner(signer, intoto.InTotoPayloadType)
 
-			// TODO canonicalize the provenance
 			var toSign []byte
-			if toSign, err = json.Marshal(provenance); err != nil {
+			if toSign, err = cjson.MarshalCanonical(provenance); err != nil {
 				// Should be impossible, but hey!
 				return errors.Wrap(err, "Could not marshal provenance for signing")
 			}
