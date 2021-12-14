@@ -147,9 +147,12 @@ The easiest way to use this action is to add the following into your workflow fi
       - name: Generate provenance for Release
         uses: philips-labs/slsa-provenance-action@v0.4.0
         with:
-          artifact_path: release-assets
-          output_path: 'provenance.json'
-          tag_name: ${{ github.ref_name }}
+          command: generate
+          subcommand: files
+          arguments: |
+            --artifact-path release-assets \
+            --output-path 'provenance.json' \
+            --tag-name: ${{ github.ref_name }}
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
   ```
