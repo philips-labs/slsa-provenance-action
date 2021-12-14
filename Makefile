@@ -20,6 +20,13 @@ LDFLAGS="-X $(PKG).GitVersion=$(GIT_VERSION) -X $(PKG).gitCommit=$(GIT_HASH) -X 
 GO_BUILD_FLAGS := -trimpath -ldflags $(LDFLAGS)
 COMMANDS       := slsa-provenance
 
+check_defined = \
+    $(strip $(foreach 1,$1, \
+        $(call __check_defined,$1,$(strip $(value 2)))))
+__check_defined = \
+    $(if $(value $1),, \
+      $(error Undefined $1$(if $2, ($2))))
+
 .PHONY: help
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-25s\033[0m %s\n", $$1, $$2}'
@@ -91,6 +98,8 @@ release-vars: ## print the release variables for goreleaser
 
 .PHONY: gh-release
 gh-release: ## Creates a new release by creating a new tag and pushing it
+	@:$(call check_defined, OLD_VERSION)
+	@:$(call check_defined, NEW_VERSION)
 	@git stash -u
 	@echo Bumping $(OLD_VERSION) to $(NEW_VERSION)…
 	@sed -i 's/$(OLD_VERSION)/$(NEW_VERSION)/g' .github/workflows/*.yaml *.yaml *.md
