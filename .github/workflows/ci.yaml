@@ -115,14 +115,38 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         run: |
           echo "::set-output name=container_digest::$(make container-digest GITHUB_REF=${{ github.ref_name }})"
-          echo "::set-output name=container_tags::$(make container-tags CONTAINER_DIGEST=${{ steps.container_info.outputs.container_digest }})"
-          echo "::set-output name=container_repos::$(echo "[$(make container-repos GITHUB_REF=${GITHUB_REF} | paste -s -d ',' -)]")"
+          echo "::set-output name=container_tags::$(make container-tags CONTAINER_DIGEST=${{ steps.container_info.outputs.container_digest }} | paste -s -d ',' -)"
+          echo "::set-output name=container_repos::$(echo "[$(make container-repos CONTAINER_DIGEST=${{ steps.container_info.outputs.container_digest }} | paste -s -d ',' -)]")"
 
       - name: Logout from Container registries
         if: ${{ always() }}
         run: |
           docker logout
           docker logout ghcr.io
+
+  container-provenance:
+    name: container-provenance
+    needs: [release]
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-20.04
+
+    strategy:
+      matrix:
+        repo: ${{ fromJSON(needs.release.outputs.container_repos) }}
+
+    steps:
+      - name: Generate provenance for Release
+        uses: philips-labs/slsa-provenance-action@v0.4.0
+        with:
+          command: generate
+          subcommand: container
+          arguments: |
+            --digest ${{ needs.release.outputs.container_digest }} \
+            --tags ${{ needs.release.outputs.container_tags }} \
+            --repositories ${{ matrix.repo }}
+
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
   provenance:
     name: provenance
