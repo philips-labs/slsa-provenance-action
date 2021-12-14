@@ -201,7 +201,7 @@ func TestListReleases(t *testing.T) {
 		return
 	}
 	assert.NotEmpty(requestLogger)
-	assert.Equal(expectedRequestPages("GET", api, opt.PerPage, 4), requestLogger.String())
+	assert.Equal(expectedRequestPages("GET", api, opt.PerPage, 3), requestLogger.String())
 	assert.GreaterOrEqual(len(releases), 2)
 
 	opt = gh.ListOptions{PerPage: 2}
