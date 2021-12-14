@@ -33,4 +33,4 @@ runs:
     - '${{ inputs.github_context }}'
     - "--runner-context"
     - '${{ inputs.runner_context }}'
-    - '${{ inputs.arguments }}'
+    - ${{ inputs.arguments }}
