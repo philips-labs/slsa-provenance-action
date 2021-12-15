@@ -24,13 +24,23 @@ inputs:
     description: 'commandline options for the given subcommand'
     required: true
 runs:
-  using: 'docker'
-  image: 'docker://ghcr.io/philips-labs/slsa-provenance:v0.4.0'
-  args:
-    - '${{ inputs.command }}'
-    - '${{ inputs.subcommand }}'
-    - "--github-context"
-    - '${{ inputs.github_context }}'
-    - "--runner-context"
-    - '${{ inputs.runner_context }}'
-    - ${{ inputs.arguments }}
+  using: 'composite'
+  steps:
+    - name: compose arguments
+      id: compose-args
+      shell: bash
+      run: |
+        args=(
+          '${{ inputs.command }}'
+          '${{ inputs.subcommand }}'
+          "--github-context"
+          '${{ inputs.github_context }}'
+          "--runner-context"
+          '${{ inputs.runner_context }}'
+          ${{ inputs.arguments }}
+        )
+
+        echo "::set-output name=provenance_args::$(echo "[${args[*]// /,}]")"
+    - uses: 'docker://ghcr.io/philips-labs/slsa-provenance:v0.4.0'
+      with:
+        args: ${{ fromJSON(steps.compose-args.outputs.provenance_args }}
