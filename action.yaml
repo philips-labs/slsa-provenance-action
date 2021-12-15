@@ -43,4 +43,4 @@ runs:
         echo "::set-output name=provenance_args::$(echo "[${args[*]// /,}]")"
     - uses: 'docker://ghcr.io/philips-labs/slsa-provenance:v0.4.0'
       with:
-        args: ${{ fromJSON(steps.compose-args.outputs.provenance_args }}
+        args: ${{ fromJSON(steps.compose-args.outputs.provenance_args) }}
