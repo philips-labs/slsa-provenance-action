@@ -30,17 +30,18 @@ runs:
       id: compose-args
       shell: bash
       run: |
-        args=(
-          '${{ inputs.command }}'
-          '${{ inputs.subcommand }}'
-          "--github-context"
-          '${{ inputs.github_context }}'
-          "--runner-context"
-          '${{ inputs.runner_context }}'
-          ${{ inputs.arguments }}
-        )
+        encoded_github="$(echo '${{ inputs.github_context }}' | base64)"
+        encoded_runner="$(echo '${{ inputs.runner_context }}' | base64)"
 
-        echo "::set-output name=provenance_args::$(echo "[${args[*]// /,}]")"
+        args=('${{ inputs.command }}')
+        args+=('${{ inputs.subcommand }}')
+        args+=('--github-context')
+        args+=("${encoded_github}")
+        args+=('--runner-context')
+        args+=("${encoded_runner}")
+        args+=('${{ inputs.arguments }}')
+
+        echo "::set-output name=provenance_args::$(echo "[$(printf "\"%s\"," ${args[*]})]" | sed 's/,]$/]/')"
     - uses: 'docker://ghcr.io/philips-labs/slsa-provenance:v0.4.0'
       with:
         args: ${{ fromJSON(steps.compose-args.outputs.provenance_args) }}
