@@ -1,0 +1,28 @@
+name: 'SLSA Sign Provenance Action'
+description: 'An action to sign SLSA build provenance'
+branding:
+  icon: lock
+  color: yellow
+inputs:
+  provenance_path:
+    description: 'path to provenance file that should be signed'
+    default: 'provenance.json'
+    required: true
+  output_path:
+    description: 'path to write the signed provenance'
+    default: 'provenance.signed.json'
+    required: true
+  key:
+    description: 'hex encoded ED25519 private key (32 byte)'
+    required: true
+runs:
+  using: 'docker'
+  image: '../Dockerfile'
+  args:
+    - "sign"
+    - "--provenance-path"
+    - '${{ inputs.provenance_path }}'
+    - "--output-path"
+    - '${{ inputs.output_path }}'
+    - "--key"
+    - '${{ inputs.key }}'

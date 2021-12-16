@@ -2,7 +2,6 @@ package intoto
 
 import (
 	"context"
-	"encoding/json"
 	"time"
 )
 
@@ -11,6 +10,9 @@ const (
 	SlsaPredicateType = "https://slsa.dev/provenance/v0.2"
 	// StatementType the type of the intoto statement
 	StatementType = "https://in-toto.io/Statement/v0.1"
+	// InTotoPayloadType is the MIME-type for PayloadType in the Envelope
+	// see https://github.com/in-toto/attestation/blob/main/spec/README.md#envelope
+	InTotoPayloadType = "application/vnd.in-toto+json"
 )
 
 // Provenancer generates provenance statements for given artifacts
@@ -69,7 +71,7 @@ func WithMetadata(buildInvocationID string) StatementOption {
 }
 
 // WithInvocation sets the Predicate Invocation and Materials
-func WithInvocation(buildType, entryPoint string, environment json.RawMessage, parameters json.RawMessage, materials []Item) StatementOption {
+func WithInvocation(buildType, entryPoint string, environment map[string]interface{}, parameters map[string]interface{}, materials []Item) StatementOption {
 	return func(s *Statement) {
 		s.Predicate.BuildType = buildType
 		s.Predicate.Invocation = Invocation{
@@ -141,9 +143,9 @@ type Metadata struct {
 
 // Invocation Identifies the configuration used for the build. When combined with materials, this SHOULD fully describe the build, such that re-running this recipe results in bit-for-bit identical output (if the build is reproducible).
 type Invocation struct {
-	ConfigSource ConfigSource    `json:"configSource"`
-	Parameters   json.RawMessage `json:"parameters"`
-	Environment  json.RawMessage `json:"environment"`
+	ConfigSource ConfigSource           `json:"configSource"`
+	Parameters   map[string]interface{} `json:"parameters"`
+	Environment  map[string]interface{} `json:"environment"`
 }
 
 // ConfigSource Describes where the config file that kicked off the build came from.

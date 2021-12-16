@@ -124,7 +124,18 @@ The Docker image includes the working binary that can be executed by using the `
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-## Usage
+## Available commands
+
+- Generate
+  Command that generates the provenance.
+- Sign
+  Command that signs an existing provenance file.
+- Help
+  Command that prints helpful information about what commands and arguments can be used.
+- Version
+  Command that prints version information about the binary that is used.
+
+### Generate Provenance
 
 The easiest way to use this action is to add the following into your workflow file. Additional configuration might be necessary to fit your usecase.
 
@@ -193,11 +204,11 @@ The easiest way to use this action is to add the following into your workflow fi
 
 </details>
 
-### Description
+#### Description
 
 An action to generate SLSA build provenance for an artifact
 
-### Inputs
+#### Inputs
 
 | parameter | description | required | default |
 | - | - | - | - |
@@ -209,14 +220,43 @@ An action to generate SLSA build provenance for an artifact
 | tag_name | The github release to generate provenance on.\n (if set the artifacts will be downloaded from the release and the provenance will be added as an additional release asset.) | `false` |  |
 | extra_materials | paths to files containing SLSA v0.1 formatted materials (JSON array) in to include in the provenance | `false` |  |
 
-### Available commands
+<p align="right">(<a href="#top">back to top</a>)</p>
 
-- Generate
-  Command that generates the provenance.
-- Help
-  Command that prints helpful information about what commands and arguments can be used.
-- Version
-  Command that prints version information about the binary that is used.
+### Sign Provenance
+
+Used like this, the action will sign an existing provenace file and generate a signed version of it in in-toto envelope format.
+
+#### Usage
+
+<details>
+  <summary>Sign provenance</summary>
+
+  Add the following part in your workflow file:
+
+  ```yaml
+  provenance:
+    name: provenance
+    needs: [release]
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Generate provenance for Release
+        uses: philips-labs/slsa-provenance-action/sign@master
+        with:
+          provenance_path: 'provenance.json'
+          output_path: 'provenance.signed.json'
+          key: ${{ secrets.signing_key }}
+  ```
+
+</details>
+
+#### Inputs
+
+| parameter | description | required | default |
+| - | - | - | - |
+| provenance_path | path to a provenance file | `true` | provenance.json  |
+| output_path | path to write build provenance file | `true` | provenance.signed.json |
+| key | hex encoded ed25519 private key | `true` |  |
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 

@@ -83,5 +83,5 @@ type RunnerContext struct {
 // The only Event with dynamically-provided input is workflow_dispatch which
 // exposes the user params at the key "input."
 type AnyEvent struct {
-	Inputs json.RawMessage `json:"inputs"`
+	Inputs map[string]interface{} `json:"inputs"`
 }
