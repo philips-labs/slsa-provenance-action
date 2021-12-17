@@ -17,6 +17,7 @@ import (
 	"github.com/philips-labs/slsa-provenance-action/lib/intoto"
 )
 
+// Sign implements the command that can sign provenance
 func Sign() *cobra.Command {
 	o := &options.SignOptions{}
 

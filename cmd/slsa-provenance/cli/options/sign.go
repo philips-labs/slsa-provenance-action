@@ -13,6 +13,7 @@ const (
 	defaultSignOutputPath = "provenance.signed.json"
 )
 
+// SignOptions are the Commandline flags for the 'sign' command
 type SignOptions struct {
 	ProvenancePath string
 	KeyPath        string
@@ -46,6 +47,7 @@ func (o *SignOptions) GetKey() (ed25519.PrivateKey, error) {
 	return ed25519.NewKeyFromSeed(privKeyData), nil
 }
 
+// GetOutputPath returns the path where the output be written
 func (o *SignOptions) GetOutputPath() (string, error) {
 	if o.OutputPath == "" {
 		return "", RequiredFlagError("--output-path")
@@ -53,6 +55,7 @@ func (o *SignOptions) GetOutputPath() (string, error) {
 	return o.OutputPath, nil
 }
 
+// GetProvenancePath returns the path to the provenance to be signed
 func (o *SignOptions) GetProvenancePath() (string, error) {
 	if o.ProvenancePath == "" {
 		return "", RequiredFlagError("--provenance-path")
@@ -61,6 +64,7 @@ func (o *SignOptions) GetProvenancePath() (string, error) {
 
 }
 
+// AddFlags registers the flags with the cmd
 func (o *SignOptions) AddFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().StringVar(&o.ProvenancePath, "provenance-path", defaultGenerateOutputPath, "")
 	cmd.PersistentFlags().StringVar(&o.KeyPath, "key-path", "", "")
