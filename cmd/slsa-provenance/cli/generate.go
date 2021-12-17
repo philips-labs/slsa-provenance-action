@@ -14,6 +14,7 @@ func Generate() *cobra.Command {
 	cmd.AddCommand(
 		Files(),
 		GitHubRelease(),
+		OCI(),
 	)
 
 	return cmd

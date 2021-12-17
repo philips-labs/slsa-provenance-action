@@ -12,7 +12,8 @@ import (
 func TestSubjects(t *testing.T) {
 	assert := assert.New(t)
 
-	s, err := Subjects("/invalid-path")
+	fps := NewFilePathSubjecter("/invalid-path")
+	s, err := fps.Subjects()
 	assert.Error(err)
 	assert.Nil(s)
 
@@ -22,19 +23,22 @@ func TestSubjects(t *testing.T) {
 	binaryName := "slsa-provenance"
 	binaryPath := path.Join(artifactPath, binaryName)
 
-	s, err = Subjects(artifactPath)
+	fps = NewFilePathSubjecter(artifactPath)
+	s, err = fps.Subjects()
 	assert.NoError(err)
 	assert.NotNil(s)
 	assert.Len(s, 1)
 	assertSubject(assert, s, binaryName, binaryPath)
 
-	s, err = Subjects(binaryPath)
+	fps = NewFilePathSubjecter(binaryPath)
+	s, err = fps.Subjects()
 	assert.NoError(err)
 	assert.NotNil(s)
 	assert.Len(s, 1)
 	assertSubject(assert, s, binaryName, binaryPath)
 
-	s, err = Subjects(".")
+	fps = NewFilePathSubjecter(".")
+	s, err = fps.Subjects()
 	assert.NoError(err)
 	assert.NotNil(s)
 

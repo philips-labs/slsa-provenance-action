@@ -17,7 +17,7 @@ const (
 
 // Provenancer generates provenance statements for given artifacts
 type Provenancer interface {
-	GenerateProvenanceStatement(ctx context.Context, artifactPath string) (*Statement, error)
+	GenerateProvenanceStatement(ctx context.Context, subjecter Subjecter) (*Statement, error)
 	PersistProvenanceStatement(ctx context.Context, stmt *Statement, path string) error
 }
 

@@ -3,25 +3,22 @@ package cli
 import (
 	"fmt"
 
+	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 
 	"github.com/philips-labs/slsa-provenance-action/cmd/slsa-provenance/cli/options"
 	"github.com/philips-labs/slsa-provenance-action/lib/github"
-	"github.com/philips-labs/slsa-provenance-action/lib/intoto"
+	"github.com/philips-labs/slsa-provenance-action/lib/oci"
 )
 
-// Files creates an instance of *cobra.Command to manage file provenance
-func Files() *cobra.Command {
-	o := &options.FilesOptions{}
+// OCI creates an instance of *cobra.Command to generate oci provenance
+func OCI() *cobra.Command {
+	o := &options.OCIOptions{}
 
 	cmd := &cobra.Command{
-		Use:   "files",
-		Short: "Generate provenance on file assets",
+		Use:   "container",
+		Short: "Generate provenance on container assets",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			artifactPath, err := o.GetArtifactPath()
-			if err != nil {
-				return err
-			}
 			outputPath, err := o.GetOutputPath()
 			if err != nil {
 				return err
@@ -42,16 +39,37 @@ func Files() *cobra.Command {
 				return err
 			}
 
+			repo, err := o.GetRepository()
+			if err != nil {
+				return err
+			}
+
+			digest, err := o.GetDigest()
+			if err != nil {
+				return err
+			}
+
+			tags, err := o.GetTags()
+			if err != nil {
+				return err
+			}
+
+			cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+			if err != nil {
+				return err
+			}
+			subjecter := oci.NewContainerSubjecter(cli, repo, digest, tags...)
+
 			env := &github.Environment{
 				Context: gh,
 				Runner:  runner,
 			}
-
-			subjecter := intoto.NewFilePathSubjecter(artifactPath)
-			stmt, err := env.GenerateProvenanceStatement(cmd.Context(), subjecter, materials...)
+			stmt, err := env.GenerateProvenanceStatement(cmd.Context(), subjecter)
 			if err != nil {
 				return fmt.Errorf("failed to generate provenance: %w", err)
 			}
+
+			stmt.Predicate.Materials = append(stmt.Predicate.Materials, materials...)
 
 			fmt.Fprintf(cmd.OutOrStdout(), "Saving provenance to %s\n", outputPath)
 
