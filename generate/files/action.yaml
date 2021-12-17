@@ -1,0 +1,40 @@
+name: 'SLSA Build Provenance Action'
+description: 'An action to generate SLSA build provenance for an artifact'
+branding:
+  icon: lock
+  color: purple
+inputs:
+  github_context:
+    description: 'internal (do not set): the "github" context object in json'
+    required: true
+    default: ${{ toJSON(github) }}
+  runner_context:
+    description: 'internal (do not set): the "runner" context object in json'
+    required: true
+    default: ${{ toJSON(runner) }}
+  output_path:
+    description: 'path to write build provenance file'
+    required: false
+    default: 'provenance.json'
+  extra_materials:
+    description: 'paths to files containing SLSA v0.1 formatted materials (JSON array) in to include in the provenance'
+    required: false
+  artifact_path:
+    description: 'path to artifact or directory of artifacts'
+    required: true
+runs:
+  using: 'docker'
+  image: '../Dockerfile'
+  args:
+    - 'generate'
+    - 'files'
+    - "--github-context"
+    - '${{ inputs.github_context }}'
+    - "--runner-context"
+    - '${{ inputs.runner_context }}'
+    - "--output-path"
+    - '${{ inputs.output_path }}'
+    - "--extra-materials"
+    - '${{ inputs.extra_materials }}'
+    - "--artifact-path"
+    - '${{ inputs.artifact_path }}'

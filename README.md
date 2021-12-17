@@ -156,14 +156,11 @@ The easiest way to use this action is to add the following into your workflow fi
 
     steps:
       - name: Generate provenance for Release
-        uses: philips-labs/slsa-provenance-action@v0.4.0
+        uses: philips-labs/slsa-provenance-action/generate/files@main # you probably want to pick a release
         with:
-          command: generate
-          subcommand: files
-          arguments: |
-            --artifact-path release-assets \
-            --output-path 'provenance.json' \
-            --tag-name: ${{ github.ref_name }}
+          artifact_path: release-assets
+          output_path: 'provenance.json'
+          tag: ${{ github.ref_name }}
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
   ```
@@ -194,7 +191,7 @@ The easiest way to use this action is to add the following into your workflow fi
           path: extra-materials/
 
       - name: Generate provenance
-        uses: philips-labs/SLSA-Provenance-Action@8c78a6b34703824b9561a26b1ae5893beea9a332
+        uses: philips-labs/slsa-provenance-action/generate/files@main # you probably want to pick a release
         with:
           artifact_path: artifact/
           extra_materials: extra-materials/file1.json extra-materials/some-more.json

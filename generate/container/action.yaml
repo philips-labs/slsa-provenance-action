@@ -1,0 +1,51 @@
+name: 'SLSA Build Provenance Action'
+description: 'An action to generate SLSA build provenance for a container'
+branding:
+  icon: lock
+  color: purple
+inputs:
+  github_context:
+    description: 'internal (do not set): the "github" context object in json'
+    required: true
+    default: ${{ toJSON(github) }}
+  runner_context:
+    description: 'internal (do not set): the "runner" context object in json'
+    required: true
+    default: ${{ toJSON(runner) }}
+  output_path:
+    description: 'path to write build provenance file'
+    required: false
+    default: 'provenance.json'
+  extra_materials:
+    description: 'paths to files containing SLSA v0.1 formatted materials (JSON array) in to include in the provenance'
+    required: false
+  repository:
+    description: 'the repository of the OCI artifact'
+    required: true
+  digest:
+    description: 'the exact digest of the OCI image name'
+    required: true
+  tags:
+    description: 'the tags used for this image at this digest'
+    required: false
+    default: 'latest'
+runs:
+  using: 'docker'
+  image: '../Dockerfile'
+  args:
+    - 'generate'
+    - 'container'
+    - "--github-context"
+    - '${{ inputs.github_context }}'
+    - "--runner-context"
+    - '${{ inputs.runner_context }}'
+    - "--output-path"
+    - '${{ inputs.output_path }}'
+    - "--extra-materials"
+    - '${{ inputs.extra_materials }}'
+    - "--repository"
+    - "${{ inputs.repository }}"
+    - "--digest"
+    - "${{ inputs.digest }}"
+    - "--tags"
+    - "${{ inputs.tags }}"

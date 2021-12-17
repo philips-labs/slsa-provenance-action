@@ -144,15 +144,11 @@ jobs:
           docker inspect ${{ matrix.repo }}@${{ needs.release.outputs.container_digest }}
 
       - name: Generate provenance for Release
-        uses: philips-labs/slsa-provenance-action@v0.4.0
+        uses: ./generate/container
         with:
-          command: generate
-          subcommand: container
-          arguments: |
-            --digest ${{ needs.release.outputs.container_digest }} \
-            --tags ${{ needs.release.outputs.container_tags }} \
-            --repositories ${{ matrix.repo }}
-
+          digest: ${{ needs.release.outputs.container_digest }}
+          tags: ${{ needs.release.outputs.container_tags }}
+          repository: ${{ matrix.repo }}
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
@@ -164,13 +160,10 @@ jobs:
 
     steps:
       - name: Generate provenance for Release
-        uses: philips-labs/slsa-provenance-action@v0.4.0
+        uses: ./generate/github-release
         with:
-          command: generate
-          subcommand: github-release
-          arguments: |
-            --artifact-path release-assets \
-            --output-path provenance.json \
-            --tag-name ${{ github.ref_name }}
+          artifact_path: release-assets
+          tag: ${{ github.ref_name }}
+          output_path: provenance.json
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
