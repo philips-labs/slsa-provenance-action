@@ -114,9 +114,10 @@ jobs:
         id: container_info
         if: startsWith(github.ref, 'refs/tags/')
         run: |
-          echo "::set-output name=container_digest::$(make container-digest GITHUB_REF=${{ github.ref_name }})"
-          echo "::set-output name=container_tags::$(make container-tags CONTAINER_DIGEST=${{ steps.container_info.outputs.container_digest }} | paste -s -d ',' -)"
-          echo "::set-output name=container_repos::$(echo "[$(make container-repos CONTAINER_DIGEST=${{ steps.container_info.outputs.container_digest }} | paste -s -d ',' -)]")"
+          export CONTAINER_DIGEST=$(make container-digest GITHUB_REF=${{ github.ref_name }})
+          echo "::set-output name=container_digest::$CONTAINER_DIGEST"
+          echo "::set-output name=container_tags::$(make container-tags CONTAINER_DIGEST="${CONTAINER_DIGEST}" | paste -s -d ',' -)"
+          echo "::set-output name=container_repos::$(make container-repos CONTAINER_DIGEST="${CONTAINER_DIGEST}" | jq --raw-input . | jq --slurp -c)"
 
       - name: Logout from Container registries
         if: ${{ always() }}
@@ -140,10 +141,7 @@ jobs:
         with:
           command: generate
           subcommand: container
-          arguments: |
-            --digest ${{ needs.release.outputs.container_digest }} \
-            --tags ${{ needs.release.outputs.container_tags }} \
-            --repositories ${{ matrix.repo }}
+          arguments: --digest ${{ needs.release.outputs.container_digest }} --tags ${{ needs.release.outputs.container_tags }} --repositories ${{ matrix.repo }}
 
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
@@ -160,9 +158,6 @@ jobs:
         with:
           command: generate
           subcommand: github-release
-          arguments: |
-            --artifact-path release-assets \
-            --output-path provenance.json \
-            --tag-name ${{ github.ref_name }}
+          arguments: --artifact-path release-assets --output-path provenance.json --tag-name ${{ github.ref_name }}
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"

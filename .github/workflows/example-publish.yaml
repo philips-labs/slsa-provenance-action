@@ -30,9 +30,7 @@ jobs:
         with:
           command: generate
           subcommand: files
-          arguments: |
-            --artifact-path artifact/ \
-            --output-path provenance.json
+          arguments: --artifact-path artifact/ --output-path provenance.json
 
       - name: Upload provenance
         uses: actions/upload-artifact@v2
