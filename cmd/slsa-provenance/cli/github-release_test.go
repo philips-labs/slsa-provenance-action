@@ -2,6 +2,7 @@ package cli_test
 
 import (
 	"context"
+	"encoding/base64"
 	"os"
 	"path"
 	"runtime"
@@ -47,15 +48,18 @@ func TestProvenenaceGitHubRelease(t *testing.T) {
 		_, err = client.Repositories.DeleteRelease(ctx, owner, repo, releaseID)
 	}()
 
+	base64GitHubContext := base64.StdEncoding.EncodeToString([]byte(githubContext))
+	base64RunnerContext := base64.StdEncoding.EncodeToString([]byte(runnerContext))
+
 	output, err := executeCommand(cli.GitHubRelease(),
 		"--artifact-path",
 		artifactPath,
 		"--github-context",
-		githubContext,
+		base64GitHubContext,
 		"--output-path",
 		provenanceFile,
 		"--runner-context",
-		runnerContext,
+		base64RunnerContext,
 		"--tag-name",
 		"v0.0.0-generate-test",
 	)

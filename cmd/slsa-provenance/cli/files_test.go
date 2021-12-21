@@ -1,6 +1,7 @@
 package cli_test
 
 import (
+	"encoding/base64"
 	"fmt"
 	"os"
 	"path"
@@ -20,6 +21,9 @@ func TestGenerateFilesCliOptions(t *testing.T) {
 	_, filename, _, _ := runtime.Caller(0)
 	rootDir := path.Join(path.Dir(filename), "../../..")
 	provenanceFile := path.Join(rootDir, "bin/unittest-provenance.json")
+
+	base64GitHubContext := base64.StdEncoding.EncodeToString([]byte(githubContext))
+	base64RunnerContext := base64.StdEncoding.EncodeToString([]byte(runnerContext))
 
 	testCases := []struct {
 		name      string
@@ -46,7 +50,7 @@ func TestGenerateFilesCliOptions(t *testing.T) {
 				"--artifact-path",
 				path.Join(rootDir, "bin/slsa-provenance"),
 				"--github-context",
-				githubContext,
+				base64GitHubContext,
 				"--output-path",
 				provenanceFile,
 			},
@@ -58,9 +62,9 @@ func TestGenerateFilesCliOptions(t *testing.T) {
 				"--artifact-path",
 				unknownFile,
 				"--github-context",
-				githubContext,
+				base64GitHubContext,
 				"--runner-context",
-				runnerContext,
+				base64RunnerContext,
 			},
 		},
 		{
@@ -70,11 +74,11 @@ func TestGenerateFilesCliOptions(t *testing.T) {
 				"--artifact-path",
 				path.Join(rootDir, "bin/slsa-provenance"),
 				"--github-context",
-				githubContext,
+				base64GitHubContext,
 				"--output-path",
 				provenanceFile,
 				"--runner-context",
-				runnerContext,
+				base64RunnerContext,
 			},
 		},
 		{
@@ -84,11 +88,11 @@ func TestGenerateFilesCliOptions(t *testing.T) {
 				"--artifact-path",
 				path.Join(rootDir, "bin/slsa-provenance"),
 				"--github-context",
-				githubContext,
+				base64GitHubContext,
 				"--output-path",
 				provenanceFile,
 				"--runner-context",
-				runnerContext,
+				base64RunnerContext,
 				"--extra-materials",
 				path.Join(rootDir, "test-data/materials-valid.json"),
 			},
@@ -100,11 +104,11 @@ func TestGenerateFilesCliOptions(t *testing.T) {
 				"--artifact-path",
 				path.Join(rootDir, "bin/slsa-provenance"),
 				"--github-context",
-				githubContext,
+				base64GitHubContext,
 				"--output-path",
 				provenanceFile,
 				"--runner-context",
-				runnerContext,
+				base64RunnerContext,
 				"--extra-materials",
 				path.Join(rootDir, "test-data/materials-broken.not-json"),
 			},
@@ -116,11 +120,11 @@ func TestGenerateFilesCliOptions(t *testing.T) {
 				"--artifact-path",
 				path.Join(rootDir, "bin/slsa-provenance"),
 				"--github-context",
-				githubContext,
+				base64GitHubContext,
 				"--output-path",
 				provenanceFile,
 				"--runner-context",
-				runnerContext,
+				base64RunnerContext,
 				"--extra-materials",
 				fmt.Sprintf("%s,%s", path.Join(rootDir, "test-data/materials-valid.json"), unknownFile),
 			},
@@ -132,11 +136,11 @@ func TestGenerateFilesCliOptions(t *testing.T) {
 				"--artifact-path",
 				path.Join(rootDir, "bin/slsa-provenance"),
 				"--github-context",
-				githubContext,
+				base64GitHubContext,
 				"--output-path",
 				provenanceFile,
 				"--runner-context",
-				runnerContext,
+				base64RunnerContext,
 				"--extra-materials",
 				path.Join(rootDir, "test-data/materials-no-uri.json"),
 			},
@@ -148,11 +152,11 @@ func TestGenerateFilesCliOptions(t *testing.T) {
 				"--artifact-path",
 				path.Join(rootDir, "bin/slsa-provenance"),
 				"--github-context",
-				githubContext,
+				base64GitHubContext,
 				"--output-path",
 				provenanceFile,
 				"--runner-context",
-				runnerContext,
+				base64RunnerContext,
 				"--extra-materials",
 				path.Join(rootDir, "test-data/materials-no-digest.json"),
 			},
