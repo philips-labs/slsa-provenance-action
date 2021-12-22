@@ -1,6 +1,8 @@
 package options
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/spf13/cobra"
+)
 
 // OCIOptions Commandline flags used for the generate oci command.
 type OCIOptions struct {
@@ -21,17 +23,13 @@ func (o *OCIOptions) GetRepository() (string, error) {
 // GetDigest The digest to validate the tag digests against.
 func (o *OCIOptions) GetDigest() (string, error) {
 	if o.Digest == "" {
-		return "", RequiredFlagError("repository")
+		return "", RequiredFlagError("digest")
 	}
 	return o.Digest, nil
 }
 
 // GetTags The tags to add as provenance subjects.
 func (o *OCIOptions) GetTags() ([]string, error) {
-	if len(o.Tags) == 0 {
-		return []string{"latest"}, nil
-	}
-
 	return o.Tags, nil
 }
 
@@ -40,5 +38,5 @@ func (o *OCIOptions) AddFlags(cmd *cobra.Command) {
 	o.GenerateOptions.AddFlags(cmd)
 	cmd.PersistentFlags().StringVar(&o.Repository, "repository", "", "The repository of the oci artifact.")
 	cmd.PersistentFlags().StringVar(&o.Digest, "digest", "", "The digest for the oci artifact.")
-	cmd.PersistentFlags().StringSliceVar(&o.Tags, "tags", nil, "The given tags for this oci release.")
+	cmd.PersistentFlags().StringSliceVar(&o.Tags, "tags", []string{"latest"}, "The given tags for this oci release.")
 }
