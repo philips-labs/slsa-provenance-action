@@ -42,6 +42,11 @@ runs:
         args+=('${{ inputs.arguments }}')
 
         echo "::set-output name=provenance_args::$(echo "[$(printf "\"%s\"," ${args[*]})]" | sed 's/,]$/]/')"
+    - name: Debug arguments
+      shell: bash
+      run: |
+        echo Running slsa-provenance with following arguments
+        echo ${{ steps.compose-args.outputs.provenance_args }}
     - uses: 'docker://ghcr.io/philips-labs/slsa-provenance:v0.4.0'
       with:
         args: ${{ fromJSON(steps.compose-args.outputs.provenance_args) }}
