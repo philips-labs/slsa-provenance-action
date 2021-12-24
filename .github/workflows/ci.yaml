@@ -94,9 +94,11 @@ jobs:
           source /tmp/spiffe-vault-release-vars.env
           if [[ -n "$LDFLAGS" ]]; then
             echo "::set-output name=LDFLAGS::$LDFLAGS"
+            echo "LDFLAGS: $LDFLAGS"
           fi
           if [[ -n "$GIT_HASH" ]]; then
             echo "::set-output name=GIT_HASH::$GIT_HASH"
+            echo "GITHASH: $GITHASH"
           fi
           rm -f /tmp/spiffe-vault-release-vars.env
 
