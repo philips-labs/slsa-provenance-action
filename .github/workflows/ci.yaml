@@ -141,7 +141,7 @@ jobs:
         with:
           command: generate
           subcommand: container
-          arguments: --digest ${{ needs.release.outputs.container_digest }} --tags ${{ needs.release.outputs.container_tags }} --repositories ${{ matrix.repo }}
+          arguments: --repository ${{ matrix.repo }} --digest ${{ needs.release.outputs.container_digest }} --tags ${{ needs.release.outputs.container_tags }}
 
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
