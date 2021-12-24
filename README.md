@@ -109,7 +109,7 @@ See all available images [here.](https://hub.docker.com/r/philipssoftware/slsa-p
 Run the Docker image by doing:
 
 ```sh
-docker run philipssoftware/slsa-provenance:v0.4.0
+docker run philipssoftware/slsa-provenance:v0.5.0
 ```
 
 **GitHub Container Registry**
@@ -117,7 +117,7 @@ See all available images [here.](https://github.com/philips-labs/slsa-provenance
 Run the Docker image by doing:
 
 ```sh
-docker run ghcr.io/philips-labs/slsa-provenance:v0.4.0
+docker run ghcr.io/philips-labs/slsa-provenance:v0.5.0
 ```
 
 The Docker image includes the working binary that can be executed by using the ``slsa-provenance`` command.
