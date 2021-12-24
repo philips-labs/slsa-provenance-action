@@ -36,9 +36,9 @@ runs:
         args=(${{ inputs.command }})
         args+=(${{ inputs.subcommand }})
         args+=(--github-context)
-        args+=(${encoded_github})
+        args+=("${encoded_github}")
         args+=(--runner-context)
-        args+=(${encoded_runner})
+        args+=("${encoded_runner}")
         args+=(${{ inputs.arguments }})
 
         echo "::set-output name=provenance_args::${args[@]}"
