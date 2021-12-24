@@ -8,23 +8,38 @@ import (
 	"path/filepath"
 )
 
+// Subjecter retrieves subjects
+type Subjecter interface {
+	Subjects() ([]Subject, error)
+}
+
+// FilePathSubjecter implements Subjector to retrieve Subject from filepath
+type FilePathSubjecter struct {
+	root string
+}
+
+// NewFilePathSubjecter walks the file or directory at "root" and hashes all files.
+func NewFilePathSubjecter(root string) *FilePathSubjecter {
+	return &FilePathSubjecter{root}
+}
+
 // Subjects walks the file or directory at "root" and hashes all files.
-func Subjects(root string) ([]Subject, error) {
+func (f *FilePathSubjecter) Subjects() ([]Subject, error) {
 	var s []Subject
-	return s, filepath.Walk(root, func(abspath string, info fs.FileInfo, err error) error {
+	return s, filepath.Walk(f.root, func(abspath string, info fs.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 		if info.IsDir() {
 			return nil
 		}
-		relpath, err := filepath.Rel(root, abspath)
+		relpath, err := filepath.Rel(f.root, abspath)
 		if err != nil {
 			return err
 		}
 		// Note: filepath.Rel() returns "." when "root" and "abspath" point to the same file.
 		if relpath == "." {
-			relpath = filepath.Base(root)
+			relpath = filepath.Base(f.root)
 		}
 
 		binary, err := os.ReadFile(abspath)

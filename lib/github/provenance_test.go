@@ -250,13 +250,15 @@ func TestGenerateProvenance(t *testing.T) {
 	runner := github.RunnerContext{}
 	_, filename, _, _ := runtime.Caller(0)
 	rootDir := path.Join(path.Dir(filename), "../..")
+
 	artifactPath := path.Join(rootDir, "bin")
+	fps := intoto.NewFilePathSubjecter(artifactPath)
 
 	env := github.Environment{
 		Context: &gh,
 		Runner:  &runner,
 	}
-	stmt, err := env.GenerateProvenanceStatement(ctx, artifactPath)
+	stmt, err := env.GenerateProvenanceStatement(ctx, fps)
 	if !assert.NoError(err) {
 		return
 	}
@@ -307,6 +309,7 @@ func TestGenerateProvenanceFromGitHubRelease(t *testing.T) {
 	_, filename, _, _ := runtime.Caller(0)
 	rootDir := path.Join(path.Dir(filename), "../..")
 	artifactPath := path.Join(rootDir, "release-assets")
+	fps := intoto.NewFilePathSubjecter(artifactPath)
 
 	tc := github.NewOAuth2Client(ctx, tokenRetriever)
 	client := github.NewReleaseClient(tc)
@@ -330,8 +333,8 @@ func TestGenerateProvenanceFromGitHubRelease(t *testing.T) {
 		assert.NoError(err)
 	}()
 
-	env := github.NewReleaseEnvironment(ghContext, runner, version, client)
-	stmt, err := env.GenerateProvenanceStatement(ctx, artifactPath)
+	env := github.NewReleaseEnvironment(ghContext, runner, version, client, artifactPath)
+	stmt, err := env.GenerateProvenanceStatement(ctx, fps)
 	if !assert.NoError(err) {
 		return
 	}
@@ -384,13 +387,16 @@ func TestGenerateProvenanceFromGitHubReleaseErrors(t *testing.T) {
 
 	version := fmt.Sprintf("v0.0.0-rel-test-%d", time.Now().UnixNano())
 
-	env := github.NewReleaseEnvironment(ghContext, github.RunnerContext{}, version, client)
+	env := github.NewReleaseEnvironment(ghContext, github.RunnerContext{}, version, client, rootDir)
 
-	stmt, err := env.GenerateProvenanceStatement(ctx, rootDir)
+	fps := intoto.NewFilePathSubjecter(rootDir)
+	stmt, err := env.GenerateProvenanceStatement(ctx, fps)
 	assert.EqualError(err, "artifactPath has to be an empty directory")
 	assert.Nil(stmt)
 
-	stmt, err = env.GenerateProvenanceStatement(ctx, path.Join(rootDir, "README.md"))
+	fps = intoto.NewFilePathSubjecter(path.Join(rootDir, "README.md"))
+	env = github.NewReleaseEnvironment(ghContext, github.RunnerContext{}, version, client, path.Join(rootDir, "README.md"))
+	stmt, err = env.GenerateProvenanceStatement(ctx, fps)
 	assert.EqualError(err, fmt.Sprintf("mkdir %s: not a directory", path.Join(rootDir, "README.md")))
 	assert.Nil(stmt)
 }

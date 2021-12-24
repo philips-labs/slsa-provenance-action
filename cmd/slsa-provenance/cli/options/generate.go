@@ -1,6 +1,7 @@
 package options
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -24,8 +25,12 @@ func (o *GenerateOptions) GetGitHubContext() (*github.Context, error) {
 	if o.GitHubContext == "" {
 		return nil, RequiredFlagError("github-context")
 	}
+	decodedContext, err := base64.StdEncoding.DecodeString(o.GitHubContext)
+	if err != nil {
+		return nil, err
+	}
 	var gh github.Context
-	if err := json.Unmarshal([]byte(o.GitHubContext), &gh); err != nil {
+	if err := json.Unmarshal(decodedContext, &gh); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal github context json: %w", err)
 	}
 	return &gh, nil
@@ -36,8 +41,12 @@ func (o *GenerateOptions) GetRunnerContext() (*github.RunnerContext, error) {
 	if o.RunnerContext == "" {
 		return nil, RequiredFlagError("runner-context")
 	}
+	decodedContext, err := base64.StdEncoding.DecodeString(o.RunnerContext)
+	if err != nil {
+		return nil, err
+	}
 	var runner github.RunnerContext
-	if err := json.Unmarshal([]byte(o.RunnerContext), &runner); err != nil {
+	if err := json.Unmarshal(decodedContext, &runner); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal runner context json: %w", err)
 	}
 	return &runner, nil

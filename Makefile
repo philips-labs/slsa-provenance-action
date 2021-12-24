@@ -20,6 +20,9 @@ LDFLAGS="-X $(PKG).GitVersion=$(GIT_VERSION) -X $(PKG).gitCommit=$(GIT_HASH) -X 
 GO_BUILD_FLAGS := -trimpath -ldflags $(LDFLAGS)
 COMMANDS       := slsa-provenance
 
+HUB_REPO := philipssoftware/slsa-provenance
+GHCR_REPO := ghcr.io/philips-labs/slsa-provenance
+
 check_defined = \
     $(strip $(foreach 1,$1, \
         $(call __check_defined,$1,$(strip $(value 2)))))
@@ -78,8 +81,11 @@ build: $(addprefix bin/,$(COMMANDS)) ## builds binaries
 .PHONY: image
 image: ## build the binary in a docker image
 	docker build \
-		-t "philipssoftware/slsa-provenance:$(GIT_TAG)" \
-		-t "philipssoftware/slsa-provenance:$(GIT_HASH)" .
+		-t "$(HUB_REPO):$(GIT_TAG)" \
+		-t "$(HUB_REPO):$(GIT_HASH)" \
+		-t "$(GHCR_REPO):$(GIT_TAG)" \
+		-t "$(GHCR_REPO):$(GIT_HASH)" \
+		.
 
 $(GO_PATH)/bin/goreleaser:
 	go install github.com/goreleaser/goreleaser@v0.182.1
@@ -119,3 +125,17 @@ gh-release: ## Creates a new release by creating a new tag and pushing it
 	@echo
 	@git stash pop
 
+.PHONY: container-digest
+container-digest: ## retrieves the container digest from the given tag
+	@:$(call check_defined, GITHUB_REF)
+	@docker inspect $(GHCR_REPO):$(subst refs/tags/,,$(GITHUB_REF)) --format '{{ index .RepoDigests 0 }}' | cut -d '@' -f 2
+
+.PHONY: container-tags
+container-tags: ## retrieves the container tags applied to the image with a given digest
+	@:$(call check_defined, CONTAINER_DIGEST)
+	@docker inspect ghcr.io/philips-labs/slsa-provenance@$(CONTAINER_DIGEST) --format '{{ join .RepoTags "\n" }}' | sed 's/.*://' | awk '!_[$$0]++'
+
+.PHONY: container-repos
+container-repos: ## retrieves the container tags applied to the image with a given digest
+	@:$(call check_defined, CONTAINER_DIGEST)
+	@docker inspect ghcr.io/philips-labs/slsa-provenance@$(CONTAINER_DIGEST) --format '{{ join .RepoTags "\n" }}' | sed 's/:.*//' | awk '!_[$$0]++'

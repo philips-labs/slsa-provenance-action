@@ -15,11 +15,9 @@ import (
 // GenerateProvenanceStatement generates provenance from the provided artifactPath
 //
 // The artifactPath can be a file or a directory.
-func (e *Environment) GenerateProvenanceStatement(ctx context.Context, artifactPath string, materials ...intoto.Item) (*intoto.Statement, error) {
-	subjects, err := intoto.Subjects(artifactPath)
-	if os.IsNotExist(err) {
-		return nil, fmt.Errorf("resource path not found: [provided=%s]", artifactPath)
-	} else if err != nil {
+func (e *Environment) GenerateProvenanceStatement(ctx context.Context, subjecter intoto.Subjecter, materials ...intoto.Item) (*intoto.Statement, error) {
+	subjects, err := subjecter.Subjects()
+	if err != nil {
 		return nil, err
 	}
 
@@ -71,21 +69,23 @@ func (e *Environment) PersistProvenanceStatement(ctx context.Context, stmt *into
 // ReleaseEnvironment implements intoto.Provenancer to Generate provenance based on a GitHub release
 type ReleaseEnvironment struct {
 	*Environment
-	rc        *ReleaseClient
-	tagName   string
-	releaseID int64
+	rc           *ReleaseClient
+	tagName      string
+	releaseID    int64
+	artifactPath string
 }
 
 // NewReleaseEnvironment creates a new instance of ReleaseEnvironment with the given tagName and provenanceClient
-func NewReleaseEnvironment(gh Context, runner RunnerContext, tagName string, rc *ReleaseClient) *ReleaseEnvironment {
+func NewReleaseEnvironment(gh Context, runner RunnerContext, tagName string, rc *ReleaseClient, artifactPath string) *ReleaseEnvironment {
 	return &ReleaseEnvironment{
 		Environment: &Environment{
 			Context: &gh,
 			Runner:  &runner,
 		},
-		rc:        rc,
-		tagName:   tagName,
-		releaseID: 0,
+		rc:           rc,
+		tagName:      tagName,
+		releaseID:    0,
+		artifactPath: artifactPath,
 	}
 }
 
@@ -94,12 +94,12 @@ func NewReleaseEnvironment(gh Context, runner RunnerContext, tagName string, rc 
 // Release assets will be downloaded to the given artifactPath
 //
 // The artifactPath has to be a directory.
-func (e *ReleaseEnvironment) GenerateProvenanceStatement(ctx context.Context, artifactPath string, materials ...intoto.Item) (*intoto.Statement, error) {
-	err := os.MkdirAll(artifactPath, 0755)
+func (e *ReleaseEnvironment) GenerateProvenanceStatement(ctx context.Context, subjecter intoto.Subjecter, materials ...intoto.Item) (*intoto.Statement, error) {
+	err := os.MkdirAll(e.artifactPath, 0755)
 	if err != nil {
 		return nil, err
 	}
-	isDir, err := isEmptyDirectory(artifactPath)
+	isDir, err := isEmptyDirectory(e.artifactPath)
 	if err != nil {
 		return nil, err
 	}
@@ -114,12 +114,12 @@ func (e *ReleaseEnvironment) GenerateProvenanceStatement(ctx context.Context, ar
 	if err != nil {
 		return nil, err
 	}
-	_, err = e.rc.DownloadReleaseAssets(ctx, owner, repo, releaseID, artifactPath)
+	_, err = e.rc.DownloadReleaseAssets(ctx, owner, repo, releaseID, e.artifactPath)
 	if err != nil {
 		return nil, err
 	}
 
-	return e.Environment.GenerateProvenanceStatement(ctx, artifactPath, materials...)
+	return e.Environment.GenerateProvenanceStatement(ctx, subjecter, materials...)
 }
 
 // PersistProvenanceStatement writes the provenance statement at the given path and uploads it to the GitHub release

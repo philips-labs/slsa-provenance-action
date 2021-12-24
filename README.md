@@ -19,7 +19,7 @@
   <h3 align="center">SLSA Provenance GitHub Action</h3>
 
   <p align="center">
-    Github Action implementation of SLSA Provenance Generation of level 1
+    Github Action to generate [SLSA provenance][slsa-provenance]
     <br>
     <a href="https://github.com/philips-labs/slsa-provenance-action/issues">Report Bug</a>
     ·
@@ -145,11 +145,11 @@ The easiest way to use this action is to add the following into your workflow fi
 
     steps:
       - name: Generate provenance for Release
-        uses: philips-labs/slsa-provenance-action@v0.4.0
+        uses: philips-labs/slsa-provenance-action@v0.5.0
         with:
-          artifact_path: release-assets
-          output_path: 'provenance.json'
-          tag_name: ${{ github.ref_name }}
+          command: generate
+          subcommand: files
+          arguments: --artifact-path release-assets --output-path 'provenance.json' --tag-name ${{ github.ref_name }}
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
   ```
@@ -180,10 +180,11 @@ The easiest way to use this action is to add the following into your workflow fi
           path: extra-materials/
 
       - name: Generate provenance
-        uses: philips-labs/SLSA-Provenance-Action@8c78a6b34703824b9561a26b1ae5893beea9a332
+        uses: philips-labs/slsa-provenance-action@v0.5.0
         with:
-          artifact_path: artifact/
-          extra_materials: extra-materials/file1.json extra-materials/some-more.json
+          command: generate
+          subcommand: files
+          arguments: --artifact-path artifact/ --extra-materials extra-materials/file1.json,extra-materials/some-more.json
 
       - name: Upload provenance
         uses: actions/upload-artifact@v2
@@ -201,22 +202,11 @@ An action to generate SLSA build provenance for an artifact
 
 | parameter | description | required | default |
 | - | - | - | - |
+| command | The slsa-provenance command to run | `false` | generate |
 | subcommand | The subcommand to use when generating provenance | `false` | files |
-| artifact_path | path to artifact or directory of artifacts | `true` |  |
-| output_path | path to write build provenance file | `false` | provenance.json |
 | github_context | internal (do not set): the "github" context object in json | `true` | ${{ toJSON(github) }} |
 | runner_context | internal (do not set): the "runner" context object in json | `true` | ${{ toJSON(runner) }} |
-| tag_name | The github release to generate provenance on.\n (if set the artifacts will be downloaded from the release and the provenance will be added as an additional release asset.) | `false` |  |
-| extra_materials | paths to files containing SLSA v0.1 formatted materials (JSON array) in to include in the provenance | `false` |  |
-
-### Available commands
-
-- Generate
-  Command that generates the provenance.
-- Help
-  Command that prints helpful information about what commands and arguments can be used.
-- Version
-  Command that prints version information about the binary that is used.
+| arguments | the arguments for the given `command` and `subcommand` | `true` |  |
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -270,3 +260,4 @@ This project is inspired by:
 [issues-url]: https://github.com/philips-labs/slsa-provenance-action/issues
 [license-shield]: https://img.shields.io/github/license/philips-labs/slsa-provenance-action.svg?style=for-the-badge
 [license-url]: https://github.com/philips-labs/slsa-provenance-action/blob/main/LICENSE.md
+[slsa-provenance]: https://slsa.dev/provenance/v0.2
