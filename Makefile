@@ -106,6 +106,7 @@ release-vars: ## print the release variables for goreleaser
 gh-release: ## Creates a new release by creating a new tag and pushing it
 	@:$(call check_defined, OLD_VERSION)
 	@:$(call check_defined, NEW_VERSION)
+	@:$(call check_defined, DESCRIPTION)
 	@git stash -u
 	@echo Bumping $(OLD_VERSION) to $(NEW_VERSION)…
 	@sed -i 's/$(OLD_VERSION)/$(NEW_VERSION)/g' .github/workflows/*.yaml *.yaml *.md
