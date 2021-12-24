@@ -30,8 +30,8 @@ runs:
       id: compose-args
       shell: bash
       run: |
-        encoded_github="$(echo '${{ inputs.github_context }}' | base64)"
-        encoded_runner="$(echo '${{ inputs.runner_context }}' | base64)"
+        encoded_github="$(echo '${{ inputs.github_context }}' | base64 -w 0)"
+        encoded_runner="$(echo '${{ inputs.runner_context }}' | base64 -w 0)"
 
         args=(${{ inputs.command }})
         args+=(${{ inputs.subcommand }})
