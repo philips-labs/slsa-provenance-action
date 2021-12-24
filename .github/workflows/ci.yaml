@@ -136,7 +136,12 @@ jobs:
         repo: ${{ fromJSON(needs.release.outputs.container_repos) }}
 
     steps:
-      - name: Generate provenance for Release
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v1.4.1
+        with:
+          cosign-release: 'v1.4.1'
+
+      - name: Generate provenance for ${{ matrix.repo }}
         uses: philips-labs/slsa-provenance-action@v0.4.0
         with:
           command: generate
@@ -145,6 +150,30 @@ jobs:
 
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Login to Container registries
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u philipssoftware --password-stdin
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login -u ${{ github.actor }} --password-stdin ghcr.io
+
+      - name: Attach provenance to image
+        run: |
+          echo '${{ secrets.COSIGN_PRIVATE_KEY }}' > cosign.key
+          cosign attest --predicate provenance.json --key cosign.key ${{ matrix.repo }}@${{ needs.release.outputs.container_digest }}
+        env:
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+
+      - name: Verify attestation
+        run: |
+          echo '${{ secrets.COSIGN_PUBLIC_KEY }}' > cosign.pub
+          cosign verify-attestation --key cosign.pub ${{ matrix.repo }}@${{ needs.release.outputs.container_digest }}
+
+      - name: Logout from Container registries
+        if: ${{ always() }}
+        run: |
+          docker logout
+          docker logout ghcr.io
 
   provenance:
     name: provenance
