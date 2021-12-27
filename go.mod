@@ -3,7 +3,7 @@ module github.com/philips-labs/slsa-provenance-action
 go 1.17
 
 require (
-	github.com/docker/docker v20.10.10+incompatible
+	github.com/docker/docker v20.10.12+incompatible
 	github.com/google/go-github/v41 v41.0.0
 	github.com/spf13/cobra v1.3.0
 	github.com/stretchr/testify v1.7.0
