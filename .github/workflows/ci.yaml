@@ -147,9 +147,12 @@ jobs:
           command: generate
           subcommand: container
           arguments: --repository ${{ matrix.repo }} --digest ${{ needs.release.outputs.container_digest }} --tags ${{ needs.release.outputs.container_tags }}
-
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Get slsa-provenance predicate
+        run: |
+          cat provenance.json | jq .predicate > provenance-predicate.json
 
       - name: Login to Container registries
         if: startsWith(github.ref, 'refs/tags/')
@@ -160,7 +163,7 @@ jobs:
       - name: Attach provenance to image
         run: |
           echo '${{ secrets.COSIGN_PRIVATE_KEY }}' > cosign.key
-          cosign attest --predicate provenance.json --key cosign.key ${{ matrix.repo }}@${{ needs.release.outputs.container_digest }}
+          cosign attest --predicate provenance-predicate.json --type slsaprovenance --key cosign.key ${{ matrix.repo }}@${{ needs.release.outputs.container_digest }}
         env:
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
 
