@@ -30,8 +30,8 @@ runs:
       id: compose-args
       shell: bash
       run: |
-        encoded_github="$(echo '${{ inputs.github_context }}' | base64 -w 0)"
-        encoded_runner="$(echo '${{ inputs.runner_context }}' | base64 -w 0)"
+        encoded_github="$( echo ${GITHUB_CONTEXT} | base64 -w 0)"
+        encoded_runner="$( echo ${RUNNER_CONTEXT} | base64 -w 0)"
 
         args=(${{ inputs.command }})
         args+=(${{ inputs.subcommand }})
@@ -42,6 +42,9 @@ runs:
         args+=(${{ inputs.arguments }})
 
         echo "::set-output name=provenance_args::${args[@]}"
+      env:
+        GITHUB_CONTEXT: ${{ inputs.github_context }}
+        RUNNER_CONTEXT: ${{ inputs.runner_context }}
     - name: Debug arguments
       shell: bash
       run: |
