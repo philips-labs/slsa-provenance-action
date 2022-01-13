@@ -30,9 +30,14 @@ archives:
     files:
       - LICENSE*
       - README*
+      - cosign.pub
+      - dist/*.sig
     format_overrides:
       - goos: windows
         format: zip
+
+checksum:
+  name_template: 'checksums.txt'
 
 dockers:
   - goos: linux
@@ -57,8 +62,57 @@ dockers:
       - "go.sum"
       - "cmd"
       - "lib"
-checksum:
-  name_template: 'checksums.txt'
+
+signs:
+  - id: checksums
+    cmd: cosign
+    stdin: '{{ .Env.COSIGN_PASSWORD }}'
+    certificate: '${artifact}.pem'
+    output: true
+    artifacts: checksum
+    args:
+      - sign-blob
+      - --key
+      - cosign.key
+      - '--output-certificate=${certificate}'
+      - '--output-signature=${signature}'
+      - '${artifact}'
+  - id: binaries
+    cmd: cosign
+    stdin: '{{ .Env.COSIGN_PASSWORD }}'
+    certificate: '{{ trimsuffix .Env.artifact ".tar.gz" }}.pem'
+    output: true
+    artifacts: binary
+    args:
+      - sign-blob
+      - --key
+      - cosign.key
+      - '--output-certificate=${certificate}'
+      - '--output-signature=${signature}'
+      - '${artifact}'
+  - id: archives
+    cmd: cosign
+    stdin: '{{ .Env.COSIGN_PASSWORD }}'
+    certificate: '{{ trimsuffix .Env.artifact ".tar.gz" }}.pem'
+    output: true
+    artifacts: archive
+    args:
+      - sign-blob
+      - --key
+      - cosign.key
+      - '--output-certificate=${certificate}'
+      - '--output-signature=${signature}'
+      - '${artifact}'
+
+docker_signs:
+  - cmd: cosign
+    artifacts: manifests
+    output: true
+    args:
+      - 'sign'
+      - --key
+      - cosign.key
+      - '${artifact}'
 
 snapshot:
   name_template: "{{ .Version }}-next"
@@ -75,3 +129,5 @@ changelog:
 release:
   draft: true
   prerelease: auto
+  extra_files:
+    - glob: "./cosign.pub"
