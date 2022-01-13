@@ -70,6 +70,9 @@ jobs:
 
     runs-on: ubuntu-20.04
 
+    env:
+      DOCKER_CLI_EXPERIMENTAL: enabled
+
     steps:
       - name: Set up Go
         uses: actions/setup-go@v2.1.5
@@ -80,6 +83,9 @@ jobs:
         uses: sigstore/cosign-installer@v1.4.1
         with:
           cosign-release: 'v1.4.1'
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1.2.0
 
       - name: Checkout
         uses: actions/checkout@v2.4.0
