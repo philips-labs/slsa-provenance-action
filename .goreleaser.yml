@@ -77,6 +77,19 @@ signs:
       - '--output-certificate=${certificate}'
       - '--output-signature=${signature}'
       - '${artifact}'
+  - id: binaries
+    cmd: cosign
+    stdin: '{{ .Env.COSIGN_PASSWORD }}'
+    certificate: '{{ trimsuffix .Env.artifact ".tar.gz" }}.pem'
+    output: true
+    artifacts: binary
+    args:
+      - sign-blob
+      - --key
+      - cosign.key
+      - '--output-certificate=${certificate}'
+      - '--output-signature=${signature}'
+      - '${artifact}'
   - id: archives
     cmd: cosign
     stdin: '{{ .Env.COSIGN_PASSWORD }}'
