@@ -47,6 +47,6 @@ runs:
       run: |
         echo Running slsa-provenance with following arguments
         echo ${{ steps.compose-args.outputs.provenance_args }}
-    - uses: 'docker://ghcr.io/philips-labs/slsa-provenance:v0.5.0'
+    - uses: 'docker://ghcr.io/philips-labs/slsa-provenance:v0.5.1-draft'
       with:
         args: ${{ steps.compose-args.outputs.provenance_args }}
