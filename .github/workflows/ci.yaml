@@ -71,6 +71,9 @@ jobs:
 
     runs-on: ubuntu-20.04
 
+    env:
+      DOCKER_CLI_EXPERIMENTAL: enabled
+
     steps:
       - name: Set up Go
         uses: actions/setup-go@v2.2.0
@@ -85,6 +88,9 @@ jobs:
 
       - name: Install Syft
         uses: anchore/sbom-action/download-syft@v0.6.0
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1.2.0
 
       - name: Checkout
         uses: actions/checkout@v2.4.0
