@@ -129,7 +129,4 @@ release:
   extra_files:
     - glob: "./cosign.pub"
   footer: |
-    {{- if .repository }}
-    **Full Changelog**: {{ .repository }}/compare/{{ .PreviousTag }}...{{ .Tag }}
-    {{- end }}
-    ---
+    **Full Changelog**: https://github.com/philips-labs/slsa-provenance-action/compare/{{ .PreviousTag }}...{{ .Tag }}
