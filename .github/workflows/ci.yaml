@@ -183,7 +183,6 @@ jobs:
 
       - name: Verify attestation
         run: |
-          echo '${{ secrets.COSIGN_PUBLIC_KEY }}' > cosign.pub
           cosign verify-attestation --key cosign.pub ${{ matrix.repo }}@${{ needs.release.outputs.container_digest }}
 
       - name: Logout from Container registries
