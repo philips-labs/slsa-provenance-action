@@ -76,6 +76,11 @@ jobs:
         with:
           go-version: 1.17
 
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v1.4.1
+        with:
+          cosign-release: 'v1.4.1'
+
       - name: Checkout
         uses: actions/checkout@v2.4.0
         with:
@@ -100,6 +105,10 @@ jobs:
           fi
           rm -f /tmp/spiffe-vault-release-vars.env
 
+      - name: Install signing key
+        run: |
+          echo '${{ secrets.COSIGN_PRIVATE_KEY }}' > cosign.key
+
       - name: Release ${{ (!startsWith(github.ref, 'refs/tags/') && 'snapshot') || '' }}
         uses: goreleaser/goreleaser-action@v2
         with:
@@ -109,6 +118,7 @@ jobs:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           LDFLAGS: ${{ steps.release-vars.outputs.LDFLAGS }}
           GIT_HASH: ${{ steps.release-vars.outputs.GIT_HASH }}
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
 
       - name: Get container info
         id: container_info
@@ -124,6 +134,10 @@ jobs:
         run: |
           docker logout
           docker logout ghcr.io
+
+      - name: Cleanup signing keys
+        if: ${{ always() }}
+        run: rm -f cosign.key
 
   container-provenance:
     name: container-provenance
@@ -142,7 +156,7 @@ jobs:
           cosign-release: 'v1.4.1'
 
       - name: Generate provenance for ${{ matrix.repo }}
-        uses: philips-labs/slsa-provenance-action@v0.5.0
+        uses: philips-labs/slsa-provenance-action@v0.5.1-draft
         with:
           command: generate
           subcommand: container
@@ -169,7 +183,6 @@ jobs:
 
       - name: Verify attestation
         run: |
-          echo '${{ secrets.COSIGN_PUBLIC_KEY }}' > cosign.pub
           cosign verify-attestation --key cosign.pub ${{ matrix.repo }}@${{ needs.release.outputs.container_digest }}
 
       - name: Logout from Container registries
@@ -177,6 +190,7 @@ jobs:
         run: |
           docker logout
           docker logout ghcr.io
+          rm -f cosign.key
 
   provenance:
     name: provenance
@@ -186,7 +200,7 @@ jobs:
 
     steps:
       - name: Generate provenance for Release
-        uses: philips-labs/slsa-provenance-action@v0.5.0
+        uses: philips-labs/slsa-provenance-action@v0.5.1-draft
         with:
           command: generate
           subcommand: github-release
