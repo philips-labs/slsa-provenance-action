@@ -195,7 +195,7 @@ func TestListReleases(t *testing.T) {
 	api := "https://api.github.com/repos/philips-labs/slsa-provenance-action/releases"
 
 	client, requestLogger := createReleaseClient(ctx)
-	opt := gh.ListOptions{PerPage: 4}
+	opt := gh.ListOptions{PerPage: 5}
 	releases, err := client.ListReleases(ctx, owner, repo, opt)
 	if !assert.NoError(err) {
 		return
