@@ -128,3 +128,8 @@ release:
   prerelease: auto
   extra_files:
     - glob: "./cosign.pub"
+  footer: |
+    {{- if .repository }}
+    **Full Changelog**: {{ .repository }}/compare/{{ .PreviousTag }}...{{ .Tag }}
+    {{- end }}
+    ---
