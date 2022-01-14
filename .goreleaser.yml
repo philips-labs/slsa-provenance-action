@@ -67,7 +67,6 @@ signs:
   - id: checksums
     cmd: cosign
     stdin: '{{ .Env.COSIGN_PASSWORD }}'
-    certificate: '${artifact}.pem'
     output: true
     artifacts: checksum
     args:
@@ -80,7 +79,6 @@ signs:
   - id: binaries
     cmd: cosign
     stdin: '{{ .Env.COSIGN_PASSWORD }}'
-    certificate: '{{ trimsuffix .Env.artifact ".tar.gz" }}.pem'
     output: true
     artifacts: binary
     args:
@@ -93,7 +91,6 @@ signs:
   - id: archives
     cmd: cosign
     stdin: '{{ .Env.COSIGN_PASSWORD }}'
-    certificate: '{{ trimsuffix .Env.artifact ".tar.gz" }}.pem'
     output: true
     artifacts: archive
     args:
