@@ -150,6 +150,9 @@ jobs:
         repo: ${{ fromJSON(needs.release.outputs.container_repos) }}
 
     steps:
+      - name: Checkout for public key
+        uses: actions/checkout@v2.4.0
+
       - name: Install cosign
         uses: sigstore/cosign-installer@v1.4.1
         with:
