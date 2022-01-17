@@ -63,6 +63,7 @@ dockers:
       - "go.sum"
       - "cmd"
       - "lib"
+      - ".git"
   - goos: linux
     goarch: arm64
     use: buildx
@@ -85,6 +86,7 @@ dockers:
       - "go.sum"
       - "cmd"
       - "lib"
+      - ".git"
 
 docker_manifests:
   - name_template: 'ghcr.io/philips-labs/{{ .ProjectName }}:v{{ .Version }}'
