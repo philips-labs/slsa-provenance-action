@@ -92,11 +92,11 @@ $(GO_PATH)/bin/goreleaser:
 
 .PHONY: snapshot-release
 snapshot-release: $(GO_PATH)/bin/goreleaser ## creates a snapshot release using goreleaser
-	LDFLAGS=$(LDFLAGS) goreleaser release --snapshot --rm-dist
+	LDFLAGS=$(LDFLAGS) goreleaser release --snapshot --rm-dist --debug
 
 .PHONY: release
 release: $(GO_PATH)/bin/goreleaser ## creates a release using goreleaser
-	LDFLAGS=$(LDFLAGS) goreleaser release
+	LDFLAGS=$(LDFLAGS) goreleaser release --debug
 
 .PHONY: release-vars
 release-vars: ## print the release variables for goreleaser
