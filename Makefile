@@ -96,7 +96,7 @@ image: ## build the binary in a docker image
 		.
 
 $(GO_PATH)/bin/goreleaser:
-	go install github.com/goreleaser/goreleaser@v1.2.5
+	go install github.com/goreleaser/goreleaser@v1.3.1
 
 .PHONY: snapshot-release
 snapshot-release: $(GO_PATH)/bin/goreleaser ## creates a snapshot release using goreleaser
