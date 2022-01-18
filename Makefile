@@ -131,6 +131,11 @@ container-digest: ## retrieves the container digest from the given tag
 	@:$(call check_defined, GITHUB_REF)
 	@docker inspect $(GHCR_REPO):$(subst refs/tags/,,$(GITHUB_REF)) --format '{{ index .RepoDigests 0 }}' | cut -d '@' -f 2
 
+.PHONY: manifest-digest
+manifest-digest: ## retrieves the container digest from the given tag
+	@:$(call check_defined, GITHUB_REF)
+	@docker manifest inspect $(GHCR_REPO):$(subst refs/tags/,,$(GITHUB_REF)) | grep digest | cut -d '"' -f 4
+
 .PHONY: container-tags
 container-tags: ## retrieves the container tags applied to the image with a given digest
 	@:$(call check_defined, CONTAINER_DIGEST)
