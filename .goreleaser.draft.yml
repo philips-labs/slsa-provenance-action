@@ -60,6 +60,8 @@ dockers:
       - "Makefile"
       - "go.mod"
       - "go.sum"
+      - ".git"
+      - ".gitignore"
       - "cmd"
       - "lib"
 
