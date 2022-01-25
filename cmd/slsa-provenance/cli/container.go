@@ -1,8 +1,15 @@
 package cli
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
+	"log"
+	"os"
+	"strings"
 
+	"github.com/docker/cli/cli/config"
+	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 
@@ -53,6 +60,19 @@ func OCI() *cobra.Command {
 			if err != nil {
 				return err
 			}
+
+			cfg := config.LoadDefaultConfigFile(&strings.Builder{})
+			log.Printf(cfg.ConfigFormat)
+			authConfig := types.AuthConfig{
+				Username: os.Getenv("DOCKER_USERNAME"),
+				Password: os.Getenv("DOCKER_PASSWORD"),
+			}
+			encodedJSON, err := json.Marshal(authConfig)
+			if err != nil {
+				panic(err)
+			}
+
+			authStr := base64.URLEncoding.EncodeToString(encodedJSON)
 
 			cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 			if err != nil {
