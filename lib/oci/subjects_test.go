@@ -5,7 +5,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/docker/docker/client"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/philips-labs/slsa-provenance-action/lib/intoto"
@@ -13,11 +12,6 @@ import (
 
 func TestSubjects(t *testing.T) {
 	assert := assert.New(t)
-
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
-	if !assert.NoError(err) {
-		return
-	}
 
 	repo := "ghcr.io/philips-labs/slsa-provenance"
 
@@ -33,14 +27,14 @@ func TestSubjects(t *testing.T) {
 			repo:   "",
 			tags:   nil,
 			digest: "",
-			err:    "invalid reference format",
+			err:    "parsing reference \":latest\": could not parse reference: :latest",
 		},
 		{
 			name:   "with non existing tag",
 			repo:   repo,
 			tags:   []string{"non-existing"},
 			digest: "",
-			err:    "Error response from daemon: manifest unknown",
+			err:    "GET https://ghcr.io/v2/philips-labs/slsa-provenance/manifests/non-existing: MANIFEST_UNKNOWN: manifest unknown",
 		},
 		{
 			name:   "invalid digest",
@@ -77,7 +71,7 @@ func TestSubjects(t *testing.T) {
 
 	for _, tc := range happyCases {
 		t.Run(tc.name, func(tt *testing.T) {
-			subjecter := NewContainerSubjecter(cli, repo, tc.digest, tc.tags...)
+			subjecter := NewContainerSubjecter(repo, tc.digest, tc.tags...)
 			s, err := subjecter.Subjects()
 			assert.NoError(err)
 			assert.NotNil(s)
@@ -91,7 +85,7 @@ func TestSubjects(t *testing.T) {
 
 	for _, tc := range errorCases {
 		t.Run(tc.name, func(tt *testing.T) {
-			subjecter := NewContainerSubjecter(cli, tc.repo, tc.digest, tc.tags...)
+			subjecter := NewContainerSubjecter(tc.repo, tc.digest, tc.tags...)
 			s, err := subjecter.Subjects()
 			assert.EqualError(err, tc.err)
 			assert.Nil(s)
