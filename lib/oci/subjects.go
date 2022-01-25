@@ -14,16 +14,17 @@ import (
 // ContainerSubjecter implements Subjector to retrieve Subject from given container
 // if digest is given, it will also compare matches with the given digest
 type ContainerSubjecter struct {
-	repo   string
-	digest string
-	tags   []string
+	options []crane.Option
+	repo    string
+	digest  string
+	tags    []string
 }
 
 // NewContainerSubjecter walks the docker tags to retrieve the digests.
 // If digest is non empty string it will be used to compare the rerieved digest
 // to match the given digest
-func NewContainerSubjecter(repo, digest string, tags ...string) *ContainerSubjecter {
-	return &ContainerSubjecter{repo, digest, tags}
+func NewContainerSubjecter(repo, digest string, tags []string, options ...crane.Option) *ContainerSubjecter {
+	return &ContainerSubjecter{options, repo, digest, tags}
 }
 
 // Subjects walks the file or directory at "root" and hashes all files.
@@ -35,7 +36,7 @@ func (c *ContainerSubjecter) Subjects() ([]intoto.Subject, error) {
 	}
 
 	for i, t := range c.tags {
-		digest, err := crane.Digest(fmt.Sprintf("%s:%s", c.repo, t))
+		digest, err := crane.Digest(fmt.Sprintf("%s:%s", c.repo, t), c.options...)
 		if err != nil {
 			return nil, err
 		}

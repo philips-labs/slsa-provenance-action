@@ -1,6 +1,7 @@
 package oci
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"testing"
@@ -14,6 +15,8 @@ func TestSubjects(t *testing.T) {
 	assert := assert.New(t)
 
 	repo := "ghcr.io/philips-labs/slsa-provenance"
+
+	opts := WithDefaultClientOptions(context.Background(), false)
 
 	errorCases := []struct {
 		name   string
@@ -71,7 +74,7 @@ func TestSubjects(t *testing.T) {
 
 	for _, tc := range happyCases {
 		t.Run(tc.name, func(tt *testing.T) {
-			subjecter := NewContainerSubjecter(repo, tc.digest, tc.tags...)
+			subjecter := NewContainerSubjecter(repo, tc.digest, tc.tags, opts...)
 			s, err := subjecter.Subjects()
 			assert.NoError(err)
 			assert.NotNil(s)
@@ -85,7 +88,7 @@ func TestSubjects(t *testing.T) {
 
 	for _, tc := range errorCases {
 		t.Run(tc.name, func(tt *testing.T) {
-			subjecter := NewContainerSubjecter(tc.repo, tc.digest, tc.tags...)
+			subjecter := NewContainerSubjecter(tc.repo, tc.digest, tc.tags, opts...)
 			s, err := subjecter.Subjects()
 			assert.EqualError(err, tc.err)
 			assert.Nil(s)
