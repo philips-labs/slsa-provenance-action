@@ -3,7 +3,6 @@ package cli
 import (
 	"fmt"
 
-	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 
 	"github.com/philips-labs/slsa-provenance-action/cmd/slsa-provenance/cli/options"
@@ -54,11 +53,8 @@ func OCI() *cobra.Command {
 				return err
 			}
 
-			cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
-			if err != nil {
-				return err
-			}
-			subjecter := oci.NewContainerSubjecter(cli, repo, digest, tags...)
+			opts := oci.WithDefaultClientOptions(cmd.Context(), true)
+			subjecter := oci.NewContainerSubjecter(repo, digest, tags, opts...)
 
 			env := &github.Environment{
 				Context: gh,
