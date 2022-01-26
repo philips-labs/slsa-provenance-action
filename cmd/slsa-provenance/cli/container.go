@@ -53,7 +53,7 @@ func OCI() *cobra.Command {
 				return err
 			}
 
-			opts := oci.WithDefaultClientOptions(cmd.Context(), true)
+			opts := o.GetRegistryClientOpts(cmd.Context())
 			subjecter := oci.NewContainerSubjecter(repo, digest, tags, opts...)
 
 			env := &github.Environment{
