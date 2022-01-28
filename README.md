@@ -246,7 +246,7 @@ Distributed under the MIT License. See [LICENSE](/LICENSE.md) for more informati
 This project is inspired by:
 
 - [SLSA Framework](https://slsa.dev/)
-- [SLSA GitHub Action Example](https://raw.githubusercontent.com/slsa-framework/github-actions-demo)
+- [SLSA GitHub Action Example](https://github.com/slsa-framework/github-actions-demo)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
