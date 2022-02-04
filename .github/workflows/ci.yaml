@@ -88,13 +88,13 @@ jobs:
         run: |
           echo '${{ secrets.COSIGN_PRIVATE_KEY }}' > cosign.key
 
-      - name: Upload SBOM to OCI
-        run: |
-          cosign upload blob -f test-data/sbom.spdx ghcr.io/philips-labs/slsa-provenance/sbom.spdx:v0.6.1-draft
-
       - name: Sign the SBOM
         run: |
-          cosign sign --key cosign.key ghcr.io/philips-labs/slsa-provenance/sbom.spdx:v0.6.1-draft
+          cosign sign-blob --key cosign.key test-data/sbom.spdx > test-data/sbom.spdx.sig
+
+      - name: Upload SBOM to OCI
+        run: |
+          cosign upload blob -f test-data/sbom.spdx -f test-data/sbom.spdx.sig ghcr.io/philips-labs/slsa-provenance/sbom.spdx:v0.6.1-draft
 
       - name: Logout from Container registries
         if: ${{ always() }}
