@@ -36,6 +36,11 @@ archives:
       - goos: windows
         format: zip
 
+sboms:
+  - artifacts: archive
+    documents:
+      - "{{ .ProjectName }}_{{ .Version }}_sbom.spdx.json"
+
 checksum:
   name_template: 'checksums.txt'
 
