@@ -139,8 +139,8 @@ jobs:
         if: ${{ always() }}
         run: rm -f cosign.key
 
-  upload-sbom:
-    name: upload-sbom
+  create-and-upload-sbom:
+    name: create-and-upload-sbom
     needs: [release]
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-20.04
@@ -160,6 +160,9 @@ jobs:
         with:
           cosign-release: 'v1.4.1'
 
+      - name: Install Syft
+        uses: anchore/sbom-action/download-syft@v0.6.0
+
       - name: Checkout
         uses: actions/checkout@v2.4.0
         with:
@@ -174,9 +177,13 @@ jobs:
         run: |
           echo '${{ secrets.COSIGN_PRIVATE_KEY }}' > cosign.key
 
+      - name: Create SBOM with Syft
+        run: |
+          syft ghcr.io/philips-labs/slsa-provenance:${{ needs.release.outputs.container_digest }} -o spdx-json > sbom.spdx.json
+
       - name: Upload SBOM to OCI
         run: |
-          cosign upload blob -f test-data/sbom.spdx ${{ matrix.repo }}/sbom.spdx@${{ needs.release.outputs.container_digest }}
+          cosign upload blob -f sbom.spdx.json ${{ matrix.repo }}/sbom.spdx@${{ needs.release.outputs.container_digest }}
 
       - name: Sign the SBOM
         run: |
