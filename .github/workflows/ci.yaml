@@ -40,10 +40,10 @@ jobs:
       - name: Build
         run: make build
 
-      - name: Test
-        env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-        run: make test-race
+      # - name: Test
+      #   env:
+      #     GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+      #   run: make test-race
 
       - name: Coverage
         env:
