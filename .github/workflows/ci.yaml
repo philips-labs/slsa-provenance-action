@@ -81,6 +81,8 @@ jobs:
         with:
           cosign-release: 'v1.4.1'
 
+      - uses: anchore/sbom-action/download-syft@v0.6.0
+
       - name: Checkout
         uses: actions/checkout@v2.4.0
         with:
