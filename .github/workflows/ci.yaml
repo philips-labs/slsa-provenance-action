@@ -98,6 +98,10 @@ jobs:
         env:
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
 
+      - name: Verify the signature of the SBOM
+        run: |
+          cosign verify --key cosign.pub ghcr.io/philips-labs/slsa-provenance/sbom.spdx:v0.6.1-draft
+
       - name: Logout from Container registries
         if: ${{ always() }}
         run: |
