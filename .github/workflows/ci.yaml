@@ -91,6 +91,8 @@ jobs:
       - name: Sign the SBOM
         run: |
           cosign sign-blob --key cosign.key test-data/sbom.spdx > test-data/sbom.spdx.sig
+        env:
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
 
       - name: Upload SBOM to OCI
         run: |
