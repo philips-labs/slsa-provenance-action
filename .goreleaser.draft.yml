@@ -39,7 +39,8 @@ archives:
 sboms:
   - artifacts: archive
     documents:
-      - "{{ .ProjectName }}_{{ .Version }}_sbom.spdx.json"
+      - "binary":   ["{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.sbom"]
+      - otherwise:  ["{{ .ArtifactName }}.sbom"]
 
 checksum:
   name_template: 'checksums.txt'
