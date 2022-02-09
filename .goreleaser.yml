@@ -36,6 +36,15 @@ archives:
       - goos: windows
         format: zip
 
+sboms:
+  -
+    id: archive-sbom
+    cmd: syft
+    args: ["${artifact}", "--file", "${artifact}.sbom.json", "--output", "spdx-json"]
+    documents:
+      - "${artifact}.sbom.json"
+    artifacts: archive
+
 checksum:
   name_template: 'checksums.txt'
 

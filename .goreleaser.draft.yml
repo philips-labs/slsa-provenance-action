@@ -37,10 +37,13 @@ archives:
         format: zip
 
 sboms:
-  - artifacts: archive
+  -
+    id: archive-sbom
+    cmd: syft
+    args: ["${artifact}", "--file", "${artifact}.sbom.json", "--output", "spdx-json"]
     documents:
-      - "binary":   ["{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.sbom"]
-      - otherwise:  ["{{ .ArtifactName }}.sbom"]
+      - "${artifact}.sbom.json"
+    artifacts: archive
 
 checksum:
   name_template: 'checksums.txt'
