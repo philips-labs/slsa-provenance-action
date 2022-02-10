@@ -81,7 +81,8 @@ jobs:
         with:
           cosign-release: 'v1.4.1'
 
-      - uses: anchore/sbom-action/download-syft@v0.6.0
+      - name: Install Syft
+        uses: anchore/sbom-action/download-syft@v0.6.2-draft
 
       - name: Checkout
         uses: actions/checkout@v2.4.0
@@ -185,17 +186,17 @@ jobs:
 
       - name: Upload SBOM to OCI
         run: |
-          cosign upload blob -f sbom.spdx.json ${{ matrix.repo }}/sbom.spdx@${{ needs.release.outputs.container_digest }}
+          cosign upload blob -f sbom.spdx.json ${{ matrix.repo }}/attestations@${{ needs.release.outputs.container_digest }}
 
       - name: Sign the SBOM
         run: |
-          cosign sign --key cosign.key ${{ matrix.repo }}/sbom.spdx@${{ needs.release.outputs.container_digest }}
+          cosign sign --key cosign.key ${{ matrix.repo }}/attestations@${{ needs.release.outputs.container_digest }}
         env:
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
 
       - name: Verify the signature of the SBOM
         run: |
-          cosign verify --key cosign.pub ${{ matrix.repo }}/sbom.spdx@${{ needs.release.outputs.container_digest }}
+          cosign verify --key cosign.pub ${{ matrix.repo }}/attestations@${{ needs.release.outputs.container_digest }}
 
       - name: Logout from Container registries
         if: ${{ always() }}
