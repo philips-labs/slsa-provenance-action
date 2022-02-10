@@ -117,7 +117,7 @@ gh-release: ## Creates a new release by creating a new tag and pushing it
 	@:$(call check_defined, DESCRIPTION)
 	@git stash -u
 	@echo Bumping $(OLD_VERSION) to $(NEW_VERSION)…
-	@$(SED) -i 's/$(OLD_VERSION)/$(NEW_VERSION)/g' .github/workflows/*.yaml *.yaml *.md
+	@$(SED) -i 's/$(OLD_VERSION)/$(NEW_VERSION)/g' .github/workflows/*.yaml *.yaml *.md *.sh
 	@git add .
 	@git commit -s -m "Bump $(OLD_VERSION) to $(NEW_VERSION) for release"
 	@git tag -sam "$(DESCRIPTION)" $(NEW_VERSION)
