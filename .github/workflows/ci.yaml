@@ -180,21 +180,21 @@ jobs:
         run: |
           echo '${{ secrets.COSIGN_PRIVATE_KEY }}' > cosign.key
 
-      - name: Create SBOM with Syft
+      - name: Create SBOM from container with Syft
         run: |
           syft ghcr.io/philips-labs/slsa-provenance:${{ needs.release.outputs.container_digest }} -o spdx-json > sbom.spdx.json
 
-      - name: Upload SBOM to OCI
+      - name: Upload Container SBOM to OCI
         run: |
           cosign upload blob -f sbom.spdx.json ${{ matrix.repo }}/attestations@${{ needs.release.outputs.container_digest }}
 
-      - name: Sign the SBOM
+      - name: Sign the container SBOM
         run: |
           cosign sign --key cosign.key ${{ matrix.repo }}/attestations@${{ needs.release.outputs.container_digest }}
         env:
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
 
-      - name: Verify the signature of the SBOM
+      - name: Verify the signature of the container SBOM
         run: |
           cosign verify --key cosign.pub ${{ matrix.repo }}/attestations@${{ needs.release.outputs.container_digest }}
 
