@@ -19,47 +19,71 @@ mkdir -p "${INSTALL_PATH}"
 VERSION=v0.7.0-rc
 RELEASE="https://github.com/philips-labs/slsa-provenance-action/releases/download/${VERSION}"
 
-OS=${RUNNER_OS:-linux}
-ARCH=${RUNNER_ARCH:-amd64}
+OS=${RUNNER_OS:-Linux}
+ARCH=${RUNNER_ARCH:-X64}
 
-log_info "Installing slsa-provenance at ${INSTALL_PATH}"
+case "${ARCH}" in
+  X64)
+    ARCH=amd64
+  ;;
+  ARM64)
+    ARCH=arm64
+  ;;
+  *)
+    log_error "unsupported ARCH ${ARCH}"
+    exit 1
+  ;;
+esac
 
-if [ "${OS}" == "Windows" ] ; then
-  OS=windows
-elif [ "${OS}" == "Linux" ] ; then
-  OS=linux
-fi
+BINARY=slsa-provenance
+case "${OS}" in
+  Linux)
+    OS=linux
+    ARCHIVE="slsa-provenance_${VERSION/v}_${OS}_${ARCH}.tar.gz"
+  ;;
+  macOS)
+    ARCHIVE="slsa-provenance_${VERSION/v}_${OS}_${ARCH}.tar.gz"
+  ;;
+  Windows)
+    OS=windows
+    ARCHIVE="slsa-provenance_${VERSION/v}_${OS}_${ARCH}.zip"
+    BINARY="${BINARY}.exe"
+  ;;
+  *)
+    log_error "unsupported OS ${OS}"
+    exit 1
+  ;;
+esac
 
-if [ "${ARCH}" == "X64" ] ; then
-  ARCH=amd64
-fi
+DOWNLOAD="${RELEASE}/${ARCHIVE}"
 
+log_info "Installing ${BINARY} (${OS}/${ARCH}) at ${INSTALL_PATH}"
 mkdir -p "$INSTALL_PATH"
 
 trap "popd >/dev/null" EXIT
 pushd "$INSTALL_PATH" > /dev/null || exit
 
-log_info "Downloading slsa-provenance_${VERSION/v}_${OS}_${ARCH}.tar.gz"
-curl -sLo slsa-provenance.tar.gz "$RELEASE/slsa-provenance_${VERSION/v}_${OS}_${ARCH}.tar.gz"
+log_info "Downloading ${ARCHIVE}"
+curl -sLo "${ARCHIVE}" "${DOWNLOAD}"
 
 if [ -x "$(command -v cosign)" ] ; then
-  log_info "Downloading slsa-provenance_${VERSION/v}_${OS}_${ARCH}.tar.gz.sig"
-  curl -sLo slsa-provenance.tar.gz.sig "$RELEASE/slsa-provenance_${VERSION/v}_${OS}_${ARCH}.tar.gz.sig"
+  log_info "Downloading ${ARCHIVE}.sig"
+  curl -sLo slsa-provenance.sig "${DOWNLOAD}.sig"
   log_info "Downloading cosign.pub"
   curl -sLo cosign.pub "$RELEASE/cosign.pub"
 
   log_info "Verifying signature…"
-  cosign verify-blob --key cosign.pub --signature slsa-provenance.tar.gz.sig slsa-provenance.tar.gz
-  rm slsa-provenance.tar.gz.sig cosign.pub
+  cosign verify-blob --key cosign.pub --signature slsa-provenance.sig "${ARCHIVE}"
+  rm slsa-provenance.sig cosign.pub
 else
   log_error >&2
   log_error "  cosign binary not installed in PATH. Unable to verify signature" >&2
   log_error >&2
 fi
 
-log_info "extracting slsa-provenance from slsa-provenance.tar.gz"
-tar -xzf slsa-provenance.tar.gz slsa-provenance
-rm slsa-provenance.tar.gz
+log_info "extracting ${BINARY} from ${ARCHIVE}"
+tar -xzf "${ARCHIVE}" "${BINARY}"
+rm "${ARCHIVE}"
 
 # for testing purposes fall back to "$INSTALL_PATH/GITHUB_PATH"
 echo "$INSTALL_PATH" >> "${GITHUB_PATH:-"$INSTALL_PATH/GITHUB_PATH"}"
