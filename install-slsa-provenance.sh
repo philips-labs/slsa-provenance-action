@@ -4,9 +4,11 @@ shopt -s expand_aliases
 if [ -z "$NO_COLOR" ]; then
   alias log_info="echo -e \"\033[1;32mINFO\033[0m:\""
   alias log_error="echo -e \"\033[1;31mERROR\033[0m:\""
+  alias log_warning="echo -e \"\033[1;33mWARN\033[0m:\""
 else
   alias log_info="echo \"INFO:\""
   alias log_error="echo \"ERROR:\""
+  alias log_warning="echo \"WARN:\""
 fi
 
 set -e
@@ -76,9 +78,11 @@ if [ -x "$(command -v cosign)" ] ; then
   cosign verify-blob --key cosign.pub --signature slsa-provenance.sig "${ARCHIVE}"
   rm slsa-provenance.sig cosign.pub
 else
-  log_error >&2
-  log_error "  cosign binary not installed in PATH. Unable to verify signature" >&2
-  log_error >&2
+  log_warning >&2
+  log_warning "  cosign binary not installed in PATH. Unable to verify signature!" >&2
+  log_warning >&2
+  log_warning "  Consider installing cosign first, to be able to verify the signature!" >&2
+  log_warning >&2
 fi
 
 log_info "extracting ${BINARY} from ${ARCHIVE}"
