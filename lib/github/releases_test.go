@@ -195,13 +195,13 @@ func TestListReleases(t *testing.T) {
 	api := "https://api.github.com/repos/philips-labs/slsa-provenance-action/releases"
 
 	client, requestLogger := createReleaseClient(ctx)
-	opt := gh.ListOptions{PerPage: 5}
+	opt := gh.ListOptions{PerPage: 10}
 	releases, err := client.ListReleases(ctx, owner, repo, opt)
 	if !assert.NoError(err) {
 		return
 	}
 	assert.NotEmpty(requestLogger)
-	assert.Equal(expectedRequestPages("GET", api, opt.PerPage, 3), requestLogger.String())
+	assert.Equal(expectedRequestPages("GET", api, opt.PerPage, 2), requestLogger.String())
 	assert.GreaterOrEqual(len(releases), 2)
 
 	opt = gh.ListOptions{PerPage: 2}
