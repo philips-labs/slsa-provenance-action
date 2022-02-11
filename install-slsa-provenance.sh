@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
 
+shopt -s expand_aliases
+if [ -z "$NO_COLOR" ]; then
+  alias log_info="echo -e \"\033[1;32mINFO\033[0m:\""
+  alias log_error="echo -e \"\033[1;31mERROR\033[0m:\""
+else
+  alias log_info="echo \"INFO:\""
+  alias log_error="echo \"ERROR:\""
+fi
+
 set -e
 
 # default to relative path if INSTALL_PATH is not set
@@ -13,7 +22,7 @@ RELEASE="https://github.com/philips-labs/slsa-provenance-action/releases/downloa
 OS=${RUNNER_OS:-linux}
 ARCH=${RUNNER_ARCH:-amd64}
 
-echo "Installing slsa-provenance at ${INSTALL_PATH}/bin"
+log_info "Installing slsa-provenance at ${INSTALL_PATH}"
 
 if [ "${OS}" == "Windows" ] ; then
   OS=windows
@@ -30,23 +39,25 @@ mkdir -p "$INSTALL_PATH"
 trap "popd >/dev/null" EXIT
 pushd "$INSTALL_PATH" > /dev/null || exit
 
-echo "Downloading slsa-provenance_${VERSION/v}_${OS}_${ARCH}.tar.gz"
+log_info "Downloading slsa-provenance_${VERSION/v}_${OS}_${ARCH}.tar.gz"
 curl -sLo slsa-provenance.tar.gz "$RELEASE/slsa-provenance_${VERSION/v}_${OS}_${ARCH}.tar.gz"
 
 if [ -x "$(command -v cosign)" ] ; then
-  echo "Downloading slsa-provenance_${VERSION/v}_${OS}_${ARCH}.tar.gz.sig"
+  log_info "Downloading slsa-provenance_${VERSION/v}_${OS}_${ARCH}.tar.gz.sig"
   curl -sLo slsa-provenance.tar.gz.sig "$RELEASE/slsa-provenance_${VERSION/v}_${OS}_${ARCH}.tar.gz.sig"
-  echo "Downloading cosign.pub"
+  log_info "Downloading cosign.pub"
   curl -sLo cosign.pub "$RELEASE/cosign.pub"
 
+  log_info "Verifying signature…"
   cosign verify-blob --key cosign.pub --signature slsa-provenance.tar.gz.sig slsa-provenance.tar.gz
   rm slsa-provenance.tar.gz.sig cosign.pub
 else
-  echo >&2
-  echo "  cosign binary not installed in PATH. Unable to verify signature" >&2
-  echo >&2
+  log_error >&2
+  log_error "  cosign binary not installed in PATH. Unable to verify signature" >&2
+  log_error >&2
 fi
 
+log_info "extracting slsa-provenance from slsa-provenance.tar.gz"
 tar -xzf slsa-provenance.tar.gz slsa-provenance
 rm slsa-provenance.tar.gz
 
