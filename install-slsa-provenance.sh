@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 shopt -s expand_aliases
+
 if [ -z "$NO_COLOR" ]; then
   alias log_info="echo -e \"\033[1;32mINFO\033[0m:\""
   alias log_error="echo -e \"\033[1;31mERROR\033[0m:\""
@@ -22,10 +23,16 @@ VERSION=v0.7.0-rc
 RELEASE="https://github.com/philips-labs/slsa-provenance-action/releases/download/${VERSION}"
 
 if [[ "$VERSION" == *-draft ]] ; then
-  html_url=$(curl -H "Authorization: token $GITHUB_TOKEN" -s https://api.github.com/repos/philips-labs/slsa-provenance-action/releases\?per_page\=10 | jq 'map(select(.name == "v0.6.2-draft"))' | jq -r '.[0].html_url')
-  RELEASE=${html_url/tag/download}
   curl_args=(-H "Authorization: token $GITHUB_TOKEN")
+  html_url=$(curl "${curl_args[@]}" -s https://api.github.com/repos/philips-labs/slsa-provenance-action/releases\?per_page\=10 | jq 'map(select(.name == "v0.6.2-draft"))' | jq -r '.[0].html_url')
+  RELEASE=${html_url/tag/download}
 fi
+
+function download {
+  log_info "Downloading ${1}…"
+  curl "${curl_args[@]}" -sLo --show-error "${1}" "${2}"
+  echo
+}
 
 OS=${RUNNER_OS:-Linux}
 ARCH=${RUNNER_ARCH:-X64}
@@ -71,14 +78,11 @@ mkdir -p "$INSTALL_PATH"
 trap "popd >/dev/null" EXIT
 pushd "$INSTALL_PATH" > /dev/null || exit
 
-log_info "Downloading ${ARCHIVE}"
-curl "${curl_args[@]}" -sLo "${ARCHIVE}" "${DOWNLOAD}"
+download "${ARCHIVE}" "${DOWNLOAD}"
 
 if [ -x "$(command -v cosign)" ] ; then
-  log_info "Downloading ${ARCHIVE}.sig"
-  curl "${curl_args[@]}" -sLo slsa-provenance.sig "${DOWNLOAD}.sig"
-  log_info "Downloading cosign.pub"
-  curl "${curl_args[@]}" -sLo cosign.pub "$RELEASE/cosign.pub"
+  download ${ARCHIVE}.sig "${DOWNLOAD}.sig"
+  download cosign.pub "$RELEASE/cosign.pub"
 
   log_info "Verifying signature…"
   cosign verify-blob --key cosign.pub --signature slsa-provenance.sig "${ARCHIVE}"
