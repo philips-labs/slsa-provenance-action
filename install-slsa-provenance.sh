@@ -21,6 +21,12 @@ mkdir -p "${INSTALL_PATH}"
 VERSION=v0.7.0-rc
 RELEASE="https://github.com/philips-labs/slsa-provenance-action/releases/download/${VERSION}"
 
+if [[ "$VERSION" == *-draft ]] ; then
+  html_url=$(curl -H "Authorization: token $GITHUB_TOKEN" -s https://api.github.com/repos/philips-labs/slsa-provenance-action/releases\?per_page\=10 | jq 'map(select(.name == "v0.6.2-draft"))' | jq -r '.[0].html_url')
+  RELEASE=${html_url/tag/download}
+  curl_args=(-H "Authorization: token $GITHUB_TOKEN")
+fi
+
 OS=${RUNNER_OS:-Linux}
 ARCH=${RUNNER_ARCH:-X64}
 
@@ -66,13 +72,13 @@ trap "popd >/dev/null" EXIT
 pushd "$INSTALL_PATH" > /dev/null || exit
 
 log_info "Downloading ${ARCHIVE}"
-curl -sLo "${ARCHIVE}" "${DOWNLOAD}"
+curl "${curl_args[@]}" -sLo "${ARCHIVE}" "${DOWNLOAD}"
 
 if [ -x "$(command -v cosign)" ] ; then
   log_info "Downloading ${ARCHIVE}.sig"
-  curl -sLo slsa-provenance.sig "${DOWNLOAD}.sig"
+  curl "${curl_args[@]}" -sLo slsa-provenance.sig "${DOWNLOAD}.sig"
   log_info "Downloading cosign.pub"
-  curl -sLo cosign.pub "$RELEASE/cosign.pub"
+  curl "${curl_args[@]}" -sLo cosign.pub "$RELEASE/cosign.pub"
 
   log_info "Verifying signature…"
   cosign verify-blob --key cosign.pub --signature slsa-provenance.sig "${ARCHIVE}"
