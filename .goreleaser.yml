@@ -37,8 +37,7 @@ archives:
         format: zip
 
 sboms:
-  -
-    id: archive-sbom
+  - id: archive-sbom
     cmd: syft
     args: ["${artifact}", "--file", "${artifact}.sbom.json", "--output", "spdx-json"]
     documents:
