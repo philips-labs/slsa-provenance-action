@@ -14,6 +14,8 @@ fi
 
 set -e
 
+GITHUB_API=${GITHUB_API:-'https://api.github.com'}
+
 # default to relative path if INSTALL_PATH is not set
 INSTALL_PATH=${INSTALL_PATH:-$(realpath ./.slsa-provenance)}
 
@@ -24,13 +26,17 @@ RELEASE="https://github.com/philips-labs/slsa-provenance-action/releases/downloa
 
 if [[ "$VERSION" == *-draft ]] ; then
   curl_args=(-H "Authorization: token $GITHUB_TOKEN")
-  html_url=$(curl "${curl_args[@]}" -s https://api.github.com/repos/philips-labs/slsa-provenance-action/releases\?per_page\=10 | jq 'map(select(.name == "v0.6.2-draft"))' | jq -r '.[0].html_url')
-  RELEASE=${html_url/tag/download}
+  assets=$(curl "${curl_args[@]}" -s "${GITHUB_API}/repos/philips-labs/slsa-provenance-action/releases?per_page=10" | jq "map(select(.name == \"${VERSION}\"))" | jq -r '.[0].assets')
 fi
 
 function download {
-  log_info "Downloading ${1}…"
-  curl "${curl_args[@]}" -sLo --show-error "${1}" "${2}"
+  url="${2}"
+  if [[ "$VERSION" == *-draft ]] ; then
+    url="$(echo "${assets}" | jq "map(select(.name == \"$1\"))" | jq -r '.[0].url')"
+    curl_args+=(-H 'Accept: application/octet-stream')
+  fi
+  log_info "Downloading ${1} from ${url}…"
+  curl -sLo "${1}" --show-error "${curl_args[@]}" "${url}"
   echo
 }
 
@@ -85,8 +91,8 @@ if [ -x "$(command -v cosign)" ] ; then
   download cosign.pub "$RELEASE/cosign.pub"
 
   log_info "Verifying signature…"
-  cosign verify-blob --key cosign.pub --signature slsa-provenance.sig "${ARCHIVE}"
-  rm slsa-provenance.sig cosign.pub
+  cosign verify-blob --key cosign.pub --signature "${ARCHIVE}.sig" "${ARCHIVE}"
+  rm "${ARCHIVE}.sig" cosign.pub
 else
   log_warning >&2
   log_warning "  cosign binary not installed in PATH. Unable to verify signature!" >&2
