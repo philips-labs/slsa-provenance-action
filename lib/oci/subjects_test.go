@@ -16,7 +16,7 @@ func TestSubjects(t *testing.T) {
 
 	repo := "ghcr.io/philips-labs/slsa-provenance"
 
-	opts := WithDefaultClientOptions(context.Background(), false)
+	opts := WithDefaultClientOptions(context.Background(), false, false)
 
 	errorCases := []struct {
 		name   string

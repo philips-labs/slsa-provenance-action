@@ -1,15 +1,22 @@
 package options
 
 import (
+	"context"
+
+	"github.com/google/go-containerregistry/pkg/crane"
 	"github.com/spf13/cobra"
+
+	"github.com/philips-labs/slsa-provenance-action/lib/oci"
 )
 
 // OCIOptions Commandline flags used for the generate oci command.
 type OCIOptions struct {
 	GenerateOptions
-	Repository string
-	Digest     string
-	Tags       []string
+	Repository         string
+	Digest             string
+	Tags               []string
+	AllowInsecure      bool
+	KubernetesKeychain bool
 }
 
 // GetRepository The oci repository to search for the given tags.
@@ -39,4 +46,12 @@ func (o *OCIOptions) AddFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().StringVar(&o.Repository, "repository", "", "The repository of the oci artifact.")
 	cmd.PersistentFlags().StringVar(&o.Digest, "digest", "", "The digest for the oci artifact.")
 	cmd.PersistentFlags().StringSliceVar(&o.Tags, "tags", []string{"latest"}, "The given tags for this oci release.")
+	cmd.Flags().BoolVar(&o.AllowInsecure, "allow-insecure", false, "whether to allow insecure connections to registries. Don't use this for anything but testing")
+	cmd.Flags().BoolVar(&o.KubernetesKeychain, "k8s-keychain", false, "whether to use the kubernetes keychain instead of the default keychain (supports workload identity).")
+}
+
+// GetRegistryClientOpts sets some sane default options for crane to authenticate
+// private registries
+func (o *OCIOptions) GetRegistryClientOpts(ctx context.Context) []crane.Option {
+	return oci.WithDefaultClientOptions(ctx, o.KubernetesKeychain, o.AllowInsecure)
 }
