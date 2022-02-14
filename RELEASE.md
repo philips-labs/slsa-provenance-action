@@ -5,7 +5,7 @@
 To make a new release you can make use of the following `make` task.
 
 ```bash
-make gh-release NEW_VERSION=v0.7.0-rc OLD_VERSION=v0.5.0 DESCRIPTION="A test release to see how it works"
+make gh-release NEW_VERSION=v0.7.0 OLD_VERSION=v0.5.0 DESCRIPTION="A test release to see how it works"
 ```
 
 `NEW_VERSION` the version that you want to release.
