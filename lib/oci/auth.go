@@ -2,6 +2,8 @@ package oci
 
 import (
 	"context"
+	"crypto/tls"
+	"net/http"
 
 	"github.com/awslabs/amazon-ecr-credential-helper/ecr-login"
 	"github.com/awslabs/amazon-ecr-credential-helper/ecr-login/api"
@@ -13,7 +15,7 @@ import (
 
 // WithDefaultClientOptions sets some sane default options for crane to authenticate
 // private registries
-func WithDefaultClientOptions(ctx context.Context, k8sKeychain bool) []crane.Option {
+func WithDefaultClientOptions(ctx context.Context, k8sKeychain, allowInsecure bool) []crane.Option {
 	opts := []crane.Option{
 		crane.WithContext(ctx),
 	}
@@ -28,6 +30,10 @@ func WithDefaultClientOptions(ctx context.Context, k8sKeychain bool) []crane.Opt
 		opts = append(opts, crane.WithAuthFromKeychain(kc))
 	} else {
 		opts = append(opts, crane.WithAuthFromKeychain(authn.DefaultKeychain))
+	}
+
+	if allowInsecure {
+		opts = append(opts, crane.WithTransport(&http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}})) // #nosec G402
 	}
 
 	return opts
