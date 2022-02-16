@@ -77,9 +77,9 @@ jobs:
           go-version: 1.17
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@v1.4.1
+        uses: sigstore/cosign-installer@v2.0.0
         with:
-          cosign-release: 'v1.4.1'
+          cosign-release: 'v1.5.1'
 
       - name: Install Syft
         uses: anchore/sbom-action/download-syft@v0.6.2-draft
@@ -147,17 +147,14 @@ jobs:
     needs: [release]
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-20.04
+    env:
+      TAGS: "${{ needs.release.outputs.container_tags }}"
 
     strategy:
       matrix:
         repo: ${{ fromJSON(needs.release.outputs.container_repos) }}
 
     steps:
-      - name: Set up Go
-        uses: actions/setup-go@v2.1.5
-        with:
-          go-version: 1.17
-
       - name: Install cosign
         uses: sigstore/cosign-installer@v2.0.0
         with:
@@ -166,43 +163,29 @@ jobs:
       - name: Install Syft
         uses: anchore/sbom-action/download-syft@v0.6.2-draft
 
-      - name: Checkout
-        uses: actions/checkout@v2.4.0
-        with:
-          fetch-depth: 0
-
       - name: Login to Container registries
         run: |
           echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u philipssoftware --password-stdin
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login -u ${{ github.actor }} --password-stdin ghcr.io
 
-      - name: Install signing key
+      - name: Attach SBOM
         run: |
+          echo '${{ secrets.COSIGN_PUBLIC_KEY }}' > cosign.pub
           echo '${{ secrets.COSIGN_PRIVATE_KEY }}' > cosign.key
+          IFS=,
+          for t in ${TAGS}; do
+            cosign verify --key cosign.pub ${{ matrix.repo }}:${{ needs.release.outputs.container_digest }}
+            syft ${{ matrix.repo }}:${{ needs.release.outputs.container_digest }} -o spdx-json > sbom-spdx.json
+            cosign attest --predicate sbom-spdx.json --type spdx --key cosign.key ${{ matrix.repo }}@${{ needs.release.outputs.container_digest }}
+            cosign verify-attestation --key cosign.pub ${{ matrix.repo }}@${{ needs.release.outputs.container_digest }}
+          done
 
-      - name: Create SBOM from container with Syft
-        run: |
-          syft ghcr.io/philips-labs/slsa-provenance:${{ needs.release.outputs.container_digest }} -o spdx-json > sbom.spdx.json
-
-      - name: Upload Container SBOM to OCI
-        run: |
-          cosign attest --predicate sbom-spdx.json --type spdx --key cosign.key docker.io/philips-software/slsa-provenance:${{ needs.release.outputs.container_digest }}
-          cosign attest --predicate sbom-spdx.json --type spdx --key cosign.key ghcr.io/philips-labs/slsa-provenance:${{ needs.release.outputs.container_digest }}
-
-      - name: Verify the signature of the SBOM attestation
-        run: |
-          cosign verify-attestation --key cosign.pub ghcr.io/philips-labs/slsa-provenance:${{ needs.release.outputs.container_digest }}
-
-      - name: Logout from Container registries
+      - name: Clean up & Logout from Container registries
         if: ${{ always() }}
         run: |
           docker logout
           docker logout ghcr.io
-
-      - name: Cleanup signing keys
-        if: ${{ always() }}
-        run: rm -f cosign.key
-
+          rm -f cosign.key
 
   container-provenance:
     name: container-provenance
@@ -216,22 +199,22 @@ jobs:
 
     steps:
       - name: Install cosign
-        uses: sigstore/cosign-installer@v1.4.1
+        uses: sigstore/cosign-installer@v2.0.0
         with:
-          cosign-release: 'v1.4.1'
+          cosign-release: 'v1.5.1'
 
       - name: Generate provenance for ${{ matrix.repo }}
-        uses: philips-labs/slsa-provenance-action@v0.6.2-draft
+        uses: philips-labs/slsa-provenance-action@v0.7.0
         with:
           command: generate
           subcommand: container
-          arguments: --repository ${{ matrix.repo }} --digest ${{ needs.release.outputs.container_digest }} --tags ${{ needs.release.outputs.container_tags }}
+          arguments: --repository ${{ matrix.repo }} --output-path provenance.att --digest ${{ needs.release.outputs.container_digest }} --tags ${{ needs.release.outputs.container_tags }}
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: Get slsa-provenance predicate
         run: |
-          cat provenance.json | jq .predicate > provenance-predicate.json
+          cat provenance.att | jq .predicate > provenance-predicate.att
 
       - name: Login to Container registries
         if: startsWith(github.ref, 'refs/tags/')
@@ -242,7 +225,7 @@ jobs:
       - name: Attach provenance to image
         run: |
           echo '${{ secrets.COSIGN_PRIVATE_KEY }}' > cosign.key
-          cosign attest --predicate provenance-predicate.json --type slsaprovenance --key cosign.key ${{ matrix.repo }}@${{ needs.release.outputs.container_digest }}
+          cosign attest --predicate provenance-predicate.att --type slsaprovenance --key cosign.key ${{ matrix.repo }}@${{ needs.release.outputs.container_digest }}
         env:
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
 
@@ -257,19 +240,3 @@ jobs:
           docker logout
           docker logout ghcr.io
           rm -f cosign.key
-
-  provenance:
-    name: provenance
-    needs: [release]
-    if: startsWith(github.ref, 'refs/tags/')
-    runs-on: ubuntu-20.04
-
-    steps:
-      - name: Generate provenance for Release
-        uses: philips-labs/slsa-provenance-action@v0.6.2-draft
-        with:
-          command: generate
-          subcommand: github-release
-          arguments: --artifact-path release-assets --output-path provenance.json --tag-name ${{ github.ref_name }}
-        env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
