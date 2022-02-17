@@ -176,10 +176,10 @@ jobs:
           echo '${{ secrets.COSIGN_PRIVATE_KEY }}' > cosign.key
           IFS=,
           for t in ${TAGS}; do
-            cosign verify --key cosign.pub ${{ matrix.repo }}:${{ needs.release.outputs.container_digest }}
-            syft ${{ matrix.repo }}:${{ needs.release.outputs.container_digest }} -o spdx-json > sbom-spdx.json
-            cosign attest --predicate sbom-spdx.json --type spdx --key cosign.key ${{ matrix.repo }}@${{ needs.release.outputs.container_digest }}
-            cosign verify-attestation --key cosign.pub ${{ matrix.repo }}@${{ needs.release.outputs.container_digest }}
+            cosign verify --key cosign.pub ${{ matrix.repo }}:${t}
+            syft ${{ matrix.repo }}:${t} -o spdx-json > sbom-spdx.json
+            cosign attest --predicate sbom-spdx.json --type spdx --key cosign.key ${{ matrix.repo }}@${t}
+            cosign verify-attestation -o verified-sbom-spdx.json --key cosign.pub ${{ matrix.repo }}@${t}
           done
 
       - name: Clean up & Logout from Container registries
