@@ -171,11 +171,14 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login -u ${{ github.actor }} --password-stdin ghcr.io
 
       - name: Attach SBOM
+        env:
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
         run: |
           echo '${{ secrets.COSIGN_PUBLIC_KEY }}' > cosign.pub
           echo '${{ secrets.COSIGN_PRIVATE_KEY }}' > cosign.key
           IFS=,
           for t in ${TAGS}; do
+            cosign verify --key cosign.pub ${{ matrix.repo }}:${t}
             syft ${{ matrix.repo }}:${t} -o spdx-json > sbom-spdx.json
             cosign attest --predicate sbom-spdx.json --type spdx --key cosign.key ${{ matrix.repo }}:${t}
             cosign verify-attestation -o verified-sbom-spdx.json --key cosign.pub ${{ matrix.repo }}:${t}
@@ -205,7 +208,7 @@ jobs:
           cosign-release: 'v1.5.1'
 
       - name: Generate provenance for ${{ matrix.repo }}
-        uses: philips-labs/slsa-provenance-action@v0.7.0
+        uses: philips-labs/slsa-provenance-action@v0.8.1-draft
         with:
           command: generate
           subcommand: container
