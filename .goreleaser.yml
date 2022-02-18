@@ -71,7 +71,8 @@ dockers:
       - ".git"
       - ".gitignore"
       - "cmd"
-      - "lib"
+      - "internal"
+      - "pkg"
 
 signs:
   - id: checksums

@@ -8,8 +8,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/philips-labs/slsa-provenance-action/lib/github"
-	"github.com/philips-labs/slsa-provenance-action/lib/intoto"
+	"github.com/philips-labs/slsa-provenance-action/pkg/github"
+	"github.com/philips-labs/slsa-provenance-action/pkg/intoto"
 )
 
 // GenerateOptions Commandline flags used for the generate command.

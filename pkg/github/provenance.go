@@ -9,7 +9,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/philips-labs/slsa-provenance-action/lib/intoto"
+	"github.com/philips-labs/slsa-provenance-action/pkg/intoto"
 )
 
 // GenerateProvenanceStatement generates provenance from the provided artifactPath

@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/philips-labs/slsa-provenance-action/lib/intoto"
+	"github.com/philips-labs/slsa-provenance-action/pkg/intoto"
 )
 
 func TestSubjects(t *testing.T) {

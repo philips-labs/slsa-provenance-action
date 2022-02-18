@@ -6,8 +6,8 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/philips-labs/slsa-provenance-action/cmd/slsa-provenance/cli/options"
-	"github.com/philips-labs/slsa-provenance-action/lib/github"
-	"github.com/philips-labs/slsa-provenance-action/lib/oci"
+	"github.com/philips-labs/slsa-provenance-action/pkg/github"
+	"github.com/philips-labs/slsa-provenance-action/pkg/oci"
 )
 
 // OCI creates an instance of *cobra.Command to generate oci provenance

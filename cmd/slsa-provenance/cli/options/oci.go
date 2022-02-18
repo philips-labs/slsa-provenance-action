@@ -6,7 +6,7 @@ import (
 	"github.com/google/go-containerregistry/pkg/crane"
 	"github.com/spf13/cobra"
 
-	"github.com/philips-labs/slsa-provenance-action/lib/oci"
+	"github.com/philips-labs/slsa-provenance-action/pkg/oci"
 )
 
 // OCIOptions Commandline flags used for the generate oci command.
