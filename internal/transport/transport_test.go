@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/philips-labs/slsa-provenance-action/lib/transport"
+	"github.com/philips-labs/slsa-provenance-action/internal/transport"
 )
 
 func TestTeeRoundTripper(t *testing.T) {

@@ -8,7 +8,7 @@ import (
 
 	"github.com/google/go-containerregistry/pkg/crane"
 
-	"github.com/philips-labs/slsa-provenance-action/lib/intoto"
+	"github.com/philips-labs/slsa-provenance-action/pkg/intoto"
 )
 
 // ContainerSubjecter implements Subjector to retrieve Subject from given container

@@ -13,8 +13,8 @@ import (
 	gh "github.com/google/go-github/v41/github"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/philips-labs/slsa-provenance-action/lib/github"
-	"github.com/philips-labs/slsa-provenance-action/lib/transport"
+	"github.com/philips-labs/slsa-provenance-action/internal/transport"
+	"github.com/philips-labs/slsa-provenance-action/pkg/github"
 )
 
 const (

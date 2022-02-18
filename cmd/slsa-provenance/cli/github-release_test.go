@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/philips-labs/slsa-provenance-action/cmd/slsa-provenance/cli"
-	"github.com/philips-labs/slsa-provenance-action/lib/github"
+	"github.com/philips-labs/slsa-provenance-action/pkg/github"
 )
 
 func TestProvenenaceGitHubRelease(t *testing.T) {
