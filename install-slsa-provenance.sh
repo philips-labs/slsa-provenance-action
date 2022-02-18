@@ -21,7 +21,7 @@ INSTALL_PATH=${INSTALL_PATH:-$(realpath ./.slsa-provenance)}
 
 mkdir -p "${INSTALL_PATH}"
 
-VERSION=v0.7.1
+VERSION=v0.7.2
 RELEASE="https://github.com/philips-labs/slsa-provenance-action/releases/download/${VERSION}"
 
 if [[ "$VERSION" == *-draft ]] ; then
