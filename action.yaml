@@ -40,8 +40,28 @@ runs:
       id: compose-args
       shell: bash
       run: |
-        encoded_github="$(echo ${GITHUB_CONTEXT} | base64 -w 0)"
-        encoded_runner="$(echo ${RUNNER_CONTEXT} | base64 -w 0)"
+        #!/bin/bash
+
+        base64func() {
+          case ${{ runner.os }} in
+            Linux)
+              echo $1 | base64 -w 0
+              ;;
+            macOS)
+              echo $1 | base64 -b 0
+              ;;
+            Windows)
+              powershell -command "[System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($1))"
+              ;;
+            *)
+              echo "unsupported OS ${{ runner.os }}"
+              exit 1
+              ;;
+          esac
+        }
+
+        encoded_github="$(base64func ${GITHUB_CONTEXT})"
+        encoded_runner="$(base64func ${RUNNER_CONTEXT})"
 
         args=(${{ inputs.command }})
         args+=(${{ inputs.subcommand }})
