@@ -18,17 +18,17 @@ func OCI() *cobra.Command {
 		Use:   "container",
 		Short: "Generate provenance on container assets",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			outputPath, err := o.GetOutputPath()
-			if err != nil {
-				return err
-			}
-
 			gh, err := o.GetGitHubContext()
 			if err != nil {
 				return err
 			}
 
 			runner, err := o.GetRunnerContext()
+			if err != nil {
+				return err
+			}
+
+			outputPath, err := o.GetOutputPath()
 			if err != nil {
 				return err
 			}

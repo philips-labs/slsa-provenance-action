@@ -21,13 +21,9 @@ func GitHubRelease() *cobra.Command {
 		Use:   "github-release",
 		Short: "Generate provenance on GitHub release assets",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			artifactPath, err := o.GetArtifactPath()
-			if err != nil {
-				return err
-			}
-			outputPath, err := o.GetOutputPath()
-			if err != nil {
-				return err
+			ghToken := os.Getenv("GITHUB_TOKEN")
+			if ghToken == "" {
+				return errors.New("GITHUB_TOKEN environment variable not set")
 			}
 
 			gh, err := o.GetGitHubContext()
@@ -36,6 +32,15 @@ func GitHubRelease() *cobra.Command {
 			}
 
 			runner, err := o.GetRunnerContext()
+			if err != nil {
+				return err
+			}
+
+			artifactPath, err := o.GetArtifactPath()
+			if err != nil {
+				return err
+			}
+			outputPath, err := o.GetOutputPath()
 			if err != nil {
 				return err
 			}
@@ -50,10 +55,6 @@ func GitHubRelease() *cobra.Command {
 				return err
 			}
 
-			ghToken := os.Getenv("GITHUB_TOKEN")
-			if ghToken == "" {
-				return errors.New("GITHUB_TOKEN environment variable not set")
-			}
 			tc := github.NewOAuth2Client(cmd.Context(), func() string { return ghToken })
 			tc.Transport = transport.TeeRoundTripper{
 				RoundTripper: tc.Transport,

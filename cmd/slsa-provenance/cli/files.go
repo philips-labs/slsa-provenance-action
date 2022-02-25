@@ -18,21 +18,21 @@ func Files() *cobra.Command {
 		Use:   "files",
 		Short: "Generate provenance on file assets",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			artifactPath, err := o.GetArtifactPath()
-			if err != nil {
-				return err
-			}
-			outputPath, err := o.GetOutputPath()
-			if err != nil {
-				return err
-			}
-
 			gh, err := o.GetGitHubContext()
 			if err != nil {
 				return err
 			}
 
 			runner, err := o.GetRunnerContext()
+			if err != nil {
+				return err
+			}
+
+			artifactPath, err := o.GetArtifactPath()
+			if err != nil {
+				return err
+			}
+			outputPath, err := o.GetOutputPath()
 			if err != nil {
 				return err
 			}

@@ -1,10 +1,11 @@
 package options
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -20,35 +21,56 @@ type GenerateOptions struct {
 	ExtraMaterials []string
 }
 
+const (
+	ContextLen = 1024 * 1024 // 1 MB
+)
+
+var (
+	// EnvGithubContext holds the environment variable name for Github context.
+	EnvGithubContext = "GITHUB_CONTEXT"
+	// EnvRunnerContext holds the environment variable name for Runner context.
+	EnvRunnerContext = "RUNNER_CONTEXT"
+)
+
 // GetGitHubContext The '${github}' context value, retrieved in a GitHub workflow.
 func (o *GenerateOptions) GetGitHubContext() (*github.Context, error) {
-	if o.GitHubContext == "" {
-		return nil, RequiredFlagError("github-context")
+	// Retrieve context by environment
+	githubContext := os.Getenv(EnvGithubContext)
+	if githubContext == "" {
+		return nil, RequiredEnvironmentVariableError(EnvGithubContext)
 	}
-	decodedContext, err := base64.StdEncoding.DecodeString(o.GitHubContext)
-	if err != nil {
-		return nil, err
-	}
+
+	// 1MB should be more than enough
+	lr := io.LimitReader(strings.NewReader(githubContext), ContextLen)
+
+	// Decode context
 	var gh github.Context
-	if err := json.Unmarshal(decodedContext, &gh); err != nil {
+	if err := json.NewDecoder(lr).Decode(&gh); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal github context json: %w", err)
 	}
+
+	// No error
 	return &gh, nil
 }
 
 // GetRunnerContext The '${runner}' context value, retrieved in a GitHub workflow.
 func (o *GenerateOptions) GetRunnerContext() (*github.RunnerContext, error) {
-	if o.RunnerContext == "" {
-		return nil, RequiredFlagError("runner-context")
+	// Retrieve context by environment
+	runnerContext := os.Getenv(EnvRunnerContext)
+	if runnerContext == "" {
+		return nil, RequiredEnvironmentVariableError(EnvRunnerContext)
 	}
-	decodedContext, err := base64.StdEncoding.DecodeString(o.RunnerContext)
-	if err != nil {
-		return nil, err
-	}
+
+	// 1MB should be more than enough
+	lr := io.LimitReader(strings.NewReader(runnerContext), ContextLen)
+
+	// Decode context
 	var runner github.RunnerContext
-	if err := json.Unmarshal(decodedContext, &runner); err != nil {
+	if err := json.NewDecoder(lr).Decode(&runner); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal runner context json: %w", err)
 	}
+
+	// No error
 	return &runner, nil
 }
 
@@ -83,8 +105,6 @@ func (o *GenerateOptions) GetExtraMaterials() ([]intoto.Item, error) {
 
 // AddFlags Registers the flags with the cobra.Command.
 func (o *GenerateOptions) AddFlags(cmd *cobra.Command) {
-	cmd.PersistentFlags().StringVar(&o.GitHubContext, "github-context", "", "The '${github}' context value.")
-	cmd.PersistentFlags().StringVar(&o.RunnerContext, "runner-context", "", "The '${runner}' context value.")
 	cmd.PersistentFlags().StringVar(&o.OutputPath, "output-path", "provenance.json", "The path to which the generated provenance should be written.")
 	cmd.PersistentFlags().StringSliceVarP(&o.ExtraMaterials, "extra-materials", "m", nil, "The '${runner}' context value.")
 }

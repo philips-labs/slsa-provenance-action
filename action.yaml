@@ -40,15 +40,8 @@ runs:
       id: compose-args
       shell: bash
       run: |
-        encoded_github="$(echo ${GITHUB_CONTEXT} | base64 -w 0)"
-        encoded_runner="$(echo ${RUNNER_CONTEXT} | base64 -w 0)"
-
         args=(${{ inputs.command }})
         args+=(${{ inputs.subcommand }})
-        args+=(--github-context)
-        args+=("${encoded_github}")
-        args+=(--runner-context)
-        args+=("${encoded_runner}")
         args+=(${{ inputs.arguments }})
 
         echo "::set-output name=provenance_args::${args[@]}"
