@@ -40,6 +40,21 @@ function download {
   echo
 }
 
+func decompress() {
+  case ${1} in
+    *.tar.gz)
+      tar xvf ${1} ${2}
+    ;;
+    *.zip)
+      unzip ${1} ${2}
+    ;;
+    *)
+      log_error "unsupported archive format"
+      exit 1
+    ;;
+  esac
+}
+
 OS=${RUNNER_OS:-Linux}
 ARCH=${RUNNER_ARCH:-X64}
 
@@ -102,7 +117,7 @@ else
 fi
 
 log_info "extracting ${BINARY} from ${ARCHIVE}"
-tar -xzf "${ARCHIVE}" "${BINARY}"
+decompress "${ARCHIVE}" "${BINARY}"
 rm "${ARCHIVE}"
 
 # for testing purposes fall back to "$INSTALL_PATH/GITHUB_PATH"
