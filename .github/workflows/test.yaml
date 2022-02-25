@@ -1,0 +1,44 @@
+name: Integration Tests
+
+on:
+  workflow_dispatch:
+
+jobs:
+  smoke-tests:
+    permissions:
+      contents: read
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v2
+      -
+        name: Create artifacts
+        run:  |
+          mkdir artifacts
+          echo "onion, tomato, jalapeno, cilantro, lime, salt" > artifacts/salsa.txt
+          echo "audi, tesla, bmw" > artifacts/cars.txt
+      -
+        name: Generate some extra materials (this usually happens as part of the build process)
+        run: |
+          echo '[{"uri": "pkg:deb/debian/stunnel4@5.50-3?arch=amd64", "digest": {"sha256": "e1731ae217fcbc64d4c00d707dcead45c828c5f762bcf8cc56d87de511e096fa"}}]' > artifacts/extra-materials.json
+      -
+        name: Install cosign
+        uses: sigstore/cosign-installer@v2.0.0
+        with:
+          cosign-release: 'v1.5.1'
+      -
+        name: Generate provenance from artifacts
+        uses: phillips/slsa-provenance-action@v0.7.2
+        with:
+          command: generate
+          subcommand: files
+          arguments: --artifact-path artifacts --extra-materials artifacts/extra-materials.json --output-path provenance.json
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+
