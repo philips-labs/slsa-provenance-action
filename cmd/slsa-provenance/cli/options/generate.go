@@ -22,6 +22,7 @@ type GenerateOptions struct {
 }
 
 const (
+	// ContextLen defines the context content limit.
 	ContextLen = 1024 * 1024 // 1 MB
 )
 
