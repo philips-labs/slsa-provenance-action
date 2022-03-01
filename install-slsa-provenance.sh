@@ -41,12 +41,12 @@ function download {
 }
 
 func decompress() {
-  case ${1} in
+  case "${1}" in
     *.tar.gz)
-      tar xvf ${1} ${2}
+      tar -xzf "${1}" "${2}"
     ;;
     *.zip)
-      unzip ${1} ${2}
+      unzip "${1}" "${2}"
     ;;
     *)
       log_error "unsupported archive format"

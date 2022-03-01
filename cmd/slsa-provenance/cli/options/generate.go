@@ -71,7 +71,6 @@ func (o *GenerateOptions) GetRunnerContext() (*github.RunnerContext, error) {
 		return nil, fmt.Errorf("failed to unmarshal runner context json: %w", err)
 	}
 
-	// No error
 	return &runner, nil
 }
 
