@@ -73,6 +73,7 @@ jobs:
     permissions:
       packages: write
       id-token: write
+      contents: write
 
     steps:
       - name: Set up Go
@@ -156,6 +157,7 @@ jobs:
     permissions:
       packages: write
       id-token: write
+      contents: write
     env:
       TAGS: "${{ needs.release.outputs.container_tags }}"
 
@@ -203,6 +205,7 @@ jobs:
     permissions:
       packages: write
       id-token: write
+      contents: write
 
     steps:
       - name: Generate provenance for Release
@@ -246,6 +249,7 @@ jobs:
     permissions:
       packages: write
       id-token: write
+      contents: write
 
     strategy:
       matrix:
