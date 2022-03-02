@@ -5,7 +5,7 @@
 To make a new release you can make use of the following `make` task.
 
 ```bash
-make gh-release NEW_VERSION=v0.7.2 OLD_VERSION=v0.5.0 DESCRIPTION="A test release to see how it works"
+make gh-release NEW_VERSION=v0.7.3-draft OLD_VERSION=v0.5.0 DESCRIPTION="A test release to see how it works"
 ```
 
 `NEW_VERSION` the version that you want to release.
@@ -15,7 +15,7 @@ make gh-release NEW_VERSION=v0.7.2 OLD_VERSION=v0.5.0 DESCRIPTION="A test releas
 Visit <https://github.com/philips-labs/slsa-provenance-action/releases>.
 Edit the release and save it to publish to GitHub Marketplace.
 
-> :warning: **NOTE:** when you need to test some changes in `.goreleaser.yml`, also apply the changes to `.goreleaser.draft.yml`. Then make sure your new `tag` ends with `-draft` (e.g.: `v0.7.2-draft`) to make a draft release to not notify our consumers when testing updates to the release process.
+> :warning: **NOTE:** when you need to test some changes in `.goreleaser.yml`, also apply the changes to `.goreleaser.draft.yml`. Then make sure your new `tag` ends with `-draft` (e.g.: `v0.7.3-draft-draft`) to make a draft release to not notify our consumers when testing updates to the release process.
 
 ### ⚠ Important alert for MacOS users ⚠
 
