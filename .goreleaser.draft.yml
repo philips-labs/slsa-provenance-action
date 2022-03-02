@@ -6,6 +6,7 @@ before:
 
 env:
   - CGO_ENABLED=0
+  - COSIGN_EXPERIMENTAL=1
 
 builds:
   - id: binary
@@ -82,8 +83,6 @@ signs:
     artifacts: checksum
     args:
       - sign-blob
-      - --key
-      - cosign.key
       - '--output-certificate=${certificate}'
       - '--output-signature=${signature}'
       - '${artifact}'
@@ -94,8 +93,6 @@ signs:
     artifacts: binary
     args:
       - sign-blob
-      - --key
-      - cosign.key
       - '--output-certificate=${certificate}'
       - '--output-signature=${signature}'
       - '${artifact}'
@@ -106,8 +103,6 @@ signs:
     artifacts: archive
     args:
       - sign-blob
-      - --key
-      - cosign.key
       - '--output-certificate=${certificate}'
       - '--output-signature=${signature}'
       - '${artifact}'
@@ -118,8 +113,6 @@ signs:
     artifacts: sbom
     args:
       - sign-blob
-      - --key
-      - cosign.key
       - '--output-certificate=${certificate}'
       - '--output-signature=${signature}'
       - '${artifact}'
@@ -130,8 +123,6 @@ docker_signs:
     output: true
     args:
       - 'sign'
-      - --key
-      - cosign.key
       - '${artifact}'
 
 snapshot:
