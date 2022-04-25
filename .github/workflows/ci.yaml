@@ -18,7 +18,7 @@ jobs:
           check-latest: true
 
       - name: Checkout
-        uses: actions/checkout@v3.0.1
+        uses: actions/checkout@v3.0.2
 
       - name: Cache Go modules
         uses: actions/cache@v3.0.2
@@ -87,7 +87,7 @@ jobs:
         uses: anchore/sbom-action/download-syft@v0.10.0
 
       - name: Checkout
-        uses: actions/checkout@v3.0.1
+        uses: actions/checkout@v3.0.2
         with:
           fetch-depth: 0
 
