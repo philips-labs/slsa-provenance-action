@@ -6,6 +6,10 @@ before:
 
 env:
   - CGO_ENABLED=0
+  - DOCKER_CLI_EXPERIMENTAL=enabled
+
+checksum:
+  name_template: 'checksums.txt'
 
 builds:
   - id: binary
@@ -44,19 +48,40 @@ sboms:
       - "${artifact}.sbom.json"
     artifacts: archive
 
-checksum:
-  name_template: 'checksums.txt'
-
 dockers:
   - goos: linux
     goarch: amd64
+    use: buildx
     image_templates:
-      - "philipssoftware/{{ .ProjectName }}:v{{ .Version }}"
-      - "philipssoftware/{{ .ProjectName }}:{{ .FullCommit }}"
-      - "ghcr.io/philips-labs/{{ .ProjectName }}:v{{ .Version }}"
-      - "ghcr.io/philips-labs/{{ .ProjectName }}:{{ .FullCommit }}"
+      - "ghcr.io/philips-labs/{{ .ProjectName }}:v{{ .Version }}-amd64"
+      - "philipssoftware/{{ .ProjectName }}:v{{ .Version }}-amd64"
     build_flag_templates:
       - "--pull"
+      - "--platform=linux/amd64"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.description={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version=v{{.Version}}"
+      - "--label=org.opencontainers.image.licenses=MIT"
+      - "--label=org.opencontainers.image.vendor=Koninklijke Philips N.V."
+    extra_files:
+      - "Makefile"
+      - "go.mod"
+      - "go.sum"
+      - ".git"
+      - ".gitignore"
+      - "cmd"
+      - "lib"
+  - goos: linux
+    goarch: arm64
+    use: buildx
+    image_templates:
+      - "ghcr.io/philips-labs/{{ .ProjectName }}:v{{ .Version }}-arm64v8"
+      - "philipssoftware/{{ .ProjectName }}:v{{ .Version }}-arm64v8"
+    build_flag_templates:
+      - "--pull"
+      - "--platform=linux/arm64/v8"
       - "--label=org.opencontainers.image.created={{.Date}}"
       - "--label=org.opencontainers.image.title={{.ProjectName}}"
       - "--label=org.opencontainers.image.description={{.ProjectName}}"
@@ -73,6 +98,24 @@ dockers:
       - "cmd"
       - "internal"
       - "pkg"
+
+docker_manifests:
+  - name_template: 'ghcr.io/philips-labs/{{ .ProjectName }}:v{{ .Version }}'
+    image_templates:
+      - 'ghcr.io/philips-labs/{{ .ProjectName }}:v{{ .Version }}-amd64'
+      - 'ghcr.io/philips-labs/{{ .ProjectName }}:v{{ .Version }}-arm64v8'
+  - name_template: 'ghcr.io/philips-labs/{{ .ProjectName }}:{{ .FullCommit }}'
+    image_templates:
+      - 'ghcr.io/philips-labs/{{ .ProjectName }}:v{{ .Version }}-amd64'
+      - 'ghcr.io/philips-labs/{{ .ProjectName }}:v{{ .Version }}-arm64v8'
+  - name_template: 'philipssoftware/{{ .ProjectName }}:{{ .FullCommit }}'
+    image_templates:
+      - 'philipssoftware/{{ .ProjectName }}:v{{ .Version }}-amd64'
+      - 'philipssoftware/{{ .ProjectName }}:v{{ .Version }}-arm64v8'
+  - name_template: 'philipssoftware/{{ .ProjectName }}:v{{ .Version }}'
+    image_templates:
+      - 'philipssoftware/{{ .ProjectName }}:v{{ .Version }}-amd64'
+      - 'philipssoftware/{{ .ProjectName }}:v{{ .Version }}-arm64v8'
 
 signs:
   - id: checksums

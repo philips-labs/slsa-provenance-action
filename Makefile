@@ -96,15 +96,15 @@ image: ## build the binary in a docker image
 		.
 
 $(GO_PATH)/bin/goreleaser:
-	go install github.com/goreleaser/goreleaser@v1.2.5
+	go install github.com/goreleaser/goreleaser@v1.3.1
 
 .PHONY: snapshot-release
 snapshot-release: $(GO_PATH)/bin/goreleaser ## creates a snapshot release using goreleaser
-	LDFLAGS=$(LDFLAGS) goreleaser release --snapshot --rm-dist
+	LDFLAGS=$(LDFLAGS) goreleaser release --snapshot --rm-dist --debug
 
 .PHONY: release
 release: $(GO_PATH)/bin/goreleaser ## creates a release using goreleaser
-	LDFLAGS=$(LDFLAGS) goreleaser release
+	LDFLAGS=$(LDFLAGS) goreleaser release --debug
 
 .PHONY: release-vars
 release-vars: ## print the release variables for goreleaser
@@ -138,6 +138,11 @@ gh-release: ## Creates a new release by creating a new tag and pushing it
 container-digest: ## retrieves the container digest from the given tag
 	@:$(call check_defined, GITHUB_REF)
 	@docker inspect $(GHCR_REPO):$(subst refs/tags/,,$(GITHUB_REF)) --format '{{ index .RepoDigests 0 }}' | cut -d '@' -f 2
+
+.PHONY: manifest-digest
+manifest-digest: ## retrieves the container digest from the given tag
+	@:$(call check_defined, GITHUB_REF)
+	@docker manifest inspect $(GHCR_REPO):$(subst refs/tags/,,$(GITHUB_REF)) | grep digest | cut -d '"' -f 4
 
 .PHONY: container-tags
 container-tags: ## retrieves the container tags applied to the image with a given digest
