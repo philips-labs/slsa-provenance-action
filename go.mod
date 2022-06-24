@@ -1,6 +1,6 @@
 module github.com/philips-labs/slsa-provenance-action
 
-go 1.17
+go 1.18
 
 require (
 	github.com/awslabs/amazon-ecr-credential-helper/ecr-login v0.0.0-20211215200129-69c85dc22db6
