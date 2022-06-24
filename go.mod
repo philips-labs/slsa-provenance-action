@@ -7,7 +7,7 @@ require (
 	github.com/chrismellard/docker-credential-acr-env v0.0.0-20220119192733-fe33c00cee21
 	github.com/google/go-containerregistry v0.9.0
 	github.com/google/go-github/v41 v41.0.0
-	github.com/spf13/cobra v1.4.0
+	github.com/spf13/cobra v1.5.0
 	github.com/stretchr/testify v1.7.5
 	golang.org/x/oauth2 v0.0.0-20220411215720-9780585627b5
 )
