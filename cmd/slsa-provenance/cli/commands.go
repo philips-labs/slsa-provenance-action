@@ -21,6 +21,12 @@ func RequiredFlagError(flagName string) error {
 	return fmt.Errorf("no value found for required flag: %s", flagName)
 }
 
+// RequiredEnvironmentVariableError creates a required environment variable
+// error for the given environment variable name
+func RequiredEnvironmentVariableError(envName string) error {
+	return fmt.Errorf("no value found for required environment variable: %s", envName)
+}
+
 // New creates a new instance of the slsa-provenance commandline interface
 func New() *cobra.Command {
 	cmd := &cobra.Command{

@@ -1,7 +1,6 @@
 package cli_test
 
 import (
-	"encoding/base64"
 	"fmt"
 	"os"
 	"path"
@@ -22,37 +21,33 @@ func TestGenerateFilesCliOptions(t *testing.T) {
 	rootDir := path.Join(path.Dir(filename), "../../..")
 	provenanceFile := path.Join(rootDir, "bin/unittest-provenance.json")
 
-	base64GitHubContext := base64.StdEncoding.EncodeToString([]byte(githubContext))
-	base64RunnerContext := base64.StdEncoding.EncodeToString([]byte(runnerContext))
-
 	testCases := []struct {
-		name      string
-		err       error
-		arguments []string
+		name        string
+		err         error
+		arguments   []string
+		environment map[string]string
 	}{
 		{
-			name:      "without commandline flags",
-			err:       cli.RequiredFlagError("artifact-path"),
-			arguments: make([]string, 0),
+			name:        "no environment variables",
+			err:         cli.RequiredEnvironmentVariableError("GITHUB_CONTEXT"),
+			arguments:   []string{},
+			environment: map[string]string{},
 		},
 		{
-			name: "only providing --artifact-path",
-			err:  cli.RequiredFlagError("github-context"),
-			arguments: []string{
-				"--artifact-path",
-				path.Join(rootDir, "bin/slsa-provenance"),
+			name:      "only github-context given",
+			err:       cli.RequiredEnvironmentVariableError("RUNNER_CONTEXT"),
+			arguments: []string{},
+			environment: map[string]string{
+				"GITHUB_CONTEXT": githubContext,
 			},
 		},
 		{
-			name: "without -runner-context",
-			err:  cli.RequiredFlagError("runner-context"),
-			arguments: []string{
-				"--artifact-path",
-				path.Join(rootDir, "bin/slsa-provenance"),
-				"--github-context",
-				base64GitHubContext,
-				"--output-path",
-				provenanceFile,
+			name:      "only contexts given",
+			err:       cli.RequiredFlagError("artifact-path"),
+			arguments: []string{},
+			environment: map[string]string{
+				"GITHUB_CONTEXT": githubContext,
+				"RUNNER_CONTEXT": runnerContext,
 			},
 		},
 		{
@@ -61,10 +56,24 @@ func TestGenerateFilesCliOptions(t *testing.T) {
 			arguments: []string{
 				"--artifact-path",
 				unknownFile,
-				"--github-context",
-				base64GitHubContext,
-				"--runner-context",
-				base64RunnerContext,
+			},
+			environment: map[string]string{
+				"GITHUB_CONTEXT": githubContext,
+				"RUNNER_CONTEXT": runnerContext,
+			},
+		},
+		{
+			name: "invalid --output-path",
+			err:  fmt.Errorf("no value found for required flag: output-path"),
+			arguments: []string{
+				"--artifact-path",
+				unknownFile,
+				"--output-path",
+				"",
+			},
+			environment: map[string]string{
+				"GITHUB_CONTEXT": githubContext,
+				"RUNNER_CONTEXT": runnerContext,
 			},
 		},
 		{
@@ -73,12 +82,12 @@ func TestGenerateFilesCliOptions(t *testing.T) {
 			arguments: []string{
 				"--artifact-path",
 				path.Join(rootDir, "bin/slsa-provenance"),
-				"--github-context",
-				base64GitHubContext,
 				"--output-path",
 				provenanceFile,
-				"--runner-context",
-				base64RunnerContext,
+			},
+			environment: map[string]string{
+				"GITHUB_CONTEXT": githubContext,
+				"RUNNER_CONTEXT": runnerContext,
 			},
 		},
 		{
@@ -87,14 +96,14 @@ func TestGenerateFilesCliOptions(t *testing.T) {
 			arguments: []string{
 				"--artifact-path",
 				path.Join(rootDir, "bin/slsa-provenance"),
-				"--github-context",
-				base64GitHubContext,
 				"--output-path",
 				provenanceFile,
-				"--runner-context",
-				base64RunnerContext,
 				"--extra-materials",
 				path.Join(rootDir, "test-data/materials-valid.json"),
+			},
+			environment: map[string]string{
+				"GITHUB_CONTEXT": githubContext,
+				"RUNNER_CONTEXT": runnerContext,
 			},
 		},
 		{
@@ -103,14 +112,14 @@ func TestGenerateFilesCliOptions(t *testing.T) {
 			arguments: []string{
 				"--artifact-path",
 				path.Join(rootDir, "bin/slsa-provenance"),
-				"--github-context",
-				base64GitHubContext,
 				"--output-path",
 				provenanceFile,
-				"--runner-context",
-				base64RunnerContext,
 				"--extra-materials",
 				path.Join(rootDir, "test-data/materials-broken.not-json"),
+			},
+			environment: map[string]string{
+				"GITHUB_CONTEXT": githubContext,
+				"RUNNER_CONTEXT": runnerContext,
 			},
 		},
 		{
@@ -119,14 +128,14 @@ func TestGenerateFilesCliOptions(t *testing.T) {
 			arguments: []string{
 				"--artifact-path",
 				path.Join(rootDir, "bin/slsa-provenance"),
-				"--github-context",
-				base64GitHubContext,
 				"--output-path",
 				provenanceFile,
-				"--runner-context",
-				base64RunnerContext,
 				"--extra-materials",
 				fmt.Sprintf("%s,%s", path.Join(rootDir, "test-data/materials-valid.json"), unknownFile),
+			},
+			environment: map[string]string{
+				"GITHUB_CONTEXT": githubContext,
+				"RUNNER_CONTEXT": runnerContext,
 			},
 		},
 		{
@@ -135,14 +144,14 @@ func TestGenerateFilesCliOptions(t *testing.T) {
 			arguments: []string{
 				"--artifact-path",
 				path.Join(rootDir, "bin/slsa-provenance"),
-				"--github-context",
-				base64GitHubContext,
 				"--output-path",
 				provenanceFile,
-				"--runner-context",
-				base64RunnerContext,
 				"--extra-materials",
 				path.Join(rootDir, "test-data/materials-no-uri.json"),
+			},
+			environment: map[string]string{
+				"GITHUB_CONTEXT": githubContext,
+				"RUNNER_CONTEXT": runnerContext,
 			},
 		},
 		{
@@ -151,14 +160,14 @@ func TestGenerateFilesCliOptions(t *testing.T) {
 			arguments: []string{
 				"--artifact-path",
 				path.Join(rootDir, "bin/slsa-provenance"),
-				"--github-context",
-				base64GitHubContext,
 				"--output-path",
 				provenanceFile,
-				"--runner-context",
-				base64RunnerContext,
 				"--extra-materials",
 				path.Join(rootDir, "test-data/materials-no-digest.json"),
+			},
+			environment: map[string]string{
+				"GITHUB_CONTEXT": githubContext,
+				"RUNNER_CONTEXT": runnerContext,
 			},
 		},
 	}
@@ -166,6 +175,12 @@ func TestGenerateFilesCliOptions(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(tt *testing.T) {
 			assert := assert.New(tt)
+
+			// Set environment
+			os.Clearenv()
+			for k, v := range tc.environment {
+				os.Setenv(k, v)
+			}
 
 			output, err := executeCommand(cli.Files(), tc.arguments...)
 			defer func() {

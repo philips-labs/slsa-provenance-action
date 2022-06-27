@@ -59,7 +59,7 @@ func (e *Environment) PersistProvenanceStatement(ctx context.Context, stmt *into
 	if err != nil {
 		return fmt.Errorf("failed to marshal provenance: %w", err)
 	}
-	if err := os.WriteFile(path, payload, 0755); err != nil {
+	if err := os.WriteFile(path, payload, 0644); err != nil {
 		return fmt.Errorf("failed to write provenance: %w", err)
 	}
 

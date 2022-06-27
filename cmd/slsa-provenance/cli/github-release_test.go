@@ -2,7 +2,6 @@ package cli_test
 
 import (
 	"context"
-	"encoding/base64"
 	"os"
 	"path"
 	"runtime"
@@ -15,7 +14,7 @@ import (
 	"github.com/philips-labs/slsa-provenance-action/pkg/github"
 )
 
-func TestProvenenaceGitHubRelease(t *testing.T) {
+func TestProvenanceGitHubRelease(t *testing.T) {
 	githubToken := os.Getenv("GITHUB_TOKEN")
 	if githubToken == "" {
 		t.Skip("skipping as GITHUB_TOKEN environment variable isn't set")
@@ -48,18 +47,15 @@ func TestProvenenaceGitHubRelease(t *testing.T) {
 		_, err = client.Repositories.DeleteRelease(ctx, owner, repo, releaseID)
 	}()
 
-	base64GitHubContext := base64.StdEncoding.EncodeToString([]byte(githubContext))
-	base64RunnerContext := base64.StdEncoding.EncodeToString([]byte(runnerContext))
+	os.Clearenv()
+	os.Setenv("GITHUB_CONTEXT", githubContext)
+	os.Setenv("RUNNER_CONTEXT", runnerContext)
 
 	output, err := executeCommand(cli.GitHubRelease(),
 		"--artifact-path",
 		artifactPath,
-		"--github-context",
-		base64GitHubContext,
 		"--output-path",
 		provenanceFile,
-		"--runner-context",
-		base64RunnerContext,
 		"--tag-name",
 		"v0.0.0-generate-test",
 	)

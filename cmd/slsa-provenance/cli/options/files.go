@@ -11,6 +11,12 @@ func RequiredFlagError(flagName string) error {
 	return fmt.Errorf("no value found for required flag: %s", flagName)
 }
 
+// RequiredEnvironmentVariableError creates a required environement variable
+// error for the given environment variable name
+func RequiredEnvironmentVariableError(envName string) error {
+	return fmt.Errorf("no value found for required environment variable: %s", envName)
+}
+
 // FilesOptions Commandline flags used for the generate files command.
 type FilesOptions struct {
 	GenerateOptions
