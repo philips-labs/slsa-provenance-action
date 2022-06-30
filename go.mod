@@ -8,7 +8,7 @@ require (
 	github.com/google/go-containerregistry v0.10.0
 	github.com/google/go-github/v41 v41.0.0
 	github.com/spf13/cobra v1.5.0
-	github.com/stretchr/testify v1.7.5
+	github.com/stretchr/testify v1.8.0
 	golang.org/x/oauth2 v0.0.0-20220524215830-622c5d57e401
 )
 
