@@ -55,7 +55,7 @@ func TestFetchRelease(t *testing.T) {
 	assert.Equal(int64(51517953), release.GetID())
 	assert.Equal("v0.1.1", release.GetTagName())
 	assert.Len(release.Assets, 7)
-	assert.Equal(fmt.Sprintf("GET: %s?per_page=10\nGET: %s?page=2&per_page=10\n", api, api), requestLogger.String())
+	assert.Equal(fmt.Sprintf("GET: %s?per_page=20\nGET: %s?page=2&per_page=20\n", api, api), requestLogger.String())
 }
 
 func TestDownloadReleaseAssets(t *testing.T) {
@@ -195,7 +195,7 @@ func TestListReleases(t *testing.T) {
 	api := "https://api.github.com/repos/philips-labs/slsa-provenance-action/releases"
 
 	client, requestLogger := createReleaseClient(ctx)
-	opt := gh.ListOptions{PerPage: 10}
+	opt := gh.ListOptions{PerPage: 20}
 	releases, err := client.ListReleases(ctx, owner, repo, opt)
 	if !assert.NoError(err) {
 		return
