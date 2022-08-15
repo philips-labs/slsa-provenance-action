@@ -10,6 +10,11 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-20.04
+
+    permissions:
+      contents: write # tests create releases
+      packages: read
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3.0.2
