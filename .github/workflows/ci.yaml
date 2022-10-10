@@ -82,9 +82,9 @@ jobs:
           cache: true
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@v2.7.0
+        uses: sigstore/cosign-installer@v2.8.0
         with:
-          cosign-release: 'v1.12.1'
+          cosign-release: 'v1.13.0'
 
       - name: Install Syft
         uses: anchore/sbom-action/download-syft@v0.12.0
@@ -156,9 +156,9 @@ jobs:
 
     steps:
       - name: Install cosign
-        uses: sigstore/cosign-installer@v2.7.0
+        uses: sigstore/cosign-installer@v2.8.0
         with:
-          cosign-release: 'v1.12.1'
+          cosign-release: 'v1.13.0'
 
       - name: Install Syft
         uses: anchore/sbom-action/download-syft@v0.12.0
@@ -206,9 +206,9 @@ jobs:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@v2.7.0
+        uses: sigstore/cosign-installer@v2.8.0
         with:
-          cosign-release: 'v1.12.1'
+          cosign-release: 'v1.13.0'
 
       - name: Sign provenance
         run: |
@@ -242,9 +242,9 @@ jobs:
 
     steps:
       - name: Install cosign
-        uses: sigstore/cosign-installer@v2.7.0
+        uses: sigstore/cosign-installer@v2.8.0
         with:
-          cosign-release: 'v1.12.1'
+          cosign-release: 'v1.13.0'
 
       - name: Generate provenance for ${{ matrix.repo }}
         uses: philips-labs/slsa-provenance-action@v0.8.0
