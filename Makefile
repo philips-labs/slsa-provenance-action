@@ -145,6 +145,6 @@ container-tags: ## retrieves the container tags applied to the image with a give
 	@docker inspect ghcr.io/philips-labs/slsa-provenance@$(CONTAINER_DIGEST) --format '{{ join .RepoTags "\n" }}' | sed 's/.*://' | awk '!_[$$0]++'
 
 .PHONY: container-repos
-container-repos: ## retrieves the container tags applied to the image with a given digest
+container-repos: ## retrieves the container repos applied to the image with a given digest
 	@:$(call check_defined, CONTAINER_DIGEST)
 	@docker inspect ghcr.io/philips-labs/slsa-provenance@$(CONTAINER_DIGEST) --format '{{ join .RepoTags "\n" }}' | sed 's/:.*//' | awk '!_[$$0]++'
