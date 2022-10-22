@@ -51,7 +51,7 @@ runs:
         args+=("${encoded_runner}")
         args+=(${{ inputs.arguments }})
 
-        echo "::set-output name=provenance_args::${args[@]}"
+        echo "provenance_args=${args[@]}" >> $GITHUB_OUTPUT
       env:
         GITHUB_CONTEXT: ${{ inputs.github_context }}
         RUNNER_CONTEXT: ${{ inputs.runner_context }}
