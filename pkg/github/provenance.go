@@ -37,7 +37,7 @@ func (e *Environment) GenerateProvenanceStatement(ctx context.Context, subjecter
 		// See https://github.com/github/feedback/discussions/4188
 		intoto.WithInvocation(
 			BuildType,
-			e.Context.Workflow,
+			e.Context.ActionPath,
 			nil,
 			event.Inputs,
 			[]intoto.Item{

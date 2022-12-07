@@ -241,6 +241,7 @@ func TestGenerateProvenance(t *testing.T) {
 		Repository:      "philips-labs/slsa-provenance-action",
 		Event:           []byte(pushGitHubEvent),
 		EventName:       "push",
+		ActionPath:      ".github/workflows/build.yml",
 		SHA:             "849fb987efc0c0fc72e26a38f63f0c00225132be",
 	}
 	materials := []intoto.Item{
@@ -299,6 +300,7 @@ func TestGenerateProvenanceFromGitHubRelease(t *testing.T) {
 		Repository:      "philips-labs/slsa-provenance-action",
 		Event:           []byte(pushGitHubEvent),
 		EventName:       "push",
+		ActionPath:      ".github/workflows/build.yml",
 		SHA:             "849fb987efc0c0fc72e26a38f63f0c00225132be",
 	}
 	materials := []intoto.Item{
@@ -402,7 +404,7 @@ func TestGenerateProvenanceFromGitHubReleaseErrors(t *testing.T) {
 }
 
 func assertInvocation(assert *assert.Assertions, recipe intoto.Invocation) {
-	assert.Equal("", recipe.ConfigSource.EntryPoint)
+	assert.Equal(".github/workflows/build.yml", recipe.ConfigSource.EntryPoint)
 	assert.Nil(recipe.Environment)
 	assert.Nil(recipe.Parameters)
 }
