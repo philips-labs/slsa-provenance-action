@@ -197,7 +197,7 @@ jobs:
 
     steps:
       - name: Generate provenance for Release
-        uses: philips-labs/slsa-provenance-action@v0.8.0
+        uses: philips-labs/slsa-provenance-action@v0.8.1
         with:
           command: generate
           subcommand: github-release
@@ -247,7 +247,7 @@ jobs:
           cosign-release: 'v1.13.1'
 
       - name: Generate provenance for ${{ matrix.repo }}
-        uses: philips-labs/slsa-provenance-action@v0.8.0
+        uses: philips-labs/slsa-provenance-action@v0.8.1
         with:
           command: generate
           subcommand: container
