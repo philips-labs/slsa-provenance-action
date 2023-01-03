@@ -33,7 +33,7 @@ jobs:
           echo ", ${{github.event.inputs.car_input}}" >> cars.txt
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3.1.1
+        uses: actions/upload-artifact@83fd05a356d7e2593de66fc9913b3002723633cb # ratchet:actions/upload-artifact@v3.1.1
         with:
           path: '*.txt'
 
@@ -44,11 +44,9 @@ jobs:
     steps:
       # checkout only required to run local action (defined in this repo)
       - name: Checkout
-        uses: actions/checkout@v3.2.0
-
+        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # ratchet:actions/checkout@v3.2.0
       - name: Download build artifact
-        uses: actions/download-artifact@v3.0.1
-
+        uses: actions/download-artifact@9782bd6a9848b53b110e712e20e42d89988822b7 # ratchet:actions/download-artifact@v3.0.1
       - name: Generate some extra materials (this usually happens as part of the build process)
         run: |
           echo '[{"uri": "pkg:deb/debian/stunnel4@5.50-3?arch=amd64", "digest": {"sha256": "e1731ae217fcbc64d4c00d707dcead45c828c5f762bcf8cc56d87de511e096fa"}}]' > extra-materials.json
@@ -61,6 +59,6 @@ jobs:
           extra_materials: extra-materials.json
 
       - name: Upload provenance
-        uses: actions/upload-artifact@v3.1.1
+        uses: actions/upload-artifact@83fd05a356d7e2593de66fc9913b3002723633cb # ratchet:actions/upload-artifact@v3.1.1
         with:
           path: provenance.json
