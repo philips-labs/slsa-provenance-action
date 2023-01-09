@@ -33,7 +33,7 @@ jobs:
           echo ", ${{github.event.inputs.car_input}}" >> cars.txt
 
       - name: Upload artifact
-        uses: actions/upload-artifact@83fd05a356d7e2593de66fc9913b3002723633cb # ratchet:actions/upload-artifact@v3.1.1
+        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # ratchet:actions/upload-artifact@v3.1.2
         with:
           path: '*.txt'
 
@@ -59,6 +59,6 @@ jobs:
           extra_materials: extra-materials.json
 
       - name: Upload provenance
-        uses: actions/upload-artifact@83fd05a356d7e2593de66fc9913b3002723633cb # ratchet:actions/upload-artifact@v3.1.1
+        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # ratchet:actions/upload-artifact@v3.1.2
         with:
           path: provenance.json
