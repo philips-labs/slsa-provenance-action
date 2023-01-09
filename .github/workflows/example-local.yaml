@@ -46,7 +46,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # ratchet:actions/checkout@v3.2.0
       - name: Download build artifact
-        uses: actions/download-artifact@9782bd6a9848b53b110e712e20e42d89988822b7 # ratchet:actions/download-artifact@v3.0.1
+        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # ratchet:actions/download-artifact@v3.0.2
       - name: Generate some extra materials (this usually happens as part of the build process)
         run: |
           echo '[{"uri": "pkg:deb/debian/stunnel4@5.50-3?arch=amd64", "digest": {"sha256": "e1731ae217fcbc64d4c00d707dcead45c828c5f762bcf8cc56d87de511e096fa"}}]' > extra-materials.json
