@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/awslabs/amazon-ecr-credential-helper/ecr-login v0.0.0-20211215200129-69c85dc22db6
 	github.com/chrismellard/docker-credential-acr-env v0.0.0-20220119192733-fe33c00cee21
-	github.com/google/go-containerregistry v0.12.1
+	github.com/google/go-containerregistry v0.13.0
 	github.com/google/go-github/v41 v41.0.0
 	github.com/spf13/cobra v1.6.1
 	github.com/stretchr/testify v1.8.1
