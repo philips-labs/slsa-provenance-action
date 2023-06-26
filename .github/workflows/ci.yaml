@@ -83,7 +83,7 @@ jobs:
       - name: Install cosign
         uses: sigstore/cosign-installer@d13028333d784fcc802b67ec924bcebe75aa0a5f # ratchet:sigstore/cosign-installer@v3.1.0
         with:
-          cosign-release: 'v2.0.0'
+          cosign-release: 'v2.1.0'
 
       - name: Install Syft
         uses: anchore/sbom-action/download-syft@4d571ad1038a9cc29d676154ef265ab8f9027042 # ratchet:anchore/sbom-action/download-syft@v0.14.2
