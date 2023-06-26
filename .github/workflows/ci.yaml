@@ -81,9 +81,9 @@ jobs:
           cache: true
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@dd6b2e2b610a11fd73dd187a43d57cc1394e35f9 # ratchet:sigstore/cosign-installer@v3.0.5
+        uses: sigstore/cosign-installer@d13028333d784fcc802b67ec924bcebe75aa0a5f # ratchet:sigstore/cosign-installer@v3.1.0
         with:
-          cosign-release: 'v2.0.0'
+          cosign-release: 'v2.1.0'
 
       - name: Install Syft
         uses: anchore/sbom-action/download-syft@4d571ad1038a9cc29d676154ef265ab8f9027042 # ratchet:anchore/sbom-action/download-syft@v0.14.2
@@ -154,9 +154,9 @@ jobs:
 
     steps:
       - name: Install cosign
-        uses: sigstore/cosign-installer@dd6b2e2b610a11fd73dd187a43d57cc1394e35f9 # ratchet:sigstore/cosign-installer@v3.0.5
+        uses: sigstore/cosign-installer@d13028333d784fcc802b67ec924bcebe75aa0a5f # ratchet:sigstore/cosign-installer@v3.1.0
         with:
-          cosign-release: 'v2.0.0'
+          cosign-release: 'v2.1.0'
 
       - name: Install Syft
         uses: anchore/sbom-action/download-syft@4d571ad1038a9cc29d676154ef265ab8f9027042 # ratchet:anchore/sbom-action/download-syft@v0.14.2
@@ -203,9 +203,9 @@ jobs:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@dd6b2e2b610a11fd73dd187a43d57cc1394e35f9 # ratchet:sigstore/cosign-installer@v3.0.5
+        uses: sigstore/cosign-installer@d13028333d784fcc802b67ec924bcebe75aa0a5f # ratchet:sigstore/cosign-installer@v3.1.0
         with:
-          cosign-release: 'v2.0.0'
+          cosign-release: 'v2.1.0'
 
       - name: Sign provenance
         run: |
@@ -239,9 +239,9 @@ jobs:
 
     steps:
       - name: Install cosign
-        uses: sigstore/cosign-installer@dd6b2e2b610a11fd73dd187a43d57cc1394e35f9 # ratchet:sigstore/cosign-installer@v3.0.5
+        uses: sigstore/cosign-installer@d13028333d784fcc802b67ec924bcebe75aa0a5f # ratchet:sigstore/cosign-installer@v3.1.0
         with:
-          cosign-release: 'v2.0.0'
+          cosign-release: 'v2.1.0'
 
       - name: Generate provenance for ${{ matrix.repo }}
         uses: philips-labs/slsa-provenance-action@752766b8a3b1ebd09d599e163eeec8fa39e677aa # ratchet:philips-labs/slsa-provenance-action@v0.8.0
