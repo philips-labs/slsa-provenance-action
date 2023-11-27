@@ -86,7 +86,7 @@ jobs:
           cosign-release: 'v2.2.1'
 
       - name: Install Syft
-        uses: anchore/sbom-action/download-syft@78fc58e266e87a38d4194b2137a3d4e9bcaf7ca1 # ratchet:anchore/sbom-action/download-syft@v0.14.3
+        uses: anchore/sbom-action/download-syft@fd74a6fb98a204a1ad35bbfae0122c1a302ff88b # ratchet:anchore/sbom-action/download-syft@v0.15.0
       - name: Login to Container registries
         if: startsWith(github.ref, 'refs/tags/')
         run: |
@@ -159,7 +159,7 @@ jobs:
           cosign-release: 'v2.2.1'
 
       - name: Install Syft
-        uses: anchore/sbom-action/download-syft@78fc58e266e87a38d4194b2137a3d4e9bcaf7ca1 # ratchet:anchore/sbom-action/download-syft@v0.14.3
+        uses: anchore/sbom-action/download-syft@fd74a6fb98a204a1ad35bbfae0122c1a302ff88b # ratchet:anchore/sbom-action/download-syft@v0.15.0
       - name: Login to Container registries
         run: |
           echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u philipssoftware --password-stdin
