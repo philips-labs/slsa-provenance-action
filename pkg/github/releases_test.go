@@ -201,15 +201,15 @@ func TestListReleases(t *testing.T) {
 		return
 	}
 	assert.NotEmpty(requestLogger)
-	assert.Equal(expectedRequestPages("GET", api, opt.PerPage, 2), requestLogger.String())
-	assert.GreaterOrEqual(len(releases), 2)
+	assert.Equal(expectedRequestPages("GET", api, opt.PerPage, 1), requestLogger.String())
+	assert.GreaterOrEqual(len(releases), 18)
 
 	opt = gh.ListOptions{PerPage: 2}
 	releases, err = client.ListReleases(ctx, owner, repo, opt)
 	if !assert.NoError(err) {
 		return
 	}
-	assert.GreaterOrEqual(len(releases), 2)
+	assert.GreaterOrEqual(len(releases), 18)
 
 	opt = gh.ListOptions{PerPage: 2}
 	_, err = client.ListReleases(ctx, owner, repo+"-fake", opt)
