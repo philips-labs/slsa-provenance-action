@@ -127,7 +127,8 @@ signs:
       - '${artifact}'
 
 docker_signs:
-  - cmd: cosign
+  - id: selfsigned
+    cmd: cosign
     artifacts: all
     output: true
     args:
@@ -136,7 +137,8 @@ docker_signs:
       - --key
       - env://COSIGN_PRIVATE_KEY
       - '${artifact}'
-  - cmd: cosign
+  - id: keyless
+    cmd: cosign
     artifacts: all
     output: true
     args:
