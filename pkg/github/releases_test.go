@@ -22,6 +22,12 @@ const (
 	repo  = "slsa-provenance-action"
 )
 
+const (
+	releasesAPI       = "https://api.github.com/repos/philips-labs/slsa-provenance-action/releases"
+	firstRelease      = "v0.1.1"
+	assetsURLTemplate = "GET: %s/assets/%d"
+)
+
 var githubToken string
 
 func tokenRetriever() string {
@@ -44,18 +50,16 @@ func TestFetchRelease(t *testing.T) {
 	assert := assert.New(t)
 	ctx := context.Background()
 
-	api := "https://api.github.com/repos/philips-labs/slsa-provenance-action/releases"
-
 	client, requestLogger := createReleaseClient(ctx)
-	release, err := client.FetchRelease(ctx, owner, repo, "v0.1.1")
+	release, err := client.FetchRelease(ctx, owner, repo, firstRelease)
 
 	if !assert.NoError(err) && !assert.NotNil(release) {
 		return
 	}
 	assert.Equal(int64(51517953), release.GetID())
-	assert.Equal("v0.1.1", release.GetTagName())
+	assert.Equal(firstRelease, release.GetTagName())
 	assert.Len(release.Assets, 7)
-	assert.Equal(fmt.Sprintf("GET: %s?per_page=20\nGET: %s?page=2&per_page=20\n", api, api), requestLogger.String())
+	assert.Equal(fmt.Sprintf("GET: %s?per_page=20\nGET: %s?page=2&per_page=20\n", releasesAPI, releasesAPI), requestLogger.String())
 }
 
 func TestDownloadReleaseAssets(t *testing.T) {
@@ -66,8 +70,8 @@ func TestDownloadReleaseAssets(t *testing.T) {
 
 	ctx := context.Background()
 
-	api := "https://api.github.com/repos/philips-labs/slsa-provenance-action/releases"
-	version := "v0.1.1"
+	api := releasesAPI
+	version := firstRelease
 	client, requestLogger := createReleaseClient(ctx)
 	release, _, err := client.Repositories.GetReleaseByTag(ctx, owner, repo, version)
 	if !assert.NoError(err) || !assert.NotNil(release) {
@@ -87,13 +91,13 @@ func TestDownloadReleaseAssets(t *testing.T) {
 	}
 	assert.NotEmpty(requestLogger)
 	assert.Contains(requestLogger.String(), fmt.Sprintf("GET: %s/%d/assets?per_page=10", api, release.GetID()))
-	assert.Contains(requestLogger.String(), fmt.Sprintf("GET: %s/assets/%d", api, assets[0].GetID()))
-	assert.Contains(requestLogger.String(), fmt.Sprintf("GET: %s/assets/%d", api, assets[1].GetID()))
-	assert.Contains(requestLogger.String(), fmt.Sprintf("GET: %s/assets/%d", api, assets[2].GetID()))
-	assert.Contains(requestLogger.String(), fmt.Sprintf("GET: %s/assets/%d", api, assets[3].GetID()))
-	assert.Contains(requestLogger.String(), fmt.Sprintf("GET: %s/assets/%d", api, assets[4].GetID()))
-	assert.Contains(requestLogger.String(), fmt.Sprintf("GET: %s/assets/%d", api, assets[5].GetID()))
-	assert.Contains(requestLogger.String(), fmt.Sprintf("GET: %s/assets/%d", api, assets[6].GetID()))
+	assert.Contains(requestLogger.String(), fmt.Sprintf(assetsURLTemplate, api, assets[0].GetID()))
+	assert.Contains(requestLogger.String(), fmt.Sprintf(assetsURLTemplate, api, assets[1].GetID()))
+	assert.Contains(requestLogger.String(), fmt.Sprintf(assetsURLTemplate, api, assets[2].GetID()))
+	assert.Contains(requestLogger.String(), fmt.Sprintf(assetsURLTemplate, api, assets[3].GetID()))
+	assert.Contains(requestLogger.String(), fmt.Sprintf(assetsURLTemplate, api, assets[4].GetID()))
+	assert.Contains(requestLogger.String(), fmt.Sprintf(assetsURLTemplate, api, assets[5].GetID()))
+	assert.Contains(requestLogger.String(), fmt.Sprintf(assetsURLTemplate, api, assets[6].GetID()))
 	assert.Contains(requestLogger.String(), "GET: https://objects.githubusercontent.com/github-production-release-asset")
 
 	defer func() {
@@ -165,7 +169,7 @@ func TestListReleaseAssets(t *testing.T) {
 	assert := assert.New(t)
 	ctx := context.Background()
 
-	api := "https://api.github.com/repos/philips-labs/slsa-provenance-action/releases/51517953/assets"
+	api := releasesAPI + "/51517953/assets"
 
 	client, requestLogger := createReleaseClient(ctx)
 	opt := gh.ListOptions{PerPage: 4}
@@ -185,17 +189,17 @@ func TestListReleaseAssets(t *testing.T) {
 	assert.Len(assets, 7)
 
 	_, err = client.ListReleaseAssets(ctx, owner, repo, 0, opt)
-	assert.EqualError(err, "failed to list release assets: GET https://api.github.com/repos/philips-labs/slsa-provenance-action/releases/0/assets?per_page=10: 404 Not Found []")
+	assert.EqualError(err, "failed to list release assets: GET "+releasesAPI+"/0/assets?per_page=10: 404 Not Found []")
 }
 
 func TestListReleases(t *testing.T) {
 	assert := assert.New(t)
 	ctx := context.Background()
 
-	api := "https://api.github.com/repos/philips-labs/slsa-provenance-action/releases"
+	api := releasesAPI
 
 	client, requestLogger := createReleaseClient(ctx)
-	opt := gh.ListOptions{PerPage: 20}
+	opt := gh.ListOptions{PerPage: 25}
 	releases, err := client.ListReleases(ctx, owner, repo, opt)
 	if !assert.NoError(err) {
 		return
