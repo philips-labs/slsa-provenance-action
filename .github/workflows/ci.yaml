@@ -174,7 +174,7 @@ jobs:
           for t in ${TAGS}; do
             cosign verify --key cosign.pub ${{ matrix.repo }}:${t}
             syft ${{ matrix.repo }}:${t} -o spdx-json > sbom-spdx.json
-            cosign attest --predicate sbom-spdx.json --type spdx --key env://COSIGN_PRIVATE_KEY ${{ matrix.repo }}:${t}
+            cosign attest --predicate sbom-spdx.json --type spdx --yes --key env://COSIGN_PRIVATE_KEY ${{ matrix.repo }}:${t}
             cosign verify-attestation -o verified-sbom-spdx.json --key cosign.pub ${{ matrix.repo }}:${t}
           done
 
@@ -207,7 +207,7 @@ jobs:
 
       - name: Sign provenance
         run: |
-          cosign sign-blob --key env://COSIGN_PRIVATE_KEY --output-signature "${SIGNATURE}" provenance.att
+          cosign sign-blob --yes --key env://COSIGN_PRIVATE_KEY --output-signature "${SIGNATURE}" provenance.att
           cat "${SIGNATURE}"
 
           curl_args=(-s -H "Authorization: token ${GITHUB_TOKEN}")
@@ -262,7 +262,7 @@ jobs:
 
       - name: Attach provenance to image
         run: |
-          cosign attest --predicate provenance-predicate.att --type slsaprovenance --key env://COSIGN_PRIVATE_KEY ${{ matrix.repo }}@${{ needs.release.outputs.container_digest }}
+          cosign attest --predicate provenance-predicate.att --type slsaprovenance --yes --key env://COSIGN_PRIVATE_KEY ${{ matrix.repo }}@${{ needs.release.outputs.container_digest }}
         env:
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
           COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
