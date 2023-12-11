@@ -60,6 +60,12 @@ jobs:
   release:
     name: release
     needs: [build]
+
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+
     outputs:
       container_digest: ${{ steps.container_info.outputs.container_digest }}
       container_tags: ${{ steps.container_info.outputs.container_tags }}

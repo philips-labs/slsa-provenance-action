@@ -80,6 +80,7 @@ signs:
     artifacts: checksum
     args:
       - sign-blob
+      - --yes
       - --key
       - cosign.key
       - '--output-certificate=${certificate}'
@@ -92,6 +93,7 @@ signs:
     artifacts: binary
     args:
       - sign-blob
+      - --yes
       - --key
       - cosign.key
       - '--output-certificate=${certificate}'
@@ -104,6 +106,7 @@ signs:
     artifacts: archive
     args:
       - sign-blob
+      - --yes
       - --key
       - cosign.key
       - '--output-certificate=${certificate}'
@@ -116,6 +119,7 @@ signs:
     artifacts: sbom
     args:
       - sign-blob
+      - --yes
       - --key
       - cosign.key
       - '--output-certificate=${certificate}'
@@ -128,8 +132,16 @@ docker_signs:
     output: true
     args:
       - 'sign'
+      - --yes
       - --key
       - cosign.key
+      - '${artifact}'
+  - cmd: cosign
+    artifacts: all
+    output: true
+    args:
+      - sign
+      - --yes
       - '${artifact}'
 
 snapshot:
