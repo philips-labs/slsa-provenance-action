@@ -59,7 +59,7 @@ func TestFetchRelease(t *testing.T) {
 	assert.Equal(int64(51517953), release.GetID())
 	assert.Equal(firstRelease, release.GetTagName())
 	assert.Len(release.Assets, 7)
-	assert.Equal(fmt.Sprintf("GET: %s?per_page=20\nGET: %s?page=2&per_page=20\n", releasesAPI, releasesAPI), requestLogger.String())
+	assert.Equal(fmt.Sprintf("GET: %s?per_page=25\n", releasesAPI), requestLogger.String())
 }
 
 func TestDownloadReleaseAssets(t *testing.T) {

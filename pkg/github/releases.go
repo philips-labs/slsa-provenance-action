@@ -42,7 +42,7 @@ func (p *ReleaseClient) FetchRelease(ctx context.Context, owner, repo, tagName s
 	listCtx, cancel := context.WithTimeout(ctx, 1*time.Minute)
 	defer cancel()
 
-	allReleases, err := p.ListReleases(listCtx, owner, repo, github.ListOptions{PerPage: 20})
+	allReleases, err := p.ListReleases(listCtx, owner, repo, github.ListOptions{PerPage: 25})
 	if err != nil {
 		return nil, err
 	}
