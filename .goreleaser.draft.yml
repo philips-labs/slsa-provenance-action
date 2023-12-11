@@ -82,7 +82,7 @@ signs:
       - sign-blob
       - --yes
       - --key
-      - cosign.key
+      - env://COSIGN_PRIVATE_KEY
       - '--output-certificate=${certificate}'
       - '--output-signature=${signature}'
       - '${artifact}'
@@ -95,7 +95,7 @@ signs:
       - sign-blob
       - --yes
       - --key
-      - cosign.key
+      - env://COSIGN_PRIVATE_KEY
       - '--output-certificate=${certificate}'
       - '--output-signature=${signature}'
       - '${artifact}'
@@ -108,7 +108,7 @@ signs:
       - sign-blob
       - --yes
       - --key
-      - cosign.key
+      - env://COSIGN_PRIVATE_KEY
       - '--output-certificate=${certificate}'
       - '--output-signature=${signature}'
       - '${artifact}'
@@ -121,7 +121,7 @@ signs:
       - sign-blob
       - --yes
       - --key
-      - cosign.key
+      - env://COSIGN_PRIVATE_KEY
       - '--output-certificate=${certificate}'
       - '--output-signature=${signature}'
       - '${artifact}'
@@ -134,7 +134,7 @@ docker_signs:
       - 'sign'
       - --yes
       - --key
-      - cosign.key
+      - env://COSIGN_PRIVATE_KEY
       - '${artifact}'
   - cmd: cosign
     artifacts: all
