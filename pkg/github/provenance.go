@@ -90,9 +90,7 @@ func NewReleaseEnvironment(gh Context, runner RunnerContext, tagName string, rc 
 }
 
 // GenerateProvenanceStatement generates provenance from the GitHub release environment
-//
 // Release assets will be downloaded to the given artifactPath
-//
 // The artifactPath has to be a directory.
 func (e *ReleaseEnvironment) GenerateProvenanceStatement(ctx context.Context, subjecter intoto.Subjecter, materials ...intoto.Item) (*intoto.Statement, error) {
 	err := os.MkdirAll(e.artifactPath, 0755)
