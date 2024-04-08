@@ -44,7 +44,7 @@ jobs:
     steps:
       # checkout only required to run local action (defined in this repo)
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # ratchet:actions/checkout@v4.1.1
+        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # ratchet:actions/checkout@v4.1.2
       - name: Download build artifact
         uses: actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427 # ratchet:actions/download-artifact@v4.1.4
       - name: Generate some extra materials (this usually happens as part of the build process)
