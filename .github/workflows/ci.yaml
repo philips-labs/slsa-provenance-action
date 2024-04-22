@@ -89,7 +89,7 @@ jobs:
       - name: Install cosign
         uses: sigstore/cosign-installer@59acb6260d9c0ba8f4a2f9d9b48431a222b68e20 # ratchet:sigstore/cosign-installer@v3.5.0
         with:
-          cosign-release: 'v2.2.3'
+          cosign-release: 'v2.2.4'
 
       - name: Install Syft
         uses: anchore/sbom-action/download-syft@ab5d7b5f48981941c4c5d6bf33aeb98fe3bae38c # ratchet:anchore/sbom-action/download-syft@v0.15.10
@@ -155,7 +155,7 @@ jobs:
       - name: Install cosign
         uses: sigstore/cosign-installer@59acb6260d9c0ba8f4a2f9d9b48431a222b68e20 # ratchet:sigstore/cosign-installer@v3.5.0
         with:
-          cosign-release: 'v2.2.3'
+          cosign-release: 'v2.2.4'
 
       - name: Install Syft
         uses: anchore/sbom-action/download-syft@ab5d7b5f48981941c4c5d6bf33aeb98fe3bae38c # ratchet:anchore/sbom-action/download-syft@v0.15.10
@@ -203,7 +203,7 @@ jobs:
       - name: Install cosign
         uses: sigstore/cosign-installer@59acb6260d9c0ba8f4a2f9d9b48431a222b68e20 # ratchet:sigstore/cosign-installer@v3.5.0
         with:
-          cosign-release: 'v2.2.3'
+          cosign-release: 'v2.2.4'
 
       - name: Sign provenance
         run: |
@@ -239,7 +239,7 @@ jobs:
       - name: Install cosign
         uses: sigstore/cosign-installer@59acb6260d9c0ba8f4a2f9d9b48431a222b68e20 # ratchet:sigstore/cosign-installer@v3.5.0
         with:
-          cosign-release: 'v2.2.3'
+          cosign-release: 'v2.2.4'
 
       - name: Generate provenance for ${{ matrix.repo }}
         uses: philips-labs/slsa-provenance-action@6b2fd198d38ba72fb3cc08fbc52da2ebaef2efad # ratchet:philips-labs/slsa-provenance-action@v0.9.0
