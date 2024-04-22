@@ -13,7 +13,7 @@ jobs:
         run:  echo "onion, tomato, jalapeno, cilantro, lime, salt" > salsa.txt
 
       - name: Upload artifact
-        uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # ratchet:actions/upload-artifact@v4.3.1
+        uses: actions/upload-artifact@1746f4ab65b179e0ea60a494b83293b640dd5bba # ratchet:actions/upload-artifact@v4.3.2
         with:
           path: salsa.txt
 
@@ -32,6 +32,6 @@ jobs:
           arguments: --artifact-path artifact/ --output-path provenance.json
 
       - name: Upload provenance
-        uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # ratchet:actions/upload-artifact@v4.3.1
+        uses: actions/upload-artifact@1746f4ab65b179e0ea60a494b83293b640dd5bba # ratchet:actions/upload-artifact@v4.3.2
         with:
           path: provenance.json
