@@ -142,13 +142,16 @@ The easiest way to use this action is to add the following into your workflow fi
     name: provenance
     needs: [release]
     runs-on: ubuntu-20.04
+    permissions:
+      # required to update the release.
+      contents: write
 
     steps:
       - name: Generate provenance for Release
         uses: philips-labs/slsa-provenance-action@v0.7.2
         with:
           command: generate
-          subcommand: files
+          subcommand: github-release
           arguments: --artifact-path release-assets --output-path 'provenance.json' --tag-name ${{ github.ref_name }}
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
