@@ -48,7 +48,7 @@ jobs:
         run: make coverage-out
 
       - name: Upload Code Coverage
-        uses: codecov/codecov-action@7f8b4b4bde536c465e797be725718b88c5d95e0e # ratchet:codecov/codecov-action@v5.1.1
+        uses: codecov/codecov-action@13ce06bfc6bbe3ecf90edbbf1bc32fe5978ca1d3 # ratchet:codecov/codecov-action@v5.3.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.out
