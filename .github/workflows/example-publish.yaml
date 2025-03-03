@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download build artifact
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # ratchet:actions/download-artifact@v4.1.8
+        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # ratchet:actions/download-artifact@v4.1.9
       - name: Generate provenance
         uses: philips-labs/slsa-provenance-action@6b2fd198d38ba72fb3cc08fbc52da2ebaef2efad # ratchet:philips-labs/slsa-provenance-action@v0.9.0
         with:
