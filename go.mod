@@ -10,7 +10,7 @@ require (
 	github.com/google/go-containerregistry v0.20.5
 	github.com/google/go-github/v41 v41.0.0
 	github.com/spf13/cobra v1.9.1
-	github.com/stretchr/testify v1.10.0
+	github.com/stretchr/testify v1.11.0
 	golang.org/x/oauth2 v0.30.0
 )
 
